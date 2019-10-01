@@ -1,8 +1,8 @@
 ## Screenshots
 
 ### Overview
-![Overview](./screenshots/overview.png)
+![Overview](./overview.png)
 
 ### Time picker
-![Time picker](./screenshots/picker.png)
+![Time picker](./picker.png)
 

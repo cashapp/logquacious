@@ -1,0 +1,16 @@
+version: "3.3"
+
+services:
+  web:
+    build:
+      dockerfile: docker/Dockerfile
+      context: ..
+    ports:
+      - "127.0.0.1:2015:2015"
+    command: "--es-url=http://es:9200"
+  generator:
+    build: generator
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.2
+    environment:
+      - discovery.type=single-node

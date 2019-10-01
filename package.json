@@ -1,0 +1,67 @@
+{
+  "scripts": {
+    "hot": "parcel index.html",
+    "build": "parcel build index.html",
+    "test": "jest"
+  },
+  "alias": {
+    "react": "inferno-compat",
+    "react-dom": "inferno-compat",
+    "inferno": "./node_modules/inferno/dist/index.dev.esm.js"
+  },
+  "jest": {
+    "automock": false,
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "html"
+    ],
+    "transform": {
+      "^.+\\.ts$": "babel-jest",
+      "^.+\\.tsx$": "babel-jest",
+      "^.+\\.js$": "babel-jest",
+      "^.+\\.html$": "html-loader-jest"
+    },
+    "setupFiles": [
+      "core-js",
+      "./testSetup.ts"
+    ]
+  },
+  "dependencies": {
+    "@mdi/font": "^4.4.95",
+    "@types/amplitude-js": "^4.4.4",
+    "bulma": "^0.7.5",
+    "bulma-checkradio": "^1.1.1",
+    "bulma-switch": "^2.0.0",
+    "bulma-tooltip": "^2.0.2",
+    "flatpickr": "^4.6.3",
+    "inferno": "^7.3.1",
+    "moment": "^2.24.0",
+    "randomcolor": "^0.5.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@babel/plugin-transform-typescript": "^7.6.0",
+    "@babel/preset-env": "^7.6.2",
+    "@babel/preset-typescript": "^7.6.0",
+    "@babel/runtime": "^7.6.2",
+    "@types/d3": "^5.7.2",
+    "@types/jest": "*",
+    "@types/node": "^12.7.8",
+    "babel-jest": "*",
+    "babel-plugin-inferno": "^6.1.0",
+    "core-js": "^3.2.1",
+    "cssnano": "^4.1.10",
+    "d3": "^5.12.0",
+    "html-loader-jest": "^0.2.1",
+    "jest": "*",
+    "jest-fetch-mock": "^2.1.2",
+    "json": "^9.0.6",
+    "parcel": "^1.12.3",
+    "sass": "^1.22.12",
+    "typescript": "^3.6.3"
+  }
+}

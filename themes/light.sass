@@ -1,0 +1,105 @@
+html.light-theme
+  $yellow-dark: #e88f00
+
+  .has-text-warning
+    color: $yellow-dark !important
+  .has-text-danger
+    color: $red !important
+  .has-text-bright
+    color: #f32500 !important
+
+  .log-input-outer
+    border: 1px solid $grey-lighter
+    border-radius: 5px
+
+  .logs
+    color: #6c6c73
+
+    .strong
+      color: $black
+
+    .weak
+      color: $grey-darker
+
+    .unexpanded
+      &:hover
+        background-color: $white-ter
+
+    .expanded
+      .filter-link
+        color: $black
+        &:hover
+          color: $blue
+      .toggle
+        &:hover
+          color: $blue
+
+  // Nice soft border around input fields.
+  input.input, select.input
+    box-shadow: 1px 0 0 #e6e6e6, -1px 0 0 #e6e6e6, 0 1px 0 #e6e6e6, 0 -1px 0 #e6e6e6, 0 3px 13px rgba(0,0,0,0.08)
+  /**
+    Rainbow colors are defined in theme-specific sass files, generated using 'randomColor':
+        const rc = require('randomColor')
+        for (let i = 0; i < 10; i++) { console.log(`$rainbow-${i}: `+rc({luminosity: 'dark'})) }
+   */
+  $rainbow-0: #077f55
+  $rainbow-1: #dd8c08
+  $rainbow-2: #c4760f
+  $rainbow-3: #269b0c
+  $rainbow-4: #02891f
+  $rainbow-5: #026187
+  $rainbow-6: #047a33
+  $rainbow-7: #a405c4
+  $rainbow-8: #001368
+  $rainbow-9: #008c2c
+  $rainbow-10: #219b03
+  $rainbow-11: #e55102
+  $rainbow-12: #02587a
+  $rainbow-13: #dd0f95
+  $rainbow-14: #00728c
+  $rainbow-15: #0b9e94
+  $rainbow-16: #ce067e
+  $rainbow-17: #d80d91
+  $rainbow-18: #ca02d8
+  $rainbow-19: #360c99
+
+  .rainbow-0
+    color: $rainbow-0
+  .rainbow-1
+    color: $rainbow-1
+  .rainbow-2
+    color: $rainbow-2
+  .rainbow-3
+    color: $rainbow-3
+  .rainbow-4
+    color: $rainbow-4
+  .rainbow-5
+    color: $rainbow-5
+  .rainbow-6
+    color: $rainbow-6
+  .rainbow-7
+    color: $rainbow-7
+  .rainbow-8
+    color: $rainbow-8
+  .rainbow-9
+    color: $rainbow-9
+  .rainbow-10
+    color: $rainbow-10
+  .rainbow-11
+    color: $rainbow-11
+  .rainbow-12
+    color: $rainbow-12
+  .rainbow-13
+    color: $rainbow-13
+  .rainbow-14
+    color: $rainbow-14
+  .rainbow-15
+    color: $rainbow-15
+  .rainbow-16
+    color: $rainbow-16
+  .rainbow-17
+    color: $rainbow-17
+  .rainbow-18
+    color: $rainbow-18
+  .rainbow-19
+    color: $rainbow-19

@@ -1,0 +1,139 @@
+$dark-nav-background: $blue
+$dark-menu-background: $blue
+$dark-menu-sep: lighten($blue, 5%)
+$dark-menu-hover: darken($blue, 5%)
+$danger: hsl(40, 100%, 50%)
+
+html.dark-theme
+  .time-picker .is-info
+    color: black
+    background-color: $warning
+
+  .has-text-danger
+    // damn it bulma
+    color: $danger !important
+
+  background-color: $black-ter
+
+  .has-text-bright
+    color: $warning !important
+
+  .logs
+    color: #90909a
+
+    .strong
+      color: $white
+
+    .weak
+      color: $grey-lighter
+
+    .unexpanded
+      &:hover
+        background-color: $grey-darker
+
+    .expanded
+      .filter-link
+        color: $white
+        &:hover
+          color: lighten($blue, 20%)
+      .toggle
+        &:hover
+          color: lighten($blue, 20%)
+
+  nav
+    background-color: $dark-nav-background
+
+  .navbar-dropdown
+    background-color: $dark-menu-background
+    border-top-color: $dark-menu-sep
+
+  .navbar-item, .navbar-link
+    color: $white-ter
+    .title, .label
+      color: $white-ter
+  
+  a.navbar-item:hover
+    background-color: $blue
+    color: white
+
+  .navbar-item.has-dropdown
+    .navbar-link
+      background-color: $dark-nav-background
+
+  .navbar-divider
+    background-color: $dark-menu-sep
+
+  // Live mode
+  .button.is-info:active, .button.is-info.is-active
+    background-color: $orange
+
+  // Down chevron for menu dropdown
+  .navbar-link:not(.is-arrowless)::after
+    border-color: $white-ter
+
+  /**
+    Rainbow colors are defined in theme-specific sass files, generated using 'randomColor':
+        const rc = require('randomColor')
+        for (let i = 0; i < 10; i++) { console.log(`$rainbow-${i}: `+rc({luminosity: 'light'})) }
+   */
+  $rainbow-0: #fcad83
+  $rainbow-1: #c0e4f9
+  $rainbow-2: #c0bdfc
+  $rainbow-3: #aef78a
+  $rainbow-4: #fcc8c4
+  $rainbow-5: #fcd174
+  $rainbow-6: #6fb4ed
+  $rainbow-7: #bef993
+  $rainbow-8: #f79eb6
+  $rainbow-9: #ef73b3
+  $rainbow-10: #82ffc0
+  $rainbow-11: #ff728c
+  $rainbow-12: #f29d79
+  $rainbow-13: #89f4c6
+  $rainbow-14: #f79685
+  $rainbow-15: #ef8193
+  $rainbow-16: #8cbff2
+  $rainbow-17: #b39dea
+  $rainbow-18: #ccd1ff
+  $rainbow-19: #a2f9c3
+
+  .rainbow-0
+    color: $rainbow-0
+  .rainbow-1
+    color: $rainbow-1
+  .rainbow-2
+    color: $rainbow-2
+  .rainbow-3
+    color: $rainbow-3
+  .rainbow-4
+    color: $rainbow-4
+  .rainbow-5
+    color: $rainbow-5
+  .rainbow-6
+    color: $rainbow-6
+  .rainbow-7
+    color: $rainbow-7
+  .rainbow-8
+    color: $rainbow-8
+  .rainbow-9
+    color: $rainbow-9
+  .rainbow-10
+    color: $rainbow-10
+  .rainbow-11
+    color: $rainbow-11
+  .rainbow-12
+    color: $rainbow-12
+  .rainbow-13
+    color: $rainbow-13
+  .rainbow-14
+    color: $rainbow-14
+  .rainbow-15
+    color: $rainbow-15
+  .rainbow-16
+    color: $rainbow-16
+  .rainbow-17
+    color: $rainbow-17
+  .rainbow-18
+    color: $rainbow-18
+  .rainbow-19
+    color: $rainbow-19

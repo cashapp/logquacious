@@ -1,0 +1,261 @@
+// The default danger red hurts my eyes.
+$danger: hsl(10, 75%, 61%)
+
+@import "node_modules/bulma/sass/utilities/all"
+@import "node_modules/bulma/sass/base/all"
+@import "node_modules/bulma/sass/form/all"
+@import "node_modules/bulma/sass/elements/button"
+@import "node_modules/bulma/sass/elements/progress"
+@import "node_modules/bulma/sass/elements/content"
+@import "node_modules/bulma/sass/elements/title"
+@import "node_modules/bulma/sass/components/navbar"
+@import "node_modules/bulma/sass/components/message"
+@import "node_modules/bulma/sass/grid/columns"
+
+$tooltip-max-width: 50rem
+
+// Bulma extensions
+@import "node_modules/bulma-switch/src/sass/index"
+@import "node_modules/bulma-checkradio/src/sass/index"
+@import "node_modules/bulma-tooltip/src/sass/index"
+
+@import "themes/dark"
+@import "themes/light"
+
+$fixed-font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace
+$nav-height: 3.25rem
+
+// Variables don't work with calc! https://github.com/sass/sass/issues/818
+$height-sans-padding: calc(100vh - #{$nav-height})
+
+body
+  // 3.25rem is from html.has-navbar-fixed-top
+  min-height: $height-sans-padding
+
+body
+  overflow-x: auto
+
+.log-wide
+  width: 100%
+
+.log-nav
+  position: relative
+
+  .navbar-item .columns
+    // This fixes columns within a dropdown. For some reason it isn't stretched to full width.
+    width: 100%
+    padding-bottom: 1rem
+    white-space: normal
+
+.log-nav
+  .navbar-dropdown.time-picker
+    .navbar-item
+      padding-right: 0
+
+$progress-height: 0.3rem
+.log-progress
+  width: 100%
+  border-radius: 0
+  position: absolute
+  height: $progress-height
+  bottom: -$progress-height
+
+$stats-height: 1.5rem
+.log-stats
+  position: absolute
+  font-family: $fixed-font-family
+  bottom: -$stats-height
+  height: $stats-height
+  right: 0
+  background-color: $white-bis
+
+.logs
+  display: block
+  font-family: $fixed-font-family
+  font-size: 0.9rem
+  padding-top: 0.5rem
+  padding-bottom: 0.5rem
+
+  .entry
+    white-space: nowrap
+    margin-left: 0.8rem
+
+    .unexpanded
+      cursor: pointer
+
+      *
+        display: inline-block
+
+    .expanded
+      display: block
+      white-space: pre
+
+      .toggle
+        cursor: pointer
+
+        &:hover
+          color: $blue
+
+      .copy-btn
+        cursor: pointer
+        margin-left: .5rem
+        line-height: normal
+        vertical-align: middle
+        display: inline-block
+
+        i
+          pointer-events: none
+
+      .copyable-wrapper
+        .copy-btn
+          visibility: hidden
+
+        &:hover
+          .copy-btn
+            visibility: visible
+
+  .more-marker
+    padding: 0
+    margin: 0
+    margin-top: 5px
+    margin-bottom: 5px
+    height: 30px
+    line-height: 30px
+    width: 100%
+    background-color: $blue
+    text-align: center
+    vertical-align: middle
+    color: white
+    cursor: pointer
+
+#log-welcome, #log-error
+  display: flex
+  align-items: center
+  justify-content: center
+  height: $height-sans-padding
+
+  article
+    width: 50rem
+
+#log-error
+  .message-header
+    background-color: #a23e3e
+
+.log-divider
+  padding: 0
+  margin: 0
+  height: 10px
+  width: 100%
+  background-color: $blue
+
+.log-navbar-dropdown-icon
+  padding: 2px 3px 0 0
+
+.time-picker
+  width: 50rem
+
+  h1
+    font-weight: bold
+
+  .flatpickr-calendar
+    width: 100%
+
+    .flatpickr-time .flatpickr-am-pm
+      // Makes the AM/PM picker slightly wider, nicer.
+      width: 25%
+
+#quick-ranges
+  margin-bottom: 0.5rem
+
+  .button
+    width: 62px
+    text-align: center
+    justify-content: center
+
+  .buttons:not(:last-child)
+    margin-bottom: 0
+    padding-bottom: 1rem
+
+#env-switcher
+  width: 5rem
+  display: inline-block
+  text-align: center
+
+#env-switcher
+  width: 5rem
+  display: inline-block
+  text-align: center
+
+#copy-helper
+  height: 1px
+  width: 1px
+  top: -1000px
+  left: -1000px
+  position: fixed
+
+// Reduce delay before progress animation is visible.
+@keyframes moveIndeterminate
+  from
+    background-position: 140% 0
+  to
+    background-position: -200% 0
+
+$histogram-width: 200px
+
+#histogram
+  svg
+    width: $histogram-width
+    position: fixed
+    right: 0
+    height: calc(100% - 52px)
+    background-color: rgba(0, 0, 0, 0.8)
+    shape-rendering: geometricPrecision
+
+    // We only want pointer events for the SVG itself
+    *
+      pointer-events: none
+
+  text
+    color: white
+    font-size: 0.8rem
+
+  line, path
+    stroke: white
+
+  rect
+    fill: $info
+    stroke: rgba(255, 255, 255, 0.5)
+
+  .hovering
+    fill: $warning
+
+  .visible-range
+    fill: rgba(255, 255, 255, 0.2)
+    stroke: none
+
+  .downloaded-range
+    fill: rgba(255, 255, 255, 0.2)
+    stroke: none
+
+  .drag-range
+    fill: rgba(255, 255, 255, 0.3)
+    stroke: none
+
+#histogram-tooltip
+  background: $link
+  color: white
+  position: fixed
+  width: 200px
+  height: 60px
+  padding: 2px
+  font-size: 0.8rem
+  font-family: $fixed-font-family
+  border: 0
+  pointer-events: none
+  right: $histogram-width
+  text-align: right
+  display: none
+
+//input[type=radio]
+//  margin-top: 0.5rem
+//  margin-right: 0.3rem

@@ -1,0 +1,139 @@
+{
+  "dataSources": [
+    {
+      "id": "elasticsearch-server",
+      "type": "elasticsearch",
+      "index": "{{.ESIndex}}",
+      "urlPrefix": "/es",
+      "fields": "main"
+    }
+  ],
+
+  "fields": {
+    "main": {
+      "collapsedFormatting": [
+        {
+          "field": "@timestamp",
+          "transforms": [
+            "timestamp"
+          ]
+        },
+        {
+          "field": "level",
+          "transforms": [
+            {
+              "upperCase": true
+            },
+            {
+              "mapValue": {
+                "DEBUG": "DEBU",
+                "WARNING": "WARN",
+                "ERROR": "ERRO"
+              }
+            },
+            {
+              "mapClass": {
+                "DEBU": "has-text-success",
+                "INFO": "has-text-info",
+                "WARN": "has-text-warning",
+                "ERRO": "has-text-danger"
+              }
+            },
+            {
+              "addClass": "has-text-weight-bold"
+            }
+          ]
+        },
+        {
+          "field": "service",
+          "transforms": [
+            {
+              "addClass": "has-text-bright"
+            }
+          ]
+        },
+        {
+          "field": "message",
+          "transforms": [
+            {
+              "addClass": "strong"
+            }
+          ]
+        }
+      ],
+      "collapsedIgnore": [
+        "_id",
+        "_index"
+      ]
+    }
+  },
+
+  "filters": [
+    {
+      "id": "env",
+      "urlKey": "e",
+      "title": "Environment",
+      "default": "production",
+      "type": "dataSource",
+      "items": [
+        {
+          "title": "Production",
+          "shortTitle": "Prod",
+          "id": "production"
+        },
+        {
+          "title": "Staging",
+          "shortTitle": "Stag",
+          "id": "staging"
+        }
+      ]
+    },
+    {
+      "id": "region",
+      "urlKey": "r",
+      "title": "Region",
+      "default": "ap-southeast-2",
+      "type": "singleValue",
+      "items": [
+        {
+          "title": "All Regions",
+          "id": null
+        },
+        {
+          "title": "Sydney",
+          "id": "ap-southeast-2"
+        },
+        {
+          "title": "London",
+          "id": "eu-west-2"
+        }
+      ]
+    },
+    {
+      "id": "level",
+      "urlKey": "ll",
+      "title": "Log Level",
+      "default": null,
+      "type": "singleValue",
+      "items": [
+        {
+          "title": "All levels",
+          "id": null
+        },
+        {
+          "title": "Info",
+          "id": "info"
+        },
+        {
+          "title": "Debug",
+          "id": "debug"
+        },
+        {
+          "title": "Error",
+          "id": "error"
+        }
+      ]
+    }
+  ]
+}
+

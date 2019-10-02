@@ -1,9 +1,44 @@
 version: 2.1
 
-jobs:
+workflows:
+  version: 2
   build:
+    jobs:
+      - test
+      - push:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+
+jobs:
+  test:
     machine: true
     steps:
-      - checkout
-      - run: docker build -f docker/Dockerfile .
+      - build_image
+  push:
+    machine: true
+    steps:
+      - early_return_for_forked_pull_requests
+      - build_image
+      - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+      - run: docker push squareup/logquacious:$CIRCLE_BRANCH
 
+commands:
+  build:
+    steps:
+      - checkout
+      - run: docker build -f docker/Dockerfile -t squareup/logquacious:$CIRCLE_BRANCH .
+  early_return_for_forked_pull_requests:
+    description: >-
+      If this build is from a fork, stop executing the current job and return success.
+      This is useful to avoid steps that will fail due to missing credentials.
+    steps:
+      - run:
+          name: Early return if this build is from a forked PR
+          command: |
+            if [ -n "$CIRCLE_PR_NUMBER" ]; then
+              echo "Nothing to upload for forked PRs, so marking this step successful"
+              circleci step halt
+            fi

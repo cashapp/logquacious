@@ -1,0 +1,11 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run: docker build -f docker/Dockerfile -t squareup/logquacious:$CIRCLE_BRANCH .
+

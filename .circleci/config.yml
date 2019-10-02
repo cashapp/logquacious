@@ -1,0 +1,9 @@
+version: 2.1
+
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run: docker build -f docker/Dockerfile .
+

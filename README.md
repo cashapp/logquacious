@@ -1,5 +1,7 @@
 # Logquacious
 
+[![CircleCI](https://circleci.com/gh/gak/logquacious/tree/master.svg?style=svg)](https://circleci.com/gh/gak/logquacious/tree/master)
+
 Logquacious (lq) is a fast and simple log viewer written by Square.
 
 It currently only supports talking to ElasticSearch with plans on adding more backend support.

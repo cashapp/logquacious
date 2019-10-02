@@ -3,12 +3,13 @@ FROM node:alpine
 RUN mkdir /lq
 WORKDIR /lq
 
+# Test and generate production ready files.
 ADD package.json /lq/
 RUN npm install
-
-ADD tsconfig.json index.html app.sass .babelrc.js /lq/
+ADD tsconfig.json index.html app.sass .babelrc.js testSetup.ts /lq/
 ADD src/ /lq/src/
 ADD themes/ /lq/themes/
+RUN npm test
 RUN npm run build
 
 # Build the entrypoint binary.

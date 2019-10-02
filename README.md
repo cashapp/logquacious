@@ -2,7 +2,7 @@
 
 Logquacious (lq) is a fast and simple log viewer written by Square.
 
-It currently only supports talking to ElasticSearch with plans on adding more backend support.
+It currently only supports talking to ElasticSearch, however the storage/indexing backend is pluggable. If you are interested in contributing more backends, open a pull request!
 
 ![Overview](./screenshots/overview.png)
 

@@ -1,12 +1,22 @@
 # Logquacious
 
-Logquacious (lq) is a fast and simple log viewer written by Square.
-
-It currently only supports talking to ElasticSearch, however the storage/indexing backend is pluggable. If you are interested in contributing more backends, open a pull request!
+Logquacious (lq) is a fast and simple log viewer. It currently only supports
+exploration of logs stored in [ElasticSearch](https://www.elastic.co/products/elasticsearch),
+however the storage/indexing backend is pluggable. If you are interested in
+contributing more backends, open a pull request!
 
 ![Overview](./screenshots/overview.png)
 
-There are [more screenshots](./screenshots/README.md) to see other parts of the UI.
+[More screenshots](./screenshots/README.md) that show off other parts of the UI.
+
+## Rationale
+Putting application and system logs in an ElasticSearch index is a common
+way to store logs from multiple sources in a single place that can be searched.
+However, while there are many web-based user interfaces for ElasticSearch, most
+of them either focus on read/write access, treating ElasticSearch as a general
+purpose database, or are ElasticSearch query builders. We didn't find any modern,
+well-designed, minimalist web user interfaces designed with the explicit purpose
+of read-only log exploration.
 
 ## Features
 
@@ -45,16 +55,16 @@ You should be presented with the Logquacious UI and a few logs that are continuo
 
 #### Docker
 
-Coming soon: image to live on Docker Hub.
+*Coming soon*: publish image to Docker Hub.
 
-You will need docker installed.
+You will need [Docker installed](https://www.docker.com/products/docker-desktop).
 
 Build the image:
 ```shell script
 docker build -f docker/Dockerfile -t logquacious .
 ```
 
-You can configure the instance via command line arguments or environment variables (e.g. ES_URL):
+You can configure the instance via command line arguments or environment variables (e.g. `ES_URL`):
 ```shell script
 # docker run logquacious --help
 Usage: lq-startup
@@ -288,4 +298,3 @@ http.cors.allow-origin: "https://lq.mycompany.com/"
 ```
 
 See the ElasticSearch documentation on the [http configuration options](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html) for more information.
-

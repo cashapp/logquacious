@@ -1,0 +1,13 @@
+server {
+  listen 8080 default_server;
+
+  location / {
+    root /lq;
+  }
+
+  {{if .ESProxy}}
+  location /es {
+    proxy_pass {{.ESURL}};
+  }
+  {{end}}
+}

@@ -3,8 +3,7 @@
 // If a config file is given via a volume mount at /lq/config.ts, the file will be used.
 // Otherwise it will be generated with some optional variables.
 //
-// Similarly if a Caddyfile is given at /lq/Caddyfile it will be used,
-// otherwise there are variables that are required.
+// Similarly if a /etc/nginx/lq.conf is given it will be used instead of generating one.
 package main
 
 import (
@@ -32,8 +31,10 @@ type Vars struct {
 	IgnoredFieldsJoined string   `hidden:""`
 }
 
-const lqConfigFile = "config.json"
-const caddyFile = "Caddyfile"
+const lqTemplate = "config.json"
+const lqDest = "/lq/config.json"
+const nginxTemplate = "nginx"
+const nginxDest = "/etc/nginx/conf.d/lq.conf"
 
 func main() {
 	err := run()
@@ -47,38 +48,33 @@ func run() error {
 	kong.Parse(&vars)
 	log.Printf("Variables for this docker image looks like this:\n%+v", vars)
 
-	if !exists(dstPath(caddyFile)) && vars.ESURL == "" {
-		return errors.Errorf("%s is missing and ES_URL (--es-url) was not specified.", caddyFile)
+	if !exists(nginxDest) && vars.ESURL == "" {
+		return errors.Errorf("%s is missing and ES_URL (--es-url) was not specified.", nginxTemplate)
 	}
 
 	vars.IgnoredFieldsJoined = fmt.Sprintf(`"%s"`, strings.Join(vars.IgnoredFields, `","`))
 
-	err := tmpl(caddyFile, vars)
+	err := tmpl(nginxTemplate, nginxDest, vars)
 	if err != nil {
 		return err
 	}
 
-	err = tmpl(lqConfigFile, vars)
+	err = tmpl(lqTemplate, lqDest, vars)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("Running caddy...")
-	err = stream("caddy")
+	log.Printf("Running nginx...")
+	err = stream("nginx")
 	if err != nil {
-		return errors.Wrapf(err, "caddy exited unusually")
+		return errors.Wrapf(err, "nginx exited unusually")
 	}
 
 	return nil
 }
 
-func dstPath(name string) string {
-	return fmt.Sprintf("/lq/%s", name)
-}
-
-func tmpl(name string, vars Vars) error {
+func tmpl(name, dst string, vars Vars) error {
 	src := fmt.Sprintf("/templates/%s", name)
-	dst := dstPath(name)
 	if exists(dst) {
 		return nil
 	}

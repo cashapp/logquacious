@@ -1,7 +1,0 @@
-:2015
-
-{{if .ESProxy}}
-proxy /es {{.ESURL}} {
-  without /es
-}
-{{end}}

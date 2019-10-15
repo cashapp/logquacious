@@ -19,10 +19,15 @@ RUN go build -mod=vendor -o lq-startup ./...
 
 # Final image
 FROM alpine:latest
-RUN apk add --no-cache caddy
+
+RUN apk add --no-cache nginx
+RUN rm /etc/nginx/conf.d/default.conf
+RUN mkdir -p /run/nginx
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+
 COPY --from=0 /lq/dist/ /lq
 COPY --from=1 /lq/lq-startup /
-COPY --from=1 /lq/Caddyfile /templates/
+COPY --from=1 /lq/nginx /templates/
 COPY --from=1 /lq/config.json /templates/
 WORKDIR /lq
 

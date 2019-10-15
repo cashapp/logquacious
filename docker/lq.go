@@ -65,7 +65,7 @@ func run() error {
 	}
 
 	log.Printf("Running nginx...")
-	err = stream("nginx")
+	err = stream("nginx", "-g", "daemon off;")
 	if err != nil {
 		return errors.Wrapf(err, "nginx exited unusually")
 	}

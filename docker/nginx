@@ -2,7 +2,7 @@ server {
   listen 8080 default_server;
 
   location / {
-    root /lq;
+    root /lq/;
   }
 
   {{if .ESProxy}}

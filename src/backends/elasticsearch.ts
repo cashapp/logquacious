@@ -181,7 +181,7 @@ export class Elasticsearch implements IDataSource {
       search.search_after = [searchAfterAscending ? cursor.searchAfter - 1 : cursor.searchAfter + 1]
     }
 
-    const url = this.url(`/${this.index}/_search`)
+    const url = this.url(`/_search`)
     const data = await Elasticsearch.fetch<ElasticsearchResults>(url, "POST", search)
     if (data.hits === undefined || !data.hits.hits) {
       console.log('No entries!')
@@ -317,7 +317,7 @@ export class Elasticsearch implements IDataSource {
 
   // Bulk get a set of documents.
   async bulkGet(index: string, ids: Array<string>): Promise<Map<string, LogMessage>> {
-    const url = this.url(`/${index}/_doc/_mget`)
+    const url = this.url(`${index}/_doc/_mget`)
     let request = {docs: ids.map(id => ({_id: id}))}
     const data = await Elasticsearch.fetch<LogMessages>(url, "POST", request)
     return new Map<string, LogMessage>(data.docs.map((doc: LogMessage) => [doc._id, this.normaliseLog(doc)]))
@@ -343,7 +343,7 @@ export class Elasticsearch implements IDataSource {
   }
 
   async histogram(query: Query, interval: IRelative, tz: string): Promise<HistogramResults> {
-    const url = this.url(`/${this.index}/_search?size=0`)
+    const url = this.url(`/_search?size=0`)
     let search = this.historicRequest(query)
 
     const unit = (interval.unit == "millisecond") ? "ms" : interval.unit[0]

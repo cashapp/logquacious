@@ -93,9 +93,8 @@ docker run -p 0.0.0.0:8080:2015 logquacious \
 
 2019/10/01 05:28:07 Variables for this docker image looks like this:
 {ESProxy:true ESURL:http://192.168.0.1:9200 ESIndex:logs-* TimestampField:@timestamp LevelField:level ServiceField:service MessageField:text IgnoredFields:[_id _index] IgnoredFieldsJoined:}
-2019/10/01 05:28:07 Successfully generated/lq/Caddyfile
 2019/10/01 05:28:07 Successfully generated/lq/config.json
-2019/10/01 05:28:07 Running caddy...
+2019/10/01 05:28:07 Running nginx...
 Activating privacy features... done.
 
 Serving HTTP on port 2015

@@ -6,8 +6,8 @@ services:
       dockerfile: docker/Dockerfile
       context: ..
     ports:
-      - "127.0.0.1:2015:2015"
-    command: "--es-url=http://es:9200"
+      - "127.0.0.1:8080:8080"
+    command: "--es-url=http://es:9200/" # Trailing slash is important
   generator:
     build: generator
   es:

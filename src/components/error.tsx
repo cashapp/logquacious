@@ -2,7 +2,7 @@ import { Component } from "inferno"
 
 interface Props {
   visible: boolean
-  message: string
+  message: string | HTMLElement
 }
 
 export class Error extends Component<Props> {
@@ -16,7 +16,7 @@ export class Error extends Component<Props> {
           <div class="message-body">
             <div class="content">
               <h4>Message</h4>
-              <pre>{this.props.message}</pre>
+              {(this.props.message instanceof HTMLElement) ? this.props.message : <pre>{this.props.message}</pre> }
               <h4>Potential Fixes</h4>
               <ul>
                 <li>

@@ -1,7 +1,7 @@
 {
   "scripts": {
     "hot": "parcel index.html",
-    "build": "parcel build index.html",
+    "build": "parcel build --public-url=./ index.html",
     "test": "jest"
   },
   "alias": {

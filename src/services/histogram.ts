@@ -474,7 +474,12 @@ export class Histogram {
   // A resize basically needs to recalculate sizes and request new buckets.
   // We don't want to spam many of them so do a debounce.
   attachResizeEvents() {
-    const f = () => this.search(this.query)
+    const f = () => {
+      if (!this.query) {
+        return
+      }
+      this.search(this.query)
+    }
     let timer: number
     window.addEventListener('resize', () => {
       clearTimeout(timer)

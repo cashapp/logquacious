@@ -110,15 +110,15 @@ export interface IDataSource {
  */
 export class Elasticsearch implements IDataSource {
   private readonly urlPrefix: string
-  private readonly index: any
+  private readonly index: string
 
   constructor(urlPrefix: string, index: string) {
     this.urlPrefix = urlPrefix
     this.index = index
   }
 
-  url(suffix: string): string {
-    return this.urlPrefix + suffix
+  url(suffix: string, index: string): string {
+    return `${this.urlPrefix}/${index}/${suffix}`
   }
 
   static async fetch<T>(url, method = "POST", body?: object): Promise<T> {
@@ -156,8 +156,8 @@ export class Elasticsearch implements IDataSource {
   }
 
   // Load a single document.
-  async loadDocument(index: String, id: String): Promise<LogMessage> {
-    const url = this.url(`/${index}/_doc/${id}`)
+  async loadDocument(index: string, id: string): Promise<LogMessage> {
+    const url = this.url(`_doc/${id}`, index)
     const data = await Elasticsearch.fetch<LogMessage>(url, "GET")
     return this.normaliseLog(data)
   }
@@ -181,7 +181,7 @@ export class Elasticsearch implements IDataSource {
       search.search_after = [searchAfterAscending ? cursor.searchAfter - 1 : cursor.searchAfter + 1]
     }
 
-    const url = this.url(`/_search`)
+    const url = this.url(`_search`, this.index)
     const data = await Elasticsearch.fetch<ElasticsearchResults>(url, "POST", search)
     if (data.hits === undefined || !data.hits.hits) {
       console.log('No entries!')
@@ -317,7 +317,7 @@ export class Elasticsearch implements IDataSource {
 
   // Bulk get a set of documents.
   async bulkGet(index: string, ids: Array<string>): Promise<Map<string, LogMessage>> {
-    const url = this.url(`${index}/_doc/_mget`)
+    const url = this.url(`_doc/_mget`, index)
     let request = {docs: ids.map(id => ({_id: id}))}
     const data = await Elasticsearch.fetch<LogMessages>(url, "POST", request)
     return new Map<string, LogMessage>(data.docs.map((doc: LogMessage) => [doc._id, this.normaliseLog(doc)]))
@@ -343,7 +343,7 @@ export class Elasticsearch implements IDataSource {
   }
 
   async histogram(query: Query, interval: IRelative, tz: string): Promise<HistogramResults> {
-    const url = this.url(`/_search?size=0`)
+    const url = this.url(`_search?size=0`, this.index)
     let search = this.historicRequest(query)
 
     const unit = (interval.unit == "millisecond") ? "ms" : interval.unit[0]

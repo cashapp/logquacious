@@ -14,7 +14,7 @@ export class FilterGroup extends Component<Props> {
     const filter = this.props.filter
     const items = filter.items.map(item => {
       const id = `${filter.id}-${item.id}`
-      const checked = filter.selected === item.id
+      const checked = (filter.selected === item.id) || (!filter.selected && !item.id)
       return (
         <Menu.Radio id={id} name={item.id} onChange={this.onChange} checked={checked}>{item.title}</Menu.Radio>
       )

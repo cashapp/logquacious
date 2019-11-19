@@ -93,13 +93,18 @@ export class Query {
       values.u = Time.whenToText(this.endTime)
     }
     for (const f of this.filters) {
-      values[f.urlKey] = f.selected
+      values[f.urlKey] = f.selected || ""
     }
 
     return Object.keys(values)
     // Space can be encoded as +, and : can be left alone. encodeURIComponent is a bit overly aggressive
     // to be support poor URI standards.
-      .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(values[k]).replace(/%20/g, '+').replace(/%3A/g, ':'))
+      .map(k =>
+        encodeURIComponent(k) + '=' +
+        encodeURIComponent(values[k])
+          .replace(/%20/g, '+')
+          .replace(/%3A/g, ':')
+      )
       .join('&')
   }
 

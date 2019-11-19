@@ -3,8 +3,8 @@ import { CopyHelper } from "../helpers/copyHelper"
 
 export type FieldsConfig = {
   collapsedFormatting: ILogRule[]
+  expandedFormatting?: ILogRule[]
   collapsedIgnore?: string[]
-  expandedFormatting?: Record<string, ExpandedViewFormatter>
 
   // Don't create links for values beneath this depth, for when you don't index this deep.
   maxDepthForLinks?: number
@@ -15,10 +15,10 @@ export type FieldsConfig = {
 
 export interface ILogRule {
   field: string
-  transforms: string | object
+  transforms: string[] | object[]
 }
 
-interface FormatField {
+interface CollapsedFormatField {
   // Original string value before formatting
   readonly original: string
   // Formatted value, modified by the transformer, maybe be HTML.
@@ -33,8 +33,9 @@ interface FormatField {
   tooltip: string,
 }
 
-export interface ExpandedViewFormatField {
+export interface ExpandedFormatField {
   readonly original: any,
+  current: string
   readonly indent: string,
   readonly hrefMaker: HrefMaker,
   copyBag: Array<any>
@@ -44,9 +45,9 @@ export interface ExpandedViewFormatField {
  * Transform is a function that transforms a log record field for formatting. It
  * returns the transformed field. It may transform its input in-place.
  */
-type Transform = (input: FormatField) => FormatField
+type CollapsedTransform = (input: CollapsedFormatField) => CollapsedFormatField
 
-type ExpandedViewFormatter = (input: ExpandedViewFormatField) => string
+type ExpandedTransform = (input: ExpandedFormatField) => ExpandedFormatField
 
 /**
  * HrefMaker returns an href link that appends the term onto the current query.
@@ -66,7 +67,7 @@ export class LogFormatter {
     }
     config.collapsedFormatting = config.collapsedFormatting || []
     config.collapsedIgnore = config.collapsedIgnore || []
-    config.expandedFormatting = config.expandedFormatting || {}
+    config.expandedFormatting = config.expandedFormatting || []
     this.config = config
     this.copyHelper = new CopyHelper()
   }
@@ -101,7 +102,7 @@ export class LogFormatter {
       if (value === undefined) {
         continue
       }
-      let format: FormatField = {
+      let format: CollapsedFormatField = {
         original: value,
         current: value,
         classes: [],
@@ -110,15 +111,8 @@ export class LogFormatter {
         tooltip: null,
       }
       for (const transform of rule.transforms) {
-        let funcName, data
-        if (typeof transform == "string") {
-          funcName = transform
-          data = {}
-        } else {
-          funcName = Object.keys(transform)[0]
-          data = transform[funcName]
-        }
-        const tf = transformers[funcName](data)
+        let {funcName, data} = this.getTransformData(transform)
+        const tf = collapsedTransformers[funcName](data)
         format = tf(format)
       }
 
@@ -174,7 +168,7 @@ export class LogFormatter {
           // Grab bag of references to use for the copy button, that gets filled in by the
           // rendering code
           const copyBag = []
-          expanded.innerHTML = this.renderPrettyJSON(this.cleanLog(full), hrefMaker, copyBag)
+          expanded.innerHTML = this.renderExpandedRecursively(this.cleanLog(full), hrefMaker, copyBag)
 
           expanded.addEventListener('click', (e) => {
             // Doing some fancy event delegation here since there could be many nested nodes
@@ -214,17 +208,45 @@ export class LogFormatter {
     return fragment
   }
 
-  renderPrettyJSON(obj: any, hrefMaker: HrefMaker, copyBag: Array<any>, path: Array<string> = [], level = 0): string {
+  private getTransformData(transform: string | object) {
+    let funcName, data
+    if (typeof transform == "string") {
+      funcName = transform
+      data = {}
+    } else {
+      funcName = Object.keys(transform)[0]
+      data = transform[funcName]
+    }
+    return {funcName, data}
+  }
+
+  renderExpandedRecursively(obj: any, hrefMaker: HrefMaker, copyBag: Array<any>, path: Array<string> = [], level = 0): string {
     const indent = makeIndent(level + 1)
     const lastIndent = makeIndent(level)
     const pathStr = path.join('.')
-    if (this.config.expandedFormatting[pathStr] !== undefined) {
-      return this.config.expandedFormatting[pathStr]({
-        original: obj,
-        indent: indent,
-        hrefMaker: hrefMaker,
-        copyBag: copyBag,
+    let current = obj
+
+    this.config.expandedFormatting.forEach(rule => {
+      if (rule.field != pathStr) {
+        return undefined
+      }
+
+      rule.transforms.forEach(transform => {
+        const {funcName, data} = this.getTransformData(transform)
+        const func = expandedTransformers[funcName](data)
+        const r = func({
+          original: obj,
+          current,
+          indent: indent,
+          hrefMaker: hrefMaker,
+          copyBag: copyBag,
+        })
+        current = r.current
       })
+    })
+
+    if (current != obj) {
+      return current
     }
 
     if (Array.isArray(obj)) {
@@ -236,7 +258,7 @@ export class LogFormatter {
       let ret = '[' + makeCopyBtn(obj, copyBag)
       obj.forEach((v) => {
         ret += `\n${indent}`
-        ret += this.renderPrettyJSON(v, hrefMaker, copyBag, path, level + 1)
+        ret += this.renderExpandedRecursively(v, hrefMaker, copyBag, path, level + 1)
       })
       ret += `\n${lastIndent}]`
       if (collapse) {
@@ -255,7 +277,7 @@ export class LogFormatter {
       keys.forEach((k) => {
         const v = obj[k]
         ret += `\n${indent}${k}: `
-        ret += this.renderPrettyJSON(v, hrefMaker, copyBag, path.concat([k]), level + 1)
+        ret += this.renderExpandedRecursively(v, hrefMaker, copyBag, path.concat([k]), level + 1)
       })
       ret += `\n${lastIndent}}`
       if (collapse) {
@@ -296,7 +318,7 @@ export class LogFormatter {
     return path.length <= this.config.maxDepthForLinks
   }
 
-  static logger(field: FormatField): FormatField {
+  static logger(field: CollapsedFormatField): CollapsedFormatField {
     if (!/^\w+(\.\w+)+$/.test(field.original)) {
       // Only format Java class names
       return field
@@ -314,6 +336,9 @@ export class LogFormatter {
     const keys = Object.keys(entry).sort()
     for (const k of keys) {
       let v = entry[k]
+      if (v == null) {
+        continue
+      }
       if (isObject(v) || Array.isArray(v)) {
         v = JSON.stringify(v)
       }
@@ -327,8 +352,8 @@ export class LogFormatter {
   }
 }
 
-function timestamp(): Transform {
-  return function (input: FormatField): FormatField {
+function timestamp(): CollapsedTransform {
+  return function (input: CollapsedFormatField): CollapsedFormatField {
     if (!input.original) {
       return input
     }
@@ -353,8 +378,8 @@ function timestamp(): Transform {
   }
 }
 
-function mapValue(mapping: Record<string, string>): Transform {
-  return function (input: FormatField) {
+function mapValue(mapping: Record<string, string>): CollapsedTransform {
+  return function (input: CollapsedFormatField) {
     const lookup = mapping[input.current]
     if (lookup !== undefined) {
       input.current = lookup
@@ -363,8 +388,8 @@ function mapValue(mapping: Record<string, string>): Transform {
   }
 }
 
-function mapClass(mapping: Record<string, string>): Transform {
-  return function (input: FormatField) {
+function mapClass(mapping: Record<string, string>): CollapsedTransform {
+  return function (input: CollapsedFormatField) {
     const lookup = mapping[input.current]
     if (lookup !== undefined) {
       input.classes.push(lookup)
@@ -373,22 +398,22 @@ function mapClass(mapping: Record<string, string>): Transform {
   }
 }
 
-function addClass(c: string): Transform {
-  return function (input: FormatField) {
+function addClass(c: string): CollapsedTransform {
+  return function (input: CollapsedFormatField) {
     input.classes.push(c)
     return input
   }
 }
 
-function upperCase(): Transform {
-  return function (input: FormatField): FormatField {
+function upperCase(): CollapsedTransform {
+  return function (input: CollapsedFormatField): CollapsedFormatField {
     input.current = input.current.toUpperCase()
     return input
   }
 }
 
-function randomStableColor(): Transform {
-  return function (field: FormatField): FormatField {
+function randomStableColor(): CollapsedTransform {
+  return function (field: CollapsedFormatField): CollapsedFormatField {
     if (!field.original) {
       return field
     }
@@ -432,11 +457,70 @@ export function makeCopyBtn(v: any, copyBag: Array<any>): string {
   return `<span class="icon copy-btn tooltip is-tooltip-right" data-tooltip="Copy" data-copy="${copyBag.length - 1}"><i class="mdi mdi-content-copy"></i></span>`
 }
 
-export const transformers: { [key: string]: (any) => Transform } = {
+interface JavaExceptionMatch {
+  // If a fqcn has this prefix, it will turn into a link.
+  fqcnMatch: string
+  // The link generated for a matched fqcn
+  href: string
+}
+
+interface JavaExceptionConfig {
+  matches: JavaExceptionMatch[]
+}
+
+function fqcnMatches(fqcn: string, config: JavaExceptionConfig): JavaExceptionMatch | undefined {
+  return config.matches.find(m => fqcn.match(new RegExp(m.fqcnMatch)))
+}
+
+function javaException(config: JavaExceptionConfig): ExpandedTransform {
+  return (field: ExpandedFormatField): ExpandedFormatField => {
+    const indent = field.indent
+    const lines = field.current.split('\n')
+    const formatted = []
+    for (const line of lines) {
+      if (!/\s/.test(line[0])) {
+        formatted.push(`<span class="has-text-danger">${line}</span>`)
+      } else {
+        const match = line.match(/^(\s+)at (.*)\((.*?)(:\d+)?\)$/)
+        if (!match) {
+          formatted.push(line)
+          continue
+        }
+        const [, space, fqcn, file, lineno] = match
+        let right = `${fqcn}(${file}${lineno || ""})`
+        // TODO: This will have to be customisable when we open source
+
+        const exceptionMatch = fqcnMatches(fqcn, config)
+
+        if (exceptionMatch) {
+          const parts = fqcn.split('.')
+          const firstCapital = parts.findIndex((i: string) => i[0].toLowerCase() !== i[0])
+          const path = parts.slice(0, firstCapital).join('/')
+          const href = exceptionMatch.href
+            .replace("${fqcn}", fqcn)
+            .replace("${path}", path)
+            .replace("${file}", file)
+            .replace("${lineno}", lineno)
+          right = `<a target="_blank" class="filter-link" href="${href}">${right}</a>`
+        }
+        formatted.push(`${space}at ${right}`)
+      }
+    }
+    field.current = `${makeCopyBtn(field.original, field.copyBag)}\n${indent}` + formatted.join(`\n${indent}`)
+    return field
+  }
+}
+
+
+export const collapsedTransformers: { [key: string]: (any) => CollapsedTransform } = {
   timestamp,
   upperCase,
   mapValue,
   mapClass,
   addClass,
   randomStableColor,
+}
+
+export const expandedTransformers: { [key: string]: (any) => ExpandedTransform } = {
+  javaException,
 }

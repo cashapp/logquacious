@@ -1,71 +1,81 @@
-import { Endpoint, Now, Time, When } from "../helpers/time"
+import { Endpoint, Now, Range, Time, When } from "../helpers/time"
 import { Filter, FilterType } from "../components/app"
 
 export const DefaultPageSize = 200
 const DefaultStartTime = Time.wrapRelative(-1, "h")
+const DefaultEndTime = Now
 
 // Query state data object with encoding/decoding to query parameters.
 export class Query {
-  q: string
+  terms?: string
   pageSize: number
   startTime: When
   endTime: When
   filters: Filter[]
+  focusCursor?: string
 
-  constructor(q: string, pageSize: number, startTime: When, endTime: When, filters: Filter[]) {
-    this.q = q
-    this.pageSize = pageSize
-    this.filters = filters || []
-    this.startTime = startTime
-    this.endTime = endTime
+  constructor() {
+    // undefined means there hasn't been a search submitted yet
+    this.terms = undefined
+    this.pageSize = DefaultPageSize
+    this.startTime = DefaultStartTime
+    this.endTime = DefaultEndTime
+    this.filters = []
+    this.focusCursor = undefined
   }
 
-  static Default(): Query {
-    return new Query("", DefaultPageSize, DefaultStartTime, Now, [])
+  clone(): Query {
+    const q = new Query()
+    q.terms = this.terms
+    q.pageSize = this.pageSize
+    q.startTime = this.startTime
+    q.endTime = this.endTime
+    q.filters = this.filters
+    q.focusCursor = this.focusCursor
+    return q
+  }
+
+  equals(other: Query): boolean {
+    return this.toURL() == other.toURL()
   }
 
   static fromURL(filters: Filter[]): Query {
     const result: any = {}
-    const query = window.location.search.substr(1)
-    if (query != "") {
-      query.split("&").forEach(function (part) {
+    const urlQuery = window.location.search.substr(1)
+    if (urlQuery != "") {
+      urlQuery.split("&").forEach(function (part) {
         const item = part.split("=")
         if (item.length === 2) {
           result[item[0]] = decodeURIComponent(item[1].replace(/:/g, '%3A').replace(/\+/g, '%20'))
         }
       })
     }
-    let q: string = result["q"] || ""
-    let pageSize: number = result["n"] || DefaultPageSize
-    let startTime: When = result["t"] ? Time.parseText(result["t"]) : DefaultStartTime
-    let endTime: When = result["u"] ? Time.parseText(result["u"]) : Now // u for until
+
+    const q = new Query()
+    q.terms = result["q"]
+    q.pageSize = parseInt(result["n"]) || DefaultPageSize
+    q.startTime = result["t"] ? Time.parseText(result["t"]) : DefaultStartTime
+    q.endTime = result["u"] ? Time.parseText(result["u"]) : DefaultEndTime // u for until
+    q.focusCursor = result["id"]
 
     for (const idx in filters) {
       const filter = filters[idx]
       const selected = result[filter.urlKey] || filter.default
-      filters[idx] = {...filter, selected}
+      q.filters[idx] = {...filter, selected}
     }
 
-    return new Query(q, pageSize, startTime, endTime, filters)
-  }
-
-  equals(other: Query): boolean {
-    return this.q == other.q &&
-      this.pageSize == other.pageSize &&
-      this.startTime == other.startTime &&
-      this.endTime == other.endTime &&
-      (this.filters.every(f => f.selected == other.filters.find(ff => ff.id == f.id).selected))
+    return q
   }
 
   title(): string {
-    if (this.q && this.q.trim() !== "") {
-      return this.q + " - Logquacious"
+    if (this.terms && this.terms.trim() !== "") {
+      return this.terms + " - Logquacious"
     }
     return "Logquacious"
   }
 
   isEmpty(): boolean {
-    return this.q == ""
+    return this.terms == undefined
   }
 
   selectedDataSource(): string | undefined {
@@ -83,14 +93,19 @@ export class Query {
 
   toURL(): string {
     const values: { [id: string]: string } = {
-      q: this.q,
       t: Time.whenToText(this.startTime),
+    }
+    if (this.terms != undefined) {
+      values.q = this.terms
     }
     if (this.pageSize != DefaultPageSize) {
       values.n = String(this.pageSize)
     }
-    if (this.endTime != Now) {
-      values.u = Time.whenToText(this.endTime)
+    if (this.endTime != DefaultEndTime) {
+      values.u = Time.whenToMoment(this.endTime).toISOString()
+    }
+    if (this.focusCursor) {
+      values.id = this.focusCursor
     }
     for (const f of this.filters) {
       values[f.urlKey] = f.selected || ""
@@ -108,39 +123,50 @@ export class Query {
       .join('&')
   }
 
-  replaceText(text: string): Query {
-    return new Query(
-      text,
-      this.pageSize,
-      this.startTime,
-      this.endTime,
-      this.filters,
-    )
+  withNewTerms(terms: string): Query {
+    console.log('got new terms', terms)
+    const q = this.clone()
+    q.terms = terms
+    return q
   }
 
   withTerm(term: string): Query {
-    return this.replaceText(this.q ? this.q + ' ' + term : term)
+    const q = this.clone()
+    q.terms = this.terms ? this.terms + ' ' + term : term
+    return q
   }
 
-  withTimeRange(range): Query {
-    return new Query(
-      this.q,
-      this.pageSize,
-      range[Endpoint.Start],
-      range[Endpoint.End],
-      this.filters,
-    )
+  withPageSize(pageSize: number): Query {
+    const q = this.clone()
+    q.pageSize = pageSize
+    return q
   }
 
-  withFilter(filter: string, selected: string) {
-    const filters = this.filters.map(f => f.id == filter ? {...f, selected} : f)
-    return new Query(
-      this.q,
-      this.pageSize,
-      this.startTime,
-      this.endTime,
-      filters,
-    )
+  withTimeRange(range: Range): Query {
+    const q = this.clone()
+    q.startTime = range[Endpoint.Start]
+    q.endTime = range[Endpoint.End]
+    return q
+  }
+
+  // Solidify the search time range so they are absolute/constant time values. Good for sharing links.
+  withFixedTimeRange(): Query {
+    const q = this.clone()
+    q.startTime = Time.parseText(Time.whenToComputed(q.startTime))
+    q.endTime = Time.parseText(Time.whenToComputed(q.endTime))
+    return q
+  }
+
+  withAppendFilter(filter: string, selected: string): Query {
+    const q = this.clone()
+    q.filters = this.filters.map(f => f.id == filter ? {...f, selected} : f)
+    return q
+  }
+
+  withFocusCursor(cursor?: string): Query {
+    const q = this.clone()
+    q.focusCursor = cursor
+    return q
   }
 }
 

@@ -1,6 +1,7 @@
 import { LogMessage } from "../backends/elasticsearch"
 import { CopyHelper } from "../helpers/copyHelper"
 import { escape } from "he"
+import { Query } from "./query"
 
 export type FieldsConfig = {
   collapsedFormatting: ILogRule[]
@@ -38,7 +39,7 @@ export interface ExpandedFormatField {
   readonly original: any,
   current: string
   readonly indent: string,
-  readonly hrefMaker: HrefMaker,
+  readonly query: () => Query
   copyBag: Array<any>
 }
 
@@ -50,15 +51,11 @@ type CollapsedTransform = (input: CollapsedFormatField) => CollapsedFormatField
 
 type ExpandedTransform = (input: ExpandedFormatField) => ExpandedFormatField
 
-/**
- * HrefMaker returns an href link that appends the term onto the current query.
- */
-export type HrefMaker = (term: string) => string
-
 export class LogFormatter {
   private readonly copyHelper: CopyHelper
   private templateContent: DocumentFragment
   private config: FieldsConfig
+  private _queryCallback: () => Query
 
   constructor(config: FieldsConfig) {
     if (config == undefined) {
@@ -71,6 +68,10 @@ export class LogFormatter {
     config.expandedFormatting = config.expandedFormatting || []
     this.config = config
     this.copyHelper = new CopyHelper()
+  }
+
+  set queryCallback(query: () => Query) {
+    this._queryCallback = query
   }
 
   setTemplate(templateContent: DocumentFragment) {
@@ -113,7 +114,7 @@ export class LogFormatter {
     }
   }
 
-  build(entry: LogMessage, hrefMaker: HrefMaker): DocumentFragment {
+  build(entry: LogMessage): DocumentFragment {
     const cursor = entry.__cursor
     entry = this.cleanLog(entry)
 
@@ -126,6 +127,7 @@ export class LogFormatter {
 
     let fragment = document.importNode(this.templateContent, true)
     fragment.firstElementChild.dataset.cursor = JSON.stringify(cursor)
+    fragment.firstElementChild.dataset.ts = entry['@timestamp']
 
     let fields = ''
     for (const rule of this.config.collapsedFormatting) {
@@ -175,6 +177,7 @@ export class LogFormatter {
         // Abort click because user is selecting
         return
       }
+
       visible = !visible
       if (visible) {
         if (!isExpandedRendered) {
@@ -188,13 +191,21 @@ export class LogFormatter {
           // Grab bag of references to use for the copy button, that gets filled in by the
           // rendering code
           const copyBag = []
-          expanded.innerHTML = this.renderExpandedRecursively(this.cleanLog(full), hrefMaker, copyBag)
+          expanded.innerHTML = this.renderExpandedRecursively(this.cleanLog(full), copyBag, undefined, 0, cursor)
 
           expanded.addEventListener('click', (e) => {
             // Doing some fancy event delegation here since there could be many nested nodes
             const target = e.target as HTMLElement
-            if (target.classList.contains('copy-btn')) {
-              const data = copyBag[parseInt(target.dataset.copy, 10)]
+            const oldTooltip = target.dataset.tooltip
+            const data = copyBag[parseInt(target.dataset.copy, 10)]
+
+            const copied = () => {
+              target.dataset.tooltip = "Copied!"
+              setTimeout(() => target.dataset.tooltip = oldTooltip, 1000)
+              e.stopPropagation()
+            }
+
+            if (target.classList.contains('copy-button')) {
               let v: string
               if (isObject(data) || Array.isArray(data)) {
                 v = JSON.stringify(data, null, 2)
@@ -202,10 +213,17 @@ export class LogFormatter {
                 v = data.toString()
               }
               this.copyHelper.copy(v)
-              target.dataset.tooltip = "Copied!"
-              setTimeout(() => target.dataset.tooltip = "Copy", 1000)
-              e.stopPropagation()
+              copied()
+
+            } else if (target.classList.contains('link-button')) {
+              const sharedQuery = this._queryCallback()
+                .withFocusCursor(JSON.stringify(data))
+                .withFixedTimeRange()
+              const w = window.location
+              this.copyHelper.copy(`${w.protocol}//${w.host}${w.pathname}?${sharedQuery.toURL()}`)
+              copied()
             }
+
           })
           isExpandedRendered = true
         }
@@ -214,6 +232,7 @@ export class LogFormatter {
         expanded.classList.add('is-hidden')
       }
     })
+
     fragment.querySelector('.expanded').addEventListener('click', (e) => {
       const target = e.target as HTMLElement
       if (target.classList.contains('show-nested')) {
@@ -240,7 +259,7 @@ export class LogFormatter {
     return {funcName, data}
   }
 
-  renderExpandedRecursively(obj: any, hrefMaker: HrefMaker, copyBag: Array<any>, path: Array<string> = [], level = 0): string {
+  renderExpandedRecursively(obj: any, copyBag: Array<any>, path: Array<string> = [], level = 0, cursor?: any): string {
     const indent = makeIndent(level + 1)
     const lastIndent = makeIndent(level)
     const pathStr = path.join('.')
@@ -260,7 +279,7 @@ export class LogFormatter {
           original: obj,
           current,
           indent: indent,
-          hrefMaker: hrefMaker,
+          query: this._queryCallback,
           copyBag: copyBag,
         })
         current = r.current
@@ -277,10 +296,10 @@ export class LogFormatter {
       }
 
       let collapse = path.length !== 0
-      let ret = '[' + makeCopyBtn(obj, copyBag)
+      let ret = '[' + copyToClipboardButton(obj, copyBag)
       obj.forEach((v) => {
         ret += `\n${indent}`
-        ret += this.renderExpandedRecursively(v, hrefMaker, copyBag, path, level + 1)
+        ret += this.renderExpandedRecursively(v, copyBag, path, level + 1)
       })
       ret += `\n${lastIndent}]`
       if (collapse) {
@@ -295,11 +314,16 @@ export class LogFormatter {
         return '{}'
       }
       let collapse = path.length !== 0
-      let ret = '{' + makeCopyBtn(obj, copyBag)
+      let ret = '{' + copyToClipboardButton(obj, copyBag)
+
+      if (level == 0) {
+        ret += linkToClipboardButton(cursor, copyBag)
+      }
+
       keys.forEach((k) => {
         const v = obj[k]
         ret += `\n${indent}${k}: `
-        ret += this.renderExpandedRecursively(v, hrefMaker, copyBag, path.concat([k]), level + 1)
+        ret += this.renderExpandedRecursively(v, copyBag, path.concat([k]), level + 1)
       })
       ret += `\n${lastIndent}}`
       if (collapse) {
@@ -321,10 +345,10 @@ export class LogFormatter {
     }
 
     if (this.shouldShowLinks(path)) {
-      const href = hrefMaker(pathStr + ':' + JSON.stringify(obj))
-      v = `<a class="filter-link" href="?${href}">${v}</a>`
+      const query = this._queryCallback().withTerm(`${pathStr}:${JSON.stringify(obj)}`)
+      v = `<a class="filter-link" href="?${query.toURL()}">${v}</a>`
     }
-    v = `<span class="copyable-wrapper">${v}${makeCopyBtn(obj, copyBag)}</span>`
+    v = `<span class="copyable-wrapper">${v}${copyToClipboardButton(obj, copyBag)}</span>`
 
     return v
   }
@@ -460,10 +484,15 @@ function nestedCollapseTemplate(placeholder: string, collapsed: string): string 
   return `<span class="show-nested toggle">${placeholder}</span><span class="is-hidden"><span class="hide-nested toggle">[collapse]</span> ${collapsed}</span>`
 }
 
-export function makeCopyBtn(v: any, copyBag: Array<any>): string {
+export function copyToClipboardButton(v: any, copyBag: Array<any>): string {
   // Save the reference to the value to the next index in the array, and track index in "data-copy"
   copyBag.push(v)
-  return `<span class="icon copy-btn tooltip is-tooltip-right" data-tooltip="Copy" data-copy="${copyBag.length - 1}"><i class="mdi mdi-content-copy"></i></span>`
+  return `<span class="icon context-button copy-button tooltip is-tooltip-right" data-tooltip="Copy" data-copy="${copyBag.length - 1}"><i class="mdi mdi-content-copy"></i></span>`
+}
+
+export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string {
+  copyBag.push(cursor)
+  return `<span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span>`
 }
 
 interface JavaExceptionMatch {
@@ -515,7 +544,7 @@ function javaException(config: JavaExceptionConfig): ExpandedTransform {
         formatted.push(`${space}at ${right}`)
       }
     }
-    field.current = `${makeCopyBtn(field.original, field.copyBag)}\n${indent}` + formatted.join(`\n${indent}`)
+    field.current = `${copyToClipboardButton(field.original, field.copyBag)}\n${indent}` + formatted.join(`\n${indent}`)
     return field
   }
 }

@@ -67,7 +67,7 @@ export class App extends Component<Props, State> {
       theme: Theme.Light,
       direction: Direction.Up,
       display: Display.welcome,
-      query: Query.Default(),
+      query: new Query(),
       focusInput: true,
     }
   }
@@ -84,7 +84,7 @@ export class App extends Component<Props, State> {
   handleAttachResults: AttachResultsCallback = (el: HTMLElement) => this.resultsElement = el
   handleAttachHistogram: AttachHistogramCallback = (el: SVGElement) => this.histogramElement = el
 
-  handleSearchBarCallback: SearchBarCallback = (text, submit) => this.log.handleSearchBarCallback(text, submit)
+  handleSearchBarCallback: SearchBarCallback = (text, submit) => this.log.handleSearchBarCallback(text || "", submit)
   handleTimeRangeChanged: ChangeRangeCallback = (range: Range) => this.log.handleRangeCallback(range)
   handleFilterChanged: ChangeFilterCallback = (filter: string, selected: string) => this.log.handleFilterChanged(filter, selected)
 
@@ -100,7 +100,7 @@ export class App extends Component<Props, State> {
           <Title/>
           <SearchBar
             focusInput={this.state.focusInput}
-            queryText={this.state.query.q}
+            queryText={this.state.query.terms}
             onQueryText={this.handleSearchBarCallback}
           />
 

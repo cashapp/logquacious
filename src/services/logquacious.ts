@@ -66,8 +66,9 @@ export class Logquacious {
     this.logo()
 
     this.query = Query.fromURL(this.config.filters)
+
     this.onQuery(this.query)
-    this.onFilter(this.config.filters)
+    this.onFilter(this.query.filters)
 
     this.prefs = new Prefs().load()
     this.onTheme(this.prefs.theme)
@@ -86,7 +87,7 @@ export class Logquacious {
     if (!fieldsConfig) {
       this.error(`dataSource field reference is invalid.\ndataSource.fields=${this.dsConfig().fields}`)
     }
-    this.results.attach(resultsElement, fieldsConfig)
+    this.results.attach(resultsElement, fieldsConfig, () => this.query)
 
     this.focusInput = true
 
@@ -196,6 +197,8 @@ export class Logquacious {
       if (nextPage && this.results.stats.visible > 0) {
         const cursor = this.results.getCursor(nextPageOlder)
         logs = await this.ds().historicSearch(query, cursor, !nextPageOlder)
+      } else if (query.focusCursor) {
+        logs = await this.ds().surroundSearch(query, JSON.parse(query.focusCursor), !nextPageOlder)
       } else {
         logs = await this.ds().historicSearch(query)
       }
@@ -212,7 +215,7 @@ export class Logquacious {
       this.results.saveScroll(nextPageOlder)
     }
 
-    await this.staggerAppend(logs.overview, query, nextPage, nextPageOlder)
+    await this.staggerAppend(logs.overview, nextPage, nextPageOlder)
 
     this.results.updateMoreMarker(true, false)
     this.results.updateMoreMarker(false, false)
@@ -220,14 +223,20 @@ export class Logquacious {
     if (nextPage) {
       // Keep the apparent scroll position when inserting dom elements above.
       this.results.restoreScroll(nextPageOlder)
+    } else if (query.focusCursor) {
+      this.results.focusCursor(query.focusCursor)
     } else {
       // Scroll to latest after all the results are in, only on first page load.
       this.results.scrollToLatest()
     }
+
+    // Clear out loaded focusCursor, since it is specific for the initial load only.
+    this.query = query.withFocusCursor()
+    this.histogram.setQuery(this.query)
   }
 
   // Append the results in chunks so that we never block browser UI rendering for too long.
-  private staggerAppend(logs: any, query: Query, nextPage: boolean, nextPageOlder: boolean): Promise<void> {
+  private staggerAppend(logs: any, nextPage: boolean, nextPageOlder: boolean): Promise<void> {
     return new Promise(resolve => {
       let idx = 0
       let chunkSize = 50
@@ -236,7 +245,6 @@ export class Logquacious {
         logs.reverse()
       }
       const that = this
-      const hrefMaker = (term: string) => query.withTerm(term).toURL()
 
       function renderChunk() {
         let chunkEnd = idx + chunkSize
@@ -245,16 +253,15 @@ export class Logquacious {
         }
         for (; idx < chunkEnd; idx++) {
           if (nextPage && nextPageOlder) {
-            that.results.prepend(logs[idx], hrefMaker)
+            that.results.prepend(logs[idx])
           } else {
-            that.results.append(logs[idx], hrefMaker)
+            that.results.append(logs[idx])
           }
         }
         if (chunkEnd === length) {
           resolve()
           return
         }
-        resolve()
         requestAnimationFrame(renderChunk)
       }
 
@@ -275,7 +282,7 @@ export class Logquacious {
   }
 
   handleSearchBarCallback(text: string, submit: boolean) {
-    this.query = this.query.replaceText(text)
+    this.query = this.query.withNewTerms(text)
     if (submit) {
       this.newSearch(this.query, true)
     }
@@ -284,9 +291,9 @@ export class Logquacious {
 
   handleFilterChanged(filter: string, selected: string) {
     this.config.filters = this.config.filters.map(f => f.id === filter ? {...f, selected} : f)
-    this.query = this.query.withFilter(filter, selected)
+    this.query = this.query.withAppendFilter(filter, selected)
     this.newSearch(this.query, true)
-    this.onFilter(this.config.filters)
+    this.onFilter(this.query.filters)
     this.onQuery(this.query)
   }
 

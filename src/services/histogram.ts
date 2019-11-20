@@ -70,6 +70,10 @@ export class Histogram {
     this.updateChart()
   }
 
+  setQuery(q: Query) {
+    this.query = q
+  }
+
   setDirection(direction: Direction) {
     this.direction = direction
     if (this.query !== undefined) {

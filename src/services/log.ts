@@ -318,19 +318,6 @@ export class LogFormatter {
     return path.length <= this.config.maxDepthForLinks
   }
 
-  static logger(field: CollapsedFormatField): CollapsedFormatField {
-    if (!/^\w+(\.\w+)+$/.test(field.original)) {
-      // Only format Java class names
-      return field
-    }
-    const parts = field.original.split('.')
-    field.current = parts
-      .map((p, idx) => (p.length > 1 && idx != parts.length - 1) ? p[0] : p)
-      .join('.')
-    field.tooltip = field.original
-    return field
-  }
-
   static toLogfmt(entry: Object): string {
     let parts = []
     const keys = Object.keys(entry).sort()
@@ -511,6 +498,20 @@ function javaException(config: JavaExceptionConfig): ExpandedTransform {
   }
 }
 
+function shortenJavaFqcn(): CollapsedTransform {
+  return function(field: CollapsedFormatField): CollapsedFormatField {
+    if (!/^\w+(\.\w+)+$/.test(field.original)) {
+      // Only format Java class names
+      return field
+    }
+    const parts = field.original.split('.')
+    field.current = parts
+      .map((p, idx) => (p.length > 1 && idx != parts.length - 1) ? p[0] : p)
+      .join('.')
+    field.tooltip = field.original
+    return field
+  }
+}
 
 export const collapsedTransformers: { [key: string]: (any) => CollapsedTransform } = {
   timestamp,
@@ -519,6 +520,7 @@ export const collapsedTransformers: { [key: string]: (any) => CollapsedTransform
   mapClass,
   addClass,
   randomStableColor,
+  shortenJavaFqcn,
 }
 
 export const expandedTransformers: { [key: string]: (any) => ExpandedTransform } = {

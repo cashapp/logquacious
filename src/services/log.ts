@@ -1,5 +1,6 @@
 import { LogMessage } from "../backends/elasticsearch"
 import { CopyHelper } from "../helpers/copyHelper"
+import { escape } from "he"
 
 export type FieldsConfig = {
   collapsedFormatting: ILogRule[]
@@ -84,6 +85,34 @@ export class LogFormatter {
     return out
   }
 
+  private safeHTML(entry: any): any {
+    if (typeof entry == "string") {
+      return escape(entry)
+    }
+
+    entry = {...entry}
+    for (const key in entry) {
+      if (typeof entry[key] == "string") {
+        entry[key] = escape(entry[key])
+      }
+    }
+
+    return entry
+  }
+
+  buildSnippet(snippetEl: HTMLElement, full: any) {
+    full = this.cleanLog(full)
+    for (const rule of this.config.collapsedFormatting) {
+      delete (full[rule.field])
+    }
+    for (const field of this.config.collapsedIgnore) {
+      delete (full[field])
+    }
+    if (Object.keys(full).length > 0) {
+      snippetEl.innerHTML = LogFormatter.toLogfmt(full)
+    }
+  }
+
   build(entry: LogMessage, hrefMaker: HrefMaker): DocumentFragment {
     const cursor = entry.__cursor
     entry = this.cleanLog(entry)
@@ -92,6 +121,8 @@ export class LogFormatter {
     const origEntry: LogMessage = {...entry}
     // The expanded part is lazily rendered.
     let isExpandedRendered = false
+
+    entry = this.safeHTML(entry)
 
     let fragment = document.importNode(this.templateContent, true)
     fragment.firstElementChild.dataset.cursor = JSON.stringify(cursor)
@@ -111,7 +142,7 @@ export class LogFormatter {
         tooltip: null,
       }
       for (const transform of rule.transforms) {
-        let {funcName, data} = this.getTransformData(transform)
+        const {funcName, data} = this.getTransformData(transform)
         const tf = collapsedTransformers[funcName](data)
         format = tf(format)
       }
@@ -128,23 +159,11 @@ export class LogFormatter {
       delete (entry[rule.field])
     }
 
-    const snippetEl = fragment.querySelector(".text")
-    const buildSnippet = (full: any) => {
-      full = this.cleanLog(full)
-      for (const rule of this.config.collapsedFormatting) {
-        delete (full[rule.field])
-      }
-      for (const field of this.config.collapsedIgnore) {
-        delete (full[field])
-      }
-      if (Object.keys(full).length > 0) {
-        snippetEl.innerHTML = LogFormatter.toLogfmt(full)
-      }
-    }
+    const snippetEl = fragment.querySelector(".text") as HTMLElement
     if (origEntry._full) {
-      origEntry._full.then(buildSnippet)
+      origEntry._full.then((logMessage) => this.buildSnippet(snippetEl, logMessage))
     } else {
-      buildSnippet(origEntry)
+      this.buildSnippet(snippetEl, origEntry)
     }
 
     fragment.querySelector(".fields").innerHTML = fields
@@ -165,6 +184,7 @@ export class LogFormatter {
           } else {
             full = origEntry
           }
+
           // Grab bag of references to use for the copy button, that gets filled in by the
           // rendering code
           const copyBag = []
@@ -224,6 +244,8 @@ export class LogFormatter {
     const indent = makeIndent(level + 1)
     const lastIndent = makeIndent(level)
     const pathStr = path.join('.')
+
+    obj = this.safeHTML(obj)
     let current = obj
 
     this.config.expandedFormatting.forEach(rule => {
@@ -499,7 +521,7 @@ function javaException(config: JavaExceptionConfig): ExpandedTransform {
 }
 
 function shortenJavaFqcn(): CollapsedTransform {
-  return function(field: CollapsedFormatField): CollapsedFormatField {
+  return function (field: CollapsedFormatField): CollapsedFormatField {
     if (!/^\w+(\.\w+)+$/.test(field.original)) {
       // Only format Java class names
       return field

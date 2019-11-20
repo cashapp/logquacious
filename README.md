@@ -22,7 +22,7 @@ of read-only log exploration.
 
 ## Features
 
-* Fields, filters and data sources are customisable, see [config.example.ts](config.example.ts).
+* Fields, filters and data sources are customisable, see [config.example.json](config.example.json).
 * Interactive histogram.
 * Time picker.
 * URLs can be shared.

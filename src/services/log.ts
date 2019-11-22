@@ -222,6 +222,7 @@ export class LogFormatter {
               const w = window.location
               this.copyHelper.copy(`${w.protocol}//${w.host}${w.pathname}?${sharedQuery.toURL()}`)
               copied()
+
             }
 
           })
@@ -318,6 +319,7 @@ export class LogFormatter {
 
       if (level == 0) {
         ret += linkToClipboardButton(cursor, copyBag)
+        ret += showContextButton(cursor, this._queryCallback)
       }
 
       keys.forEach((k) => {
@@ -487,12 +489,21 @@ function nestedCollapseTemplate(placeholder: string, collapsed: string): string 
 export function copyToClipboardButton(v: any, copyBag: Array<any>): string {
   // Save the reference to the value to the next index in the array, and track index in "data-copy"
   copyBag.push(v)
-  return `<span class="icon context-button copy-button tooltip is-tooltip-right" data-tooltip="Copy" data-copy="${copyBag.length - 1}"><i class="mdi mdi-content-copy"></i></span>`
+  return `<a><span class="icon context-button copy-button tooltip is-tooltip-right" data-tooltip="Copy value to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-content-copy"></i></span></a>`
 }
 
 export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string {
   copyBag.push(cursor)
-  return `<span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span>`
+  return `<a><span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span></a>`
+}
+
+export function showContextButton(cursor: any, queryCallback: () => Query): string {
+  const contextQuery = queryCallback()
+    .withFocusCursor(JSON.stringify(cursor))
+    .withNewTerms("")
+  const w = window.location
+  const url = `${w.protocol}//${w.host}${w.pathname}?${contextQuery.toURL()}`
+  return `<a href="${url}"><span class="icon context-button show-context-button tooltip is-tooltip-right" data-tooltip="View this entry without filters"><i class="mdi mdi-filter-variant-remove"></i></span></a>`
 }
 
 interface JavaExceptionMatch {

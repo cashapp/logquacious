@@ -7,12 +7,19 @@ export type FieldsConfig = {
   collapsedFormatting: ILogRule[]
   expandedFormatting?: ILogRule[]
   collapsedIgnore?: string[]
+  contextFilters?: ContextFilter[]
 
   // Don't create links for values beneath this depth, for when you don't index this deep.
   maxDepthForLinks?: number
 
   // Always create links for these fields by prefix. Recommended for them to be indexed.
   maxDepthForLinksExceptions?: string[]
+}
+
+export type ContextFilter = {
+  title: string
+  keep?: string[]
+  icon?: string
 }
 
 export interface ILogRule {
@@ -222,6 +229,7 @@ export class LogFormatter {
               const w = window.location
               this.copyHelper.copy(`${w.protocol}//${w.host}${w.pathname}?${sharedQuery.toURL()}`)
               copied()
+
             }
 
           })
@@ -318,6 +326,7 @@ export class LogFormatter {
 
       if (level == 0) {
         ret += linkToClipboardButton(cursor, copyBag)
+        ret += this.showContextButtons(cursor, obj)
       }
 
       keys.forEach((k) => {
@@ -382,6 +391,10 @@ export class LogFormatter {
       parts.push(`${k}=${v}`)
     }
     return parts.join(' ')
+  }
+
+  private showContextButtons(cursor: any, obj: any) {
+    return this.config.contextFilters.map(f => showContextButton(f, obj, cursor, this._queryCallback)).join("")
   }
 }
 
@@ -487,12 +500,27 @@ function nestedCollapseTemplate(placeholder: string, collapsed: string): string 
 export function copyToClipboardButton(v: any, copyBag: Array<any>): string {
   // Save the reference to the value to the next index in the array, and track index in "data-copy"
   copyBag.push(v)
-  return `<span class="icon context-button copy-button tooltip is-tooltip-right" data-tooltip="Copy" data-copy="${copyBag.length - 1}"><i class="mdi mdi-content-copy"></i></span>`
+  return `<a><span class="icon context-button copy-button tooltip is-tooltip-right" data-tooltip="Copy value to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-content-copy"></i></span></a>`
 }
 
 export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string {
   copyBag.push(cursor)
-  return `<span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span>`
+  return `<a><span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span></a>`
+}
+
+export function showContextButton(filter: ContextFilter, obj: any, cursor: any, queryCallback: () => Query): string {
+  const newTerms = (filter.keep || [])
+    .filter(k => obj[k])
+    .map(k => `${k}:${JSON.stringify(obj[k])}`)
+    .join(" ")
+  const contextQuery = queryCallback()
+    .withFocusCursor(JSON.stringify(cursor))
+    .withFixedTimeRange()
+    .withNewTerms(newTerms)
+  const w = window.location
+  const url = `${w.protocol}//${w.host}${w.pathname}?${contextQuery.toURL()}`
+  const icon = filter.icon || "mdi-filter-variant-remove"
+  return `<a href="${url}"><span class="icon context-button show-context-button tooltip is-tooltip-right" data-tooltip="${filter.title}"><i class="mdi ${icon}"></i></span></a>`
 }
 
 interface JavaExceptionMatch {

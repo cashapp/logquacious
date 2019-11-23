@@ -7,12 +7,19 @@ export type FieldsConfig = {
   collapsedFormatting: ILogRule[]
   expandedFormatting?: ILogRule[]
   collapsedIgnore?: string[]
+  contextFilters?: ContextFilter[]
 
   // Don't create links for values beneath this depth, for when you don't index this deep.
   maxDepthForLinks?: number
 
   // Always create links for these fields by prefix. Recommended for them to be indexed.
   maxDepthForLinksExceptions?: string[]
+}
+
+export type ContextFilter = {
+  title: string
+  keep?: string[]
+  icon?: string
 }
 
 export interface ILogRule {
@@ -319,7 +326,7 @@ export class LogFormatter {
 
       if (level == 0) {
         ret += linkToClipboardButton(cursor, copyBag)
-        ret += showContextButton(cursor, this._queryCallback)
+        ret += this.showContextButtons(cursor, obj)
       }
 
       keys.forEach((k) => {
@@ -384,6 +391,10 @@ export class LogFormatter {
       parts.push(`${k}=${v}`)
     }
     return parts.join(' ')
+  }
+
+  private showContextButtons(cursor: any, obj: any) {
+    return this.config.contextFilters.map(f => showContextButton(f, obj, cursor, this._queryCallback)).join("")
   }
 }
 
@@ -497,13 +508,18 @@ export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string 
   return `<a><span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span></a>`
 }
 
-export function showContextButton(cursor: any, queryCallback: () => Query): string {
+export function showContextButton(filter: ContextFilter, obj: any, cursor: any, queryCallback: () => Query): string {
+  const newTerms = (filter.keep || [])
+    .filter(k => obj[k])
+    .map(k => `${k}:${JSON.stringify(obj[k])}`)
+    .join(" ")
   const contextQuery = queryCallback()
     .withFocusCursor(JSON.stringify(cursor))
-    .withNewTerms("")
+    .withNewTerms(newTerms)
   const w = window.location
   const url = `${w.protocol}//${w.host}${w.pathname}?${contextQuery.toURL()}`
-  return `<a href="${url}"><span class="icon context-button show-context-button tooltip is-tooltip-right" data-tooltip="View this entry without filters"><i class="mdi mdi-filter-variant-remove"></i></span></a>`
+  const icon = filter.icon || "mdi-filter-variant-remove"
+  return `<a href="${url}"><span class="icon context-button show-context-button tooltip is-tooltip-right" data-tooltip="${filter.title}"><i class="mdi ${icon}"></i></span></a>`
 }
 
 interface JavaExceptionMatch {

@@ -83,6 +83,13 @@ export class Time {
     }
   }
 
+  static wrapDateRange(d: [Date, Date]): Range {
+    return [
+      this.wrapDate(d[0]),
+      this.wrapDate(d[1]),
+    ]
+  }
+
   static wrapDate(d: Date): When {
     return {
       kind: "moment",

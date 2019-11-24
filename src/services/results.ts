@@ -1,7 +1,8 @@
-import { FieldsConfig, HrefMaker, LogFormatter } from "./log"
+import { FieldsConfig, LogFormatter } from "./log"
 import { Lookup } from "../helpers/lookup"
 import { LogMessage } from "../backends/elasticsearch"
 import { Direction, SwapDirection } from "./prefs"
+import { Query } from "./query"
 
 export interface IStats {
   visible: number
@@ -24,6 +25,7 @@ export class Results {
   private beforeLogs: HTMLElement
   private afterLogs: HTMLElement
   private savedScrollEntry: HTMLElement
+  private queryCallback: () => Query
 
   constructor(direction: Direction) {
     this.direction = direction
@@ -32,7 +34,7 @@ export class Results {
     }
   }
 
-  attach(element: HTMLElement, fieldsConfig: FieldsConfig) {
+  attach(element: HTMLElement, fieldsConfig: FieldsConfig, queryCallback: () => Query) {
     this.logs = element
     this.beforeLogs = Lookup.element("#before-logs")
     this.beforeLogs.hidden = true
@@ -40,6 +42,7 @@ export class Results {
     this.afterLogs.hidden = true
     this.templateElement = Lookup.element('#logs-entry-template')
     this.templateContent = this.templateElement.content
+    this.queryCallback = queryCallback
     this.fieldsConfig = fieldsConfig
     this.newChunk(this.direction)
     this.followInterval()
@@ -47,6 +50,7 @@ export class Results {
 
   set fieldsConfig(fieldsConfig: FieldsConfig) {
     this.logFormatter = new LogFormatter(fieldsConfig).setTemplate(this.templateContent)
+    this.logFormatter.queryCallback = this.queryCallback
   }
 
   followInterval() {
@@ -118,13 +122,13 @@ export class Results {
     }
   }
 
-  append(entry: LogMessage, hrefMaker: HrefMaker) {
-    const fragment = this.logFormatter.build(entry, hrefMaker)
+  append(entry: LogMessage) {
+    const fragment = this.logFormatter.build(entry)
     this.addFragment(fragment, this.direction)
   }
 
-  prepend(entry: any, hrefMaker: HrefMaker) {
-    const fragment = this.logFormatter.build(entry, hrefMaker)
+  prepend(entry: any) {
+    const fragment = this.logFormatter.build(entry)
     this.addFragment(fragment, SwapDirection(this.direction))
   }
 
@@ -186,6 +190,19 @@ export class Results {
           return chunk.children[rowIdx] as HTMLElement
         }
         idx--
+      }
+    }
+    return undefined
+  }
+
+  find(predicate: (e: HTMLElement) => boolean): HTMLElement {
+    for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
+      const chunk = this.logs.children[chunkIdx]
+      for (let rowIdx = 0; rowIdx < chunk.children.length; rowIdx++) {
+        const element = chunk.children[rowIdx] as HTMLElement
+        if (predicate(element)) {
+          return element
+        }
       }
     }
     return undefined
@@ -278,8 +295,8 @@ export class Results {
     }
   }
 
-  domEntryToDate(d: HTMLElement): Date {
-    return new Date(JSON.parse(d.dataset.cursor).searchAfter)
+  domEntryToDate(e: HTMLElement): Date {
+    return new Date(e.dataset.ts)
   }
 
   getRange(): [Date, Date] {
@@ -317,5 +334,16 @@ export class Results {
 
   getScrollHeight(): number {
     return document.documentElement.scrollHeight || document.body.scrollHeight
+  }
+
+  focusCursor(cursor: string) {
+    const e = this.find((e: HTMLElement) => e.dataset.cursor == cursor)
+    if (!e) {
+      console.error(`Could not find cursor ${cursor} in results.`)
+      return
+    }
+
+    e.scrollIntoView({block: "center"})
+    e.getElementsByClassName("unexpanded")[0].click()
   }
 }

@@ -1,10 +1,10 @@
 import { Lookup } from "../helpers/lookup"
 import { prepareApp, resultsFlatten } from "../helpers/testHelper"
-import { HrefMaker } from "./log"
+import { QueryCallback } from "./log"
 import { Logquacious } from "./logquacious"
 import { Direction } from "./prefs"
 
-const hrefMaker: HrefMaker = (s: string) => s
+const hrefMaker: QueryCallback = (s: string) => s
 
 function resultLookup(chunk: number, entry: number) {
   const logs = Lookup.element("#logs")

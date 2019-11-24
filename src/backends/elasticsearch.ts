@@ -78,7 +78,7 @@ interface SearchQuery {
   aggs?: any
   docvalue_fields?: { field: string; format: string }[]
   _source?: string[]
-  search_after?: number[]
+  search_after?: Cursor
   sort?: SortItem[]
   size?: number
   timeout?: string
@@ -94,13 +94,12 @@ interface ElasticsearchResults {
   took: number
 }
 
-export interface Cursor {
-  searchAfter: number
-  id: string
-}
+export type Cursor = (number | string)[]
 
 export interface IDataSource {
   historicSearch(query: Query, cursor?: Cursor, searchAfterAscending?: boolean): Promise<Result>
+
+  surroundSearch(query: Query, cursor: Cursor, searchAfterAscending?: boolean): Promise<Result>
 
   histogram(query: Query, interval: IRelative, tz: string): Promise<HistogramResults>
 }
@@ -169,16 +168,16 @@ export class Elasticsearch implements IDataSource {
         '@timestamp': {
           order: (searchAfterAscending === true) ? 'asc' : 'desc'
         }
-      }
+      },
+      {
+        "_id": {
+          order: 'asc'
+        },
+      },
     ]
 
     if (cursor !== undefined) {
-      if (!cursor.searchAfter || typeof cursor.searchAfter !== 'number') {
-        // Sanity check, since we store the cursor untyped on the DOM
-        console.log('invalid cursor', cursor)
-      }
-      // Shift cursor by 1ms to make sure we don't drop results that have the same timestamp as the last doc we received
-      search.search_after = [searchAfterAscending ? cursor.searchAfter - 1 : cursor.searchAfter + 1]
+      search.search_after = cursor
     }
 
     const url = this.url(`_search`, this.index)
@@ -189,13 +188,6 @@ export class Elasticsearch implements IDataSource {
     }
 
     let hits = data.hits.hits.map(r => this.normaliseLog(r))
-
-    if (cursor) {
-      const overlap = hits.findIndex((e) => e._id === cursor.id)
-      if (overlap !== -1) {
-        hits = hits.slice(overlap + 1)
-      }
-    }
 
     // We retrieve the data in descending order, but the app expects it to be in ascending order.
     if (searchAfterAscending !== true) {
@@ -216,16 +208,26 @@ export class Elasticsearch implements IDataSource {
     return {overview: hits, full: full}
   }
 
+  async surroundSearch(query: Query, cursor?: Cursor, searchAfterAscending?: boolean): Promise<Result> {
+    // 1) Search up by half the query limit size, get the first item, then discard the whole set
+    // 2) Search down from the first result to the full query size
+    // That should make the focused document in the middle of the results
+    const backQuery = query.withPageSize(query.pageSize / 2 + 1)
+    const backResults = await this.historicSearch(backQuery, cursor, !searchAfterAscending)
+    const backCursor = backResults.overview[0].__cursor
+    return this.historicSearch(query, backCursor, searchAfterAscending)
+  }
+
   private historicRequest(query: Query): SearchQuery {
     let stringQuery: any
-    if (query.q) {
+    if (query.terms) {
       stringQuery = {
         query_string: {
           analyze_wildcard: true,
           default_field: 'message',
           default_operator: 'AND',
           fuzziness: 0,
-          query: query.q,
+          query: query.terms,
         }
       }
     } else {
@@ -329,16 +331,11 @@ export class Elasticsearch implements IDataSource {
   }
 
   private normaliseLog(r: LogMessage): LogMessage {
-    let searchAfter = r['sort'] ? r['sort'][0] : 0
     return {
       ...r['_source'],
       _index: r['_index'],
       _id: r['_id'],
-      __cursor: {
-        // Sort should be an array of a single number: the unix millisecond timestamp of the record
-        searchAfter: searchAfter,
-        id: r['_id'],
-      }
+      __cursor: r['sort'],
     }
   }
 

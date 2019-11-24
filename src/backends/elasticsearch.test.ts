@@ -59,13 +59,10 @@ describe('elasticsearch', () => {
         docs: [docExpanded],
       }))
 
-    const query = new Query(
-      "crashy mccrashface",
-      5,
-      Time.wrapRelative(-1, "w"),
-      Now,
-      [],
-    )
+    const query = new Query()
+      .withNewTerms("crashy mccrashface")
+      .withPageSize(5)
+      .withTimeRange([Time.wrapRelative(-1, "w"), Now])
 
     es.historicSearch(query).then(data => {
       expect(fetchMock.mock.calls.length).toEqual(2)

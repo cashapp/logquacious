@@ -214,6 +214,9 @@ export class Elasticsearch implements IDataSource {
     // That should make the focused document in the middle of the results
     const backQuery = query.withPageSize(query.pageSize / 2 + 1)
     const backResults = await this.historicSearch(backQuery, cursor, !searchAfterAscending)
+    if (backResults.overview.length == 0) {
+      return Promise.resolve(backResults)
+    }
     const backCursor = backResults.overview[0].__cursor
     return this.historicSearch(query, backCursor, searchAfterAscending)
   }

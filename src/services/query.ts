@@ -124,7 +124,6 @@ export class Query {
   }
 
   withNewTerms(terms: string): Query {
-    console.log('got new terms', terms)
     const q = this.clone()
     q.terms = terms
     return q

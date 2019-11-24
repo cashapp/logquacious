@@ -515,6 +515,7 @@ export function showContextButton(filter: ContextFilter, obj: any, cursor: any, 
     .join(" ")
   const contextQuery = queryCallback()
     .withFocusCursor(JSON.stringify(cursor))
+    .withFixedTimeRange()
     .withNewTerms(newTerms)
   const w = window.location
   const url = `${w.protocol}//${w.host}${w.pathname}?${contextQuery.toURL()}`

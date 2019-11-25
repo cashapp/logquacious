@@ -93,23 +93,29 @@ export class LogFormatter {
     return out
   }
 
-  private safeHTML(entry: any): any {
+  private safeHTML(entry: any, recursive: true): any {
     if (typeof entry == "string") {
       return escape(entry)
+    }
+    if (!recursive) {
+      return entry
+    }
+
+    if (Array.isArray(entry)) {
+      return entry.map(e => this.safeHTML(e, true))
     }
 
     entry = {...entry}
     for (const key in entry) {
-      if (typeof entry[key] == "string") {
-        entry[key] = escape(entry[key])
-      }
+      entry[key] = this.safeHTML(entry[key], true)
     }
-
     return entry
   }
 
   buildSnippet(snippetEl: HTMLElement, full: any) {
     full = this.cleanLog(full)
+    full = this.safeHTML(full, true)
+
     for (const rule of this.config.collapsedFormatting) {
       delete (full[rule.field])
     }
@@ -129,8 +135,6 @@ export class LogFormatter {
     const origEntry: LogMessage = {...entry}
     // The expanded part is lazily rendered.
     let isExpandedRendered = false
-
-    entry = this.safeHTML(entry)
 
     let fragment = document.importNode(this.templateContent, true)
     fragment.firstElementChild.dataset.cursor = JSON.stringify(cursor)
@@ -272,7 +276,7 @@ export class LogFormatter {
     const lastIndent = makeIndent(level)
     const pathStr = path.join('.')
 
-    obj = this.safeHTML(obj)
+    obj = this.safeHTML(obj, false)
     let current = obj
 
     this.config.expandedFormatting.forEach(rule => {

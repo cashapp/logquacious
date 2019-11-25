@@ -87,7 +87,11 @@ export class Logquacious {
     if (!fieldsConfig) {
       this.error(`dataSource field reference is invalid.\ndataSource.fields=${this.dsConfig().fields}`)
     }
-    this.results.attach(resultsElement, fieldsConfig, () => this.query)
+    this.results.attach(resultsElement, fieldsConfig, {
+      getQuery: () => this.query,
+      changeQuery: (q: Query) => this.newSearch(q, true),
+      getFilters: () => this.config.filters,
+    })
 
     this.focusInput = true
 
@@ -101,7 +105,6 @@ export class Logquacious {
     window.onpopstate = () => {
       let q = Query.fromURL(this.config.filters)
       if (!q.equals(this.query)) {
-        this.onQuery(q)
         this.newSearch(q)
       }
     }
@@ -161,6 +164,7 @@ export class Logquacious {
   // Called when the user presses enter, clicks on search, or on load.
   newSearch(q: Query, pushHistory?: boolean, inputFocus: boolean = true) {
     this.query = q
+    this.onQuery(this.query)
     document.title = q.title()
     if (pushHistory) {
       history.pushState(null, q.title(), "?" + q.toURL())
@@ -286,7 +290,6 @@ export class Logquacious {
     if (submit) {
       this.newSearch(this.query, true)
     }
-    this.onQuery(this.query)
   }
 
   handleFilterChanged(filter: string, selected: string) {
@@ -294,13 +297,11 @@ export class Logquacious {
     this.query = this.query.withAppendFilter(filter, selected)
     this.newSearch(this.query, true)
     this.onFilter(this.query.filters)
-    this.onQuery(this.query)
   }
 
   handleRangeCallback(range: Range) {
     this.query = this.query.withTimeRange(range)
     this.newSearch(this.query, true)
-    this.onQuery(this.query)
   }
 
   set filterCallback(callback: FilterCallback) {

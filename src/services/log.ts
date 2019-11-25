@@ -2,6 +2,7 @@ import { LogMessage } from "../backends/elasticsearch"
 import { CopyHelper } from "../helpers/copyHelper"
 import { escape } from "he"
 import { Query } from "./query"
+import { Filter } from "../components/app"
 
 export type FieldsConfig = {
   collapsedFormatting: ILogRule[]
@@ -58,11 +59,17 @@ type CollapsedTransform = (input: CollapsedFormatField) => CollapsedFormatField
 
 type ExpandedTransform = (input: ExpandedFormatField) => ExpandedFormatField
 
+export type QueryManipulator = {
+  getQuery: () => Query
+  changeQuery: (newQuery: Query) => void
+  getFilters: () => Filter[]
+}
+
 export class LogFormatter {
   private readonly copyHelper: CopyHelper
   private templateContent: DocumentFragment
   private config: FieldsConfig
-  private _queryCallback: () => Query
+  private _queryManipulator: QueryManipulator
 
   constructor(config: FieldsConfig) {
     if (config == undefined) {
@@ -77,8 +84,8 @@ export class LogFormatter {
     this.copyHelper = new CopyHelper()
   }
 
-  set queryCallback(query: () => Query) {
-    this._queryCallback = query
+  set queryManipulator(qm: QueryManipulator) {
+    this._queryManipulator = qm
   }
 
   setTemplate(templateContent: DocumentFragment) {
@@ -209,6 +216,7 @@ export class LogFormatter {
             const target = e.target as HTMLElement
             const oldTooltip = target.dataset.tooltip
             const data = copyBag[parseInt(target.dataset.copy, 10)]
+            const {getQuery, getFilters, changeQuery} = this._queryManipulator
 
             const copied = () => {
               target.dataset.tooltip = "Copied!"
@@ -227,13 +235,26 @@ export class LogFormatter {
               copied()
 
             } else if (target.classList.contains('link-button')) {
-              const sharedQuery = this._queryCallback()
+              const sharedQuery = getQuery()
                 .withFocusCursor(JSON.stringify(data))
                 .withFixedTimeRange()
               const w = window.location
               this.copyHelper.copy(`${w.protocol}//${w.host}${w.pathname}?${sharedQuery.toURL()}`)
               copied()
 
+            } else if (target.classList.contains('show-context-button')) {
+              // We're hijacking the a href when the user left clicks, so that the page doesn't reload.
+              // This will also allow middle clicks to new tabs.
+              const parent = target.parentNode as HTMLAnchorElement
+              changeQuery(Query.fromURL(getFilters(), parent.href.substring(1)))
+              e.stopPropagation()
+              e.preventDefault()
+
+            } else if (target.classList.contains('filter-link')) {
+              const anchor = target as HTMLAnchorElement
+              changeQuery(Query.fromURL(getFilters(), anchor.href.substring(1)))
+              e.stopPropagation()
+              e.preventDefault()
             }
 
           })
@@ -291,7 +312,7 @@ export class LogFormatter {
           original: obj,
           current,
           indent: indent,
-          query: this._queryCallback,
+          query: this._queryManipulator.getQuery,
           copyBag: copyBag,
         })
         current = r.current
@@ -358,7 +379,7 @@ export class LogFormatter {
     }
 
     if (this.shouldShowLinks(path)) {
-      const query = this._queryCallback().withTerm(`${pathStr}:${JSON.stringify(obj)}`)
+      const query = this._queryManipulator.getQuery().withTerm(`${pathStr}:${JSON.stringify(obj)}`)
       v = `<a class="filter-link" href="?${query.toURL()}">${v}</a>`
     }
     v = `<span class="copyable-wrapper">${v}${copyToClipboardButton(obj, copyBag)}</span>`
@@ -398,7 +419,7 @@ export class LogFormatter {
   }
 
   private showContextButtons(cursor: any, obj: any) {
-    return this.config.contextFilters.map(f => showContextButton(f, obj, cursor, this._queryCallback)).join("")
+    return this.config.contextFilters.map(f => showContextButton(f, obj, cursor, this._queryManipulator)).join("")
   }
 }
 
@@ -512,17 +533,16 @@ export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string 
   return `<a><span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span></a>`
 }
 
-export function showContextButton(filter: ContextFilter, obj: any, cursor: any, queryCallback: () => Query): string {
+export function showContextButton(filter: ContextFilter, obj: any, cursor: any, qm: QueryManipulator): string {
   const newTerms = (filter.keep || [])
     .filter(k => obj[k])
     .map(k => `${k}:${JSON.stringify(obj[k])}`)
     .join(" ")
-  const contextQuery = queryCallback()
+  const contextQuery = qm.getQuery()
     .withFocusCursor(JSON.stringify(cursor))
     .withFixedTimeRange()
     .withNewTerms(newTerms)
-  const w = window.location
-  const url = `${w.protocol}//${w.host}${w.pathname}?${contextQuery.toURL()}`
+  const url = `?${contextQuery.toURL()}`
   const icon = filter.icon || "mdi-filter-variant-remove"
   return `<a href="${url}"><span class="icon context-button show-context-button tooltip is-tooltip-right" data-tooltip="${filter.title}"><i class="mdi ${icon}"></i></span></a>`
 }

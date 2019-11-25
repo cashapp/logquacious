@@ -39,9 +39,9 @@ export class Query {
     return this.toURL() == other.toURL()
   }
 
-  static fromURL(filters: Filter[]): Query {
+  static fromURL(filters: Filter[], urlQuery?: string): Query {
     const result: any = {}
-    const urlQuery = window.location.search.substr(1)
+    urlQuery = urlQuery || window.location.search.substr(1)
     if (urlQuery != "") {
       urlQuery.split("&").forEach(function (part) {
         const item = part.split("=")

@@ -1,8 +1,7 @@
-import { FieldsConfig, LogFormatter } from "./log"
+import { FieldsConfig, LogFormatter, QueryManipulator } from "./log"
 import { Lookup } from "../helpers/lookup"
 import { LogMessage } from "../backends/elasticsearch"
 import { Direction, SwapDirection } from "./prefs"
-import { Query } from "./query"
 
 export interface IStats {
   visible: number
@@ -25,7 +24,7 @@ export class Results {
   private beforeLogs: HTMLElement
   private afterLogs: HTMLElement
   private savedScrollEntry: HTMLElement
-  private queryCallback: () => Query
+  private queryManipulator: QueryManipulator
 
   constructor(direction: Direction) {
     this.direction = direction
@@ -34,7 +33,7 @@ export class Results {
     }
   }
 
-  attach(element: HTMLElement, fieldsConfig: FieldsConfig, queryCallback: () => Query) {
+  attach(element: HTMLElement, fieldsConfig: FieldsConfig, queryManipulator: QueryManipulator) {
     this.logs = element
     this.beforeLogs = Lookup.element("#before-logs")
     this.beforeLogs.hidden = true
@@ -42,7 +41,7 @@ export class Results {
     this.afterLogs.hidden = true
     this.templateElement = Lookup.element('#logs-entry-template')
     this.templateContent = this.templateElement.content
-    this.queryCallback = queryCallback
+    this.queryManipulator = queryManipulator
     this.fieldsConfig = fieldsConfig
     this.newChunk(this.direction)
     this.followInterval()
@@ -50,7 +49,7 @@ export class Results {
 
   set fieldsConfig(fieldsConfig: FieldsConfig) {
     this.logFormatter = new LogFormatter(fieldsConfig).setTemplate(this.templateContent)
-    this.logFormatter.queryCallback = this.queryCallback
+    this.logFormatter.queryManipulator = this.queryManipulator
   }
 
   followInterval() {

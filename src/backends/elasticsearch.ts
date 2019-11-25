@@ -170,11 +170,6 @@ export class Elasticsearch implements IDataSource {
           order: (searchAfterAscending === true) ? 'asc' : 'desc'
         }
       },
-      {
-        "_id": {
-          order: 'asc'
-        },
-      },
     ]
 
     if (cursor !== undefined) {

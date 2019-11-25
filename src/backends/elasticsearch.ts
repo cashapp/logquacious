@@ -89,6 +89,7 @@ interface ElasticsearchHits {
 }
 
 interface ElasticsearchResults {
+  _shards: any
   hits: ElasticsearchHits
   timed_out: boolean
   took: number
@@ -182,8 +183,11 @@ export class Elasticsearch implements IDataSource {
 
     const url = this.url(`_search`, this.index)
     const data = await Elasticsearch.fetch<ElasticsearchResults>(url, "POST", search)
+    if (data._shards.failed) {
+      throw new ElasticsearchException("Shard failure", JSON.stringify(data._shards.failures[0], null, 2))
+    }
+
     if (data.hits === undefined || !data.hits.hits) {
-      console.log('No entries!')
       return null
     }
 

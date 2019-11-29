@@ -558,10 +558,6 @@ interface JavaExceptionConfig {
   matches: JavaExceptionMatch[]
 }
 
-function fqcnMatches(fqcn: string, config: JavaExceptionConfig): JavaExceptionMatch | undefined {
-  return config.matches.find(m => fqcn.match(new RegExp(m.fqcnMatch)))
-}
-
 function javaException(config: JavaExceptionConfig): ExpandedTransform {
   return (field: ExpandedFormatField): ExpandedFormatField => {
     const indent = field.indent
@@ -578,10 +574,7 @@ function javaException(config: JavaExceptionConfig): ExpandedTransform {
         }
         const [, space, fqcn, file, lineno] = match
         let right = `${fqcn}(${file}${lineno || ""})`
-        // TODO: This will have to be customisable when we open source
-
-        const exceptionMatch = fqcnMatches(fqcn, config)
-
+        const exceptionMatch = config.matches.find(m => fqcn.match(new RegExp(m.fqcnMatch)))
         if (exceptionMatch) {
           const parts = fqcn.split('.')
           const firstCapital = parts.findIndex((i: string) => i[0].toLowerCase() !== i[0])

@@ -227,8 +227,8 @@ export class Logquacious {
     if (nextPage) {
       // Keep the apparent scroll position when inserting dom elements above.
       this.results.restoreScroll(nextPageOlder)
-    } else if (query.focusCursor) {
-      this.results.focusCursor(query.focusCursor)
+    } else if (query.focusId) {
+      this.results.focusID(query.focusId)
     } else {
       // Scroll to latest after all the results are in, only on first page load.
       this.results.scrollToLatest()

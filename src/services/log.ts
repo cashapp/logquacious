@@ -146,6 +146,7 @@ export class LogFormatter {
     let fragment = document.importNode(this.templateContent, true)
     fragment.firstElementChild.dataset.cursor = JSON.stringify(cursor)
     fragment.firstElementChild.dataset.ts = entry['@timestamp']
+    fragment.firstElementChild.dataset.id = entry['_id']
 
     let fields = ''
     for (const rule of this.config.collapsedFormatting) {

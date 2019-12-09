@@ -235,7 +235,7 @@ export class Logquacious {
     }
 
     // Clear out loaded focusCursor, since it is specific for the initial load only.
-    this.query = query.withFocusCursor()
+    this.query = query.withFocus()
     this.histogram.setQuery(this.query)
   }
 

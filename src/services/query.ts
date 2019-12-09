@@ -13,6 +13,7 @@ export class Query {
   endTime: When
   filters: Filter[]
   focusCursor?: string
+  focusId?: string
 
   constructor() {
     // undefined means there hasn't been a search submitted yet
@@ -22,6 +23,7 @@ export class Query {
     this.endTime = DefaultEndTime
     this.filters = []
     this.focusCursor = undefined
+    this.focusId = undefined
   }
 
   clone(): Query {
@@ -32,6 +34,7 @@ export class Query {
     q.endTime = this.endTime
     q.filters = this.filters
     q.focusCursor = this.focusCursor
+    q.focusId = this.focusId
     return q
   }
 
@@ -56,7 +59,8 @@ export class Query {
     q.pageSize = parseInt(result["n"]) || DefaultPageSize
     q.startTime = result["t"] ? Time.parseText(result["t"]) : DefaultStartTime
     q.endTime = result["u"] ? Time.parseText(result["u"]) : DefaultEndTime // u for until
-    q.focusCursor = result["id"]
+    q.focusCursor = result["cursor"]
+    q.focusId = result["id"]
 
     for (const idx in filters) {
       const filter = filters[idx]
@@ -105,7 +109,10 @@ export class Query {
       values.u = Time.whenToMoment(this.endTime).toISOString()
     }
     if (this.focusCursor) {
-      values.id = this.focusCursor
+      values.cursor = this.focusCursor
+    }
+    if (this.focusId) {
+      values.id = this.focusId
     }
     for (const f of this.filters) {
       values[f.urlKey] = f.selected || ""
@@ -162,8 +169,9 @@ export class Query {
     return q
   }
 
-  withFocusCursor(cursor?: string): Query {
+  withFocus(id?: string, cursor?: string): Query {
     const q = this.clone()
+    q.focusId = id
     q.focusCursor = cursor
     return q
   }

@@ -132,7 +132,7 @@ export class Time {
 
   static whenToComputed(when: When): string {
     const w = Time.whenToMoment(when)
-    return w && w.format() || ""
+    return w && w.toISOString(true) || ""
   }
 
   static whenToElastic(when: When): string | undefined {

@@ -157,7 +157,7 @@ export class Time {
       case "invalid":
         return ""
       case "moment":
-        return when.moment.format()
+        return when.moment.toISOString()
       case "relative":
         return `${when.count}${when.unit.substring(0, 1)}`
       default:

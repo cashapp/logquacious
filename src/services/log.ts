@@ -100,7 +100,7 @@ export class LogFormatter {
     return out
   }
 
-  private safeHTML(entry: any, recursive: true): any {
+  private safeHTML(entry: any, recursive: boolean): any {
     if (typeof entry == "string") {
       return escape(entry)
     }
@@ -379,7 +379,7 @@ export class LogFormatter {
     }
 
     if (this.shouldShowLinks(path)) {
-      const query = this._queryManipulator.getQuery().withTerm(`${pathStr}:${JSON.stringify(obj)}`)
+      const query = this._queryManipulator.getQuery().withAddTerms(`${pathStr}:${JSON.stringify(obj)}`)
       v = `<a class="filter-link" href="?${query.toURL()}">${v}</a>`
     }
     v = `<span class="copyable-wrapper">${v}${copyToClipboardButton(obj, copyBag)}</span>`
@@ -541,7 +541,7 @@ export function showContextButton(filter: ContextFilter, obj: any, cursor: any, 
   const contextQuery = qm.getQuery()
     .withFocusCursor(JSON.stringify(cursor))
     .withFixedTimeRange()
-    .withNewTerms(newTerms)
+    .withAddTerms(newTerms)
   const url = `?${contextQuery.toURL()}`
   const icon = filter.icon || "mdi-filter-variant-remove"
   return `<a href="${url}"><span class="icon context-button show-context-button tooltip is-tooltip-right" data-tooltip="${filter.title}"><i class="mdi ${icon}"></i></span></a>`

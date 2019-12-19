@@ -129,7 +129,7 @@ export class Query {
     return q
   }
 
-  withTerm(term: string): Query {
+  withAddTerms(term: string): Query {
     const q = this.clone()
     q.terms = this.terms ? this.terms + ' ' + term : term
     return q

@@ -44,7 +44,8 @@ export class Query {
 
   static fromURL(filters: Filter[], urlQuery?: string): Query {
     const result: any = {}
-    urlQuery = urlQuery || window.location.search.substr(1)
+    urlQuery = urlQuery || window.location.search
+    urlQuery = urlQuery.split(/\?(.+)/)[1] || ""
     if (urlQuery != "") {
       urlQuery.split("&").forEach(function (part) {
         const item = part.split("=")
@@ -119,8 +120,8 @@ export class Query {
     }
 
     return Object.keys(values)
-    // Space can be encoded as +, and : can be left alone. encodeURIComponent is a bit overly aggressive
-    // to be support poor URI standards.
+      // Space can be encoded as +, and : can be left alone. encodeURIComponent is a bit overly aggressive
+      // to be support poor URI standards.
       .map(k =>
         encodeURIComponent(k) + '=' +
         encodeURIComponent(values[k])

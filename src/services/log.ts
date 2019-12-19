@@ -247,13 +247,13 @@ export class LogFormatter {
               // We're hijacking the a href when the user left clicks, so that the page doesn't reload.
               // This will also allow middle clicks to new tabs.
               const parent = target.parentNode as HTMLAnchorElement
-              changeQuery(Query.fromURL(getFilters(), parent.href.substring(1)))
+              changeQuery(Query.fromURL(getFilters(), parent.href))
               e.stopPropagation()
               e.preventDefault()
 
             } else if (target.classList.contains('filter-link')) {
               const anchor = target as HTMLAnchorElement
-              changeQuery(Query.fromURL(getFilters(), anchor.href.substring(1)))
+              changeQuery(Query.fromURL(getFilters(), anchor.href))
               e.stopPropagation()
               e.preventDefault()
             }

@@ -287,6 +287,8 @@ export class Logquacious {
 
   handleSearchBarCallback(text: string, submit: boolean) {
     this.query = this.query.withNewTerms(text)
+    this.onQuery(this.query)
+
     if (submit) {
       this.newSearch(this.query, true)
     }

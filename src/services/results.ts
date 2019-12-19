@@ -335,10 +335,10 @@ export class Results {
     return document.documentElement.scrollHeight || document.body.scrollHeight
   }
 
-  focusCursor(cursor: string) {
-    const e = this.find((e: HTMLElement) => e.dataset.cursor == cursor)
+  focusID(id: string) {
+    const e = this.find((e: HTMLElement) => e.dataset.id == id)
     if (!e) {
-      console.error(`Could not find cursor ${cursor} in results.`)
+      console.error(`Could not find id ${id} in results.`)
       return
     }
 

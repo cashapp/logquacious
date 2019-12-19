@@ -146,6 +146,7 @@ export class LogFormatter {
     let fragment = document.importNode(this.templateContent, true)
     fragment.firstElementChild.dataset.cursor = JSON.stringify(cursor)
     fragment.firstElementChild.dataset.ts = entry['@timestamp']
+    fragment.firstElementChild.dataset.id = entry['_id']
 
     let fields = ''
     for (const rule of this.config.collapsedFormatting) {
@@ -236,7 +237,7 @@ export class LogFormatter {
 
             } else if (target.classList.contains('link-button')) {
               const sharedQuery = getQuery()
-                .withFocusCursor(JSON.stringify(data))
+                .withFocus(full._id, JSON.stringify(data))
                 .withFixedTimeRange()
               const w = window.location
               this.copyHelper.copy(`${w.protocol}//${w.host}${w.pathname}?${sharedQuery.toURL()}`)
@@ -539,7 +540,7 @@ export function showContextButton(filter: ContextFilter, obj: any, cursor: any, 
     .map(k => `${k}:${JSON.stringify(obj[k])}`)
     .join(" ")
   const contextQuery = qm.getQuery()
-    .withFocusCursor(JSON.stringify(cursor))
+    .withFocus(obj._id, JSON.stringify(cursor))
     .withFixedTimeRange()
     .withAddTerms(newTerms)
   const url = `?${contextQuery.toURL()}`

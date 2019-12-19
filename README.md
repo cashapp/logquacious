@@ -1,3 +1,5 @@
+<img align="left" src="./lq.png" height="120px">
+
 # Logquacious
 
 Logquacious (lq) is a fast and simple log viewer built by Cash App. 

@@ -51,7 +51,7 @@ class DefaultWelcome extends Component {
             <li><a href="?q=_exists:exception"><code>_exists_:exception</code></a> all exceptions</li>
           </ul>
           <p>
-            Please feel free to submit suggestions, bugs or feedback on <a href="https://github.com/square/logquacious">Square's Logquacious GitHub repository</a>.
+            Please feel free to submit suggestions, bugs or feedback on <a href="https://github.com/cashapp/logquacious">Cash App's Logquacious GitHub repository</a>.
           </p>
         </div>
       </div>

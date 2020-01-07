@@ -291,6 +291,7 @@ You can see an example of this in the [example config](./config.example.json) un
 
 ### Cross-Origin Resource Sharing (CORS)
 
+
 If you want to be able to communicate to ElasticSearch on a different host and port to Logquacious, you will need to
 configure ElasticSearch to respond with the correct [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 

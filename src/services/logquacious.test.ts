@@ -100,7 +100,7 @@ describe('logquacious', () => {
             items.reverse()
           }
           const received = items.map(a => a.getElementsByClassName("strong")[0].innerHTML)
-          expect(received).toEqual(expected)
+          expect(received).toEqual(null)
 
           if (done != undefined) {
             done()

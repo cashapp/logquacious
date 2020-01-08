@@ -25,7 +25,7 @@ jobs:
     docker:
       - image: docker:17.05.0-ce-git
     steps:
-      # - early_return_for_forked_pull_requests
+      - early_return_for_forked_pull_requests
       - setup_remote_docker
       - checkout
       - run: docker login -u $DOCKER_USER -p $DOCKER_TOKEN
@@ -43,6 +43,6 @@ workflows:
       - build:
           requires:
             - test
-#          filters:
-#            branches:
-#              only: master
+          filters:
+            branches:
+              only: master

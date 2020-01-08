@@ -34,10 +34,7 @@ describe('elasticsearch', () => {
         hello: "12345",
         _index: index,
         _id: docId,
-        __cursor: {
-          searchAfter: 0,
-          id: docId,
-        }
+        __cursor: undefined,
       })
       done()
     }).catch(e => console.log(e))
@@ -109,10 +106,7 @@ describe('elasticsearch', () => {
       // _full is a promise, so we extract it out and resolve it after an assertion
       const {_full, ...overview} = data.overview[0]
       const expectedShort = {
-        __cursor: {
-          "id": "docid",
-          "searchAfter": 0,
-        },
+        __cursor: undefined,
         _id: "docid",
         _index: "my-index",
         "hello": "12345",

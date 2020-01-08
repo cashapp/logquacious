@@ -26,7 +26,10 @@
     "setupFiles": [
       "core-js",
       "./testSetup.ts"
-    ]
+    ],
+    "moduleNameMapper": {
+      "\\.png$": "<rootDir>/src/helpers/fileMock.ts"
+    }
   },
   "dependencies": {
     "@mdi/font": "^4.4.95",

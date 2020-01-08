@@ -17,9 +17,10 @@ commands:
 jobs:
   test:
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: nodejs:current-alpine
     steps:
-      - run: echo TODO
+      - run: npm install
+      - run: npm test
 
   build:
     docker:

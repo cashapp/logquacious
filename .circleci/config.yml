@@ -19,6 +19,7 @@ jobs:
     docker:
       - image: node:current-alpine
     steps:
+      - checkout
       - run: npm install
       - run: npm test
 

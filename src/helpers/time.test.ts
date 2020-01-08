@@ -32,7 +32,10 @@ describe("picker", () => {
     })
 
     test("wrap", () => {
-      const month = new Date().getMonth() - 2
+      let month = new Date().getMonth() - 2
+      if (month < 0) {
+        month += 12
+      }
       expect(Time.whenToDate(Time.wrapRelative(-2, "months")).getMonth())
         .toEqual(month)
 

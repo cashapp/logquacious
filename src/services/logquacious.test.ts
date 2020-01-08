@@ -33,14 +33,7 @@ describe('logquacious', () => {
   describe('log order', () => {
     const pageSize = 200
 
-    const q = new Query(
-      "hello",
-      1,
-      Time.parseText("-1h"),
-      Time.parseText("now"),
-      [],
-    )
-
+    const q = new Query()
     let app: Logquacious
     beforeEach(() => {
       const config: Config = {

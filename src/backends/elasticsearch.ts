@@ -178,7 +178,7 @@ export class Elasticsearch implements IDataSource {
 
     const url = this.url(`_search`, this.index)
     const data = await Elasticsearch.fetch<ElasticsearchResults>(url, "POST", search)
-    if (data._shards.failed) {
+    if (data._shards && data._shards.failed) {
       throw new ElasticsearchException("Shard failure", JSON.stringify(data._shards.failures[0], null, 2))
     }
 

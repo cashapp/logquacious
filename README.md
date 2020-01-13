@@ -55,9 +55,9 @@ Wait a while, then visit http://localhost:8080/ in your browser.
 
 You should be presented with the Logquacious UI and a few logs that are continuously generated in the background.
 
-### Installation
+## Installation
 
-#### Docker
+### Docker
 
 You will need [Docker installed](https://www.docker.com/products/docker-desktop).
 
@@ -66,7 +66,7 @@ You can configure the image in multiple ways:
 * A basic configuration that has a single ES endpoint, configured via command line arguments.
 * Mounting custom config.json and/or nginx files.
 
-##### Command line
+#### Command line
 
 You can configure the instance via command line arguments or environment variables (e.g. `ES_URL`):
 ```shell script
@@ -117,7 +117,7 @@ Typical output:
 
 http://localhost:9999/ should work in this example.
 
-##### Custom config
+#### Custom config
 
 If you have your own `config.json`, you can simply mount it at `/lq/config.json`.
 
@@ -127,7 +127,7 @@ docker run -p 0.0.0.0:9999:8080 -v `pwd`/custom-config.json:/lq/config.json squa
 
 You can also mount your own nginx configuration at `/etc/nginx/conf.d/lq.conf`. By default it is [generated for you](docker/nginx) based on command line arguments. 
 
-### Build from source
+## Build from source
 
 * Install Node.js
 ```shell script
@@ -153,7 +153,7 @@ proxy /es my-elastic-search-hostname:9200 {
 * Run `caddy` in the same directory as the `Caddyfile`
 * Point your browser at `http://localhost:8080/`. The ElasticSearch endpoint should be working at `http://localhost:8080/es/`.
 
-### Development
+## Development
 
 The development workflow is very similar to the "From Source" set up above. You can run a self reloading development server instead of `npm run build`.
 
@@ -179,7 +179,7 @@ Run `caddy`. You should be able to hit http://localhost:8080/ and when you make 
 
 There are tests which are executed with `npm test`.
 
-### Configuration
+## Configuration
 
 The top level structure of the json configuration is as follows:
 ```json
@@ -192,7 +192,7 @@ The top level structure of the json configuration is as follows:
 }
 ```
 
-#### dataSources
+### dataSources
 
 Contains the URL, index, etc for querying ElasticSearch. An example:
 
@@ -218,7 +218,7 @@ Contains the URL, index, etc for querying ElasticSearch. An example:
 
 `fields` is a reference to the key of the `fields` in the top level of the json configuration.
 
-#### fields
+### fields
 
 Configures how log entries are shown in the UI. You're able to transform, add classes, ignore fields, etc.
 
@@ -256,7 +256,7 @@ This configuration will do the following:
 
 If you want to see an example of many transforms check out the [example config](./config.example.json).
 
-#### filters
+### filters
 
 There is a menu drop down that is enabled when you use filters. It is between the search button and the time drop down.
 
@@ -299,7 +299,7 @@ Another type of filter is a `dataSource` filter for when you have multiple Elast
 The `id` of each item must point to the `id` of a data source.
 You can see an example of this in the [example config](./config.example.json) under the `env` filter.
 
-### Cross-Origin Resource Sharing (CORS)
+## Cross-Origin Resource Sharing (CORS)
 
 If you want to be able to communicate to ElasticSearch on a different host and port to Logquacious, you will need to
 configure ElasticSearch to respond with the correct [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
@@ -312,8 +312,7 @@ http.cors.allow-origin: "https://lq.mycompany.com/"
 
 See the ElasticSearch documentation on the [http configuration options](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html) for more information.
 
-License
---------
+## License
 
     Copyright 2019 Square, Inc.
 

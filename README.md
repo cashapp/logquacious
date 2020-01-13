@@ -51,7 +51,7 @@ cd demo
 docker-compose up
 ```
 
-Wait a while, then visit http://localhost:2015/ in your browser.
+Wait a while, then visit http://localhost:8080/ in your browser.
 
 You should be presented with the Logquacious UI and a few logs that are continuously generated in the background.
 
@@ -59,14 +59,14 @@ You should be presented with the Logquacious UI and a few logs that are continuo
 
 #### Docker
 
-*Coming soon*: publish image to Docker Hub.
-
 You will need [Docker installed](https://www.docker.com/products/docker-desktop).
 
-Build the image:
-```shell script
-docker build -f docker/Dockerfile -t logquacious .
-```
+You can configure the image in multiple ways:
+
+* A basic configuration that has a single ES endpoint, configured via command line arguments.
+* Mounting custom config.json and/or nginx files.
+
+##### Command line
 
 You can configure the instance via command line arguments or environment variables (e.g. `ES_URL`):
 ```shell script
@@ -93,31 +93,41 @@ Flags:
                                line. (IGNORED_FIELDS)
 ```
 
-For example:
-* ElasticSearch service is at `192.168.0.1`
+For example run the following for this configuration:
+* Your ElasticSearch service is at `192.168.0.1`
 * The ElasticSearch indexes start with `logs-`
 * The message field is `text`
-* You want the host to listen on port `8080` (internally it's always port `2015`).
+* You want the host to listen on port `9999`
 
 ```shell script
-docker run -p 0.0.0.0:8080:2015 logquacious \
+docker run -p 0.0.0.0:9999:8080 squareup/logquacious \
   --es-url="http://192.168.0.1:9200" \
   --es-index="logs-*" \
   --message-field="text"
-
-2019/10/01 05:28:07 Variables for this docker image looks like this:
-{ESProxy:true ESURL:http://192.168.0.1:9200 ESIndex:logs-* TimestampField:@timestamp LevelField:level ServiceField:service MessageField:text IgnoredFields:[_id _index] IgnoredFieldsJoined:}
-2019/10/01 05:28:07 Successfully generated/lq/config.json
-2019/10/01 05:28:07 Running nginx...
-Activating privacy features... done.
-
-Serving HTTP on port 2015
-http://:2015
 ```
 
-http://localhost:8080/ should work in this example.
+Typical output:
+```
+2020/01/13 21:39:32 Variables for this docker image looks like this:
+{ESProxy:true ESURL:http://192.168.0.1:9200 ESIndex:logs-* TimestampField:@timestamp LevelField:level ServiceField:service MessageField:text IgnoredFields:[_id _index] IgnoredFieldsJoined:}
+2020/01/13 21:39:32 Successfully generated/etc/nginx/conf.d/lq.conf
+2020/01/13 21:39:32 Successfully generated/lq/config.json
+2020/01/13 21:39:32 Running nginx...
+```
 
-#### From Source
+http://localhost:9999/ should work in this example.
+
+##### Custom config
+
+If you have your own `config.json`, you can simply mount it at `/lq/config.json`.
+
+```shell script
+docker run -p 0.0.0.0:9999:8080 -v `pwd`/custom-config.json:/lq/config.json squareup/logquacious
+```
+
+You can also mount your own nginx configuration at `/etc/nginx/conf.d/lq.conf`. By default it is [generated for you](docker/nginx) based on command line arguments. 
+
+### Build from source
 
 * Install Node.js
 ```shell script
@@ -128,20 +138,20 @@ npm run build
 ```
 * `npm run build` will generate a `dist` directory containing all the files needed for a web server, including an `index.html` file.
 
-Configure Logquacious in `config.ts`.
+Configure Logquacious in `config.json`.
 
 Setting up a web server if you don't already have one:
 
 * Install Caddy: `curl https://getcaddy.com | bash -s personal`
-* Create a `Caddyfile` to listen on port 2015 with http, also to talk to your ElasticSearch server:
+* Create a `Caddyfile` to listen on port 8080 with http, also to talk to your ElasticSearch server:
 ```
-:2015
+:8080
 proxy /es my-elastic-search-hostname:9200 {
   without /es
 }
 ```
 * Run `caddy` in the same directory as the `Caddyfile`
-* Point your browser at `http://localhost:2015/`. The ElasticSearch endpoint should be working at `http://localhost:2015/es/`.
+* Point your browser at `http://localhost:8080/`. The ElasticSearch endpoint should be working at `http://localhost:8080/es/`.
 
 ### Development
 
@@ -149,7 +159,7 @@ The development workflow is very similar to the "From Source" set up above. You 
 
 You can either set up CORS on ElasticSearch or reverse proxy both the hot server and ElasticSearch. To do this, create `Caddyfile` in the root of the project:
 ```
-:2015
+:8080
 
 # Redirect all /es requests to the ElasticSearch server
 proxy /es my-elastic-search-hostname:9200 {
@@ -165,7 +175,7 @@ To run the parcel development server:
 npm run hot
 ```
 
-Run `caddy`. You should be able to hit http://localhost:2015/ and when you make any code changes the page should refresh.
+Run `caddy`. You should be able to hit http://localhost:8080/ and when you make any code changes the page should refresh.
 
 There are tests which are executed with `npm test`.
 
@@ -279,7 +289,7 @@ You are able to customise it to have values you can filter on, e.g.:
 
 This `singleValue` filter allows you filter log entries based on `region` equalling `ap-southeast-2` for example. This is identical to searching for `region:ap-southeast-2` in the search field.
 
-The `urlKey` is what is used in the URL for this filter. For example the URL might look like: `http://localhost:2015/?q=my+search&r=ap-southeast-2`
+The `urlKey` is what is used in the URL for this filter. For example the URL might look like: `http://localhost:8080/?q=my+search&r=ap-southeast-2`
 
 `title` is shown as the the name of the field/value in the search drop down menu.
 

@@ -48,8 +48,12 @@ func run() error {
 	kong.Parse(&vars)
 	log.Printf("Variables for this docker image looks like this:\n%+v", vars)
 
-	if !exists(nginxDest) && vars.ESURL == "" {
-		return errors.Errorf("%s is missing and ES_URL (--es-url) was not specified.", nginxTemplate)
+	if exists(lqDest) {
+		log.Printf("%s exists in this container! Ignoring command-line options that configure lq.", lqDest)
+	}
+
+	if !exists(lqDest) && !exists(nginxDest) && vars.ESURL == "" {
+		return errors.Errorf("ES_URL (--es-url) was not specified.")
 	}
 
 	vars.IgnoredFieldsJoined = fmt.Sprintf(`"%s"`, strings.Join(vars.IgnoredFields, `","`))

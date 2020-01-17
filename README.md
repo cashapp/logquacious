@@ -227,6 +227,7 @@ Here is an example:
 ```json
 "fields": {
   "main": {
+    "timestamp": "@timestamp",
     "collapsedFormatting": [
       {
         "field": "@timestamp",

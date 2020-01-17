@@ -1,6 +1,7 @@
 import { IRelative, Time, When } from "../helpers/time"
 import { Query } from "../services/query"
 import { FilterType } from "../components/app"
+import { FieldsConfig } from "../services/log"
 
 class ElasticsearchException implements Error {
   constructor(name: string, s: string) {
@@ -55,13 +56,6 @@ export interface LogMessage {
   _id?: string
   _index?: string
 
-  "@timestamp": string
-  message: string
-
-  container?: string
-  level?: string
-  service?: string
-
   [key: string]: any
 }
 
@@ -111,10 +105,12 @@ export interface IDataSource {
 export class Elasticsearch implements IDataSource {
   private readonly urlPrefix: string
   private readonly index: string
+  private fieldsConfig: FieldsConfig
 
-  constructor(urlPrefix: string, index: string) {
+  constructor(urlPrefix: string, index: string, fieldsConfig: FieldsConfig) {
     this.urlPrefix = urlPrefix
     this.index = index
+    this.fieldsConfig = fieldsConfig
   }
 
   url(suffix: string, index: string): string {
@@ -166,7 +162,7 @@ export class Elasticsearch implements IDataSource {
     let search = this.historicRequest(query)
     search.sort = [
       {
-        '@timestamp': {
+        [this.fieldsConfig.timestamp]: {
           order: (searchAfterAscending === true) ? 'asc' : 'desc'
         }
       },
@@ -239,7 +235,7 @@ export class Elasticsearch implements IDataSource {
     }
     const timeQuery = {
       range: {
-        '@timestamp': {
+        [this.fieldsConfig.timestamp]: {
           format: 'strict_date_optional_time',
           gte: Time.whenToElastic(query.startTime),
           lte: Time.whenToElastic(query.endTime),
@@ -269,10 +265,10 @@ export class Elasticsearch implements IDataSource {
 
     return {
       // Select specific fields from logs. This list must contain all fields used in rules for log formatting
-      _source: ["@timestamp", "message", "level", "logger", "thread", "container", "service"],
+      _source: this.collapsedFields(),
       docvalue_fields: [
         {
-          field: '@timestamp',
+          field: this.fieldsConfig.timestamp,
           format: 'date_time'
         }
       ],
@@ -350,7 +346,7 @@ export class Elasticsearch implements IDataSource {
     search.aggs = {
       "n": {
         "date_histogram": {
-          "field": "@timestamp",
+          "field": this.fieldsConfig.timestamp,
           "interval": interval.count + unit,
           "time_zone": tz,
         }
@@ -369,5 +365,12 @@ export class Elasticsearch implements IDataSource {
         count: b.doc_count,
       }))
     }
+  }
+
+  private collapsedFields() {
+    return [
+      this.fieldsConfig.timestamp,
+      ...this.fieldsConfig.collapsedFormatting.map(f => f.field)
+    ]
   }
 }

@@ -60,6 +60,8 @@ export class Logquacious {
     if (!this.config) {
       this.error("config is invalid")
     }
+
+    this.config = Logquacious.cleanConfig(this.config)
   }
 
   run(resultsElement: HTMLElement, histogramElement: SVGElement) {
@@ -79,7 +81,7 @@ export class Logquacious {
     this.dataSources = new Map<string, IDataSource>()
     for (const ds of this.config.dataSources) {
       // We only currently support elasticsearch
-      this.dataSources.set(ds.id, new Elasticsearch(ds.urlPrefix, ds.index))
+      this.dataSources.set(ds.id, new Elasticsearch(ds.urlPrefix, ds.index, this.config.fields[ds.fields]))
     }
 
     this.results = new Results(this.prefs.direction)
@@ -128,6 +130,14 @@ export class Logquacious {
       this.histogram.setDownloadedRange(this.results.getRange())
       this.histogram.setVisibleRange(this.results.getVisibleRange())
     }, 100)
+  }
+
+  static cleanConfig(oldConfig: Config): Config {
+    const config = {...oldConfig} as Config
+    for (const k in config.fields) {
+      config.fields[k].timestamp = config.fields[k].timestamp || "@timestamp"
+    }
+    return config
   }
 
   dsConfig(): DataSourceConfig {

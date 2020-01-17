@@ -85,10 +85,9 @@ export class Logquacious {
     }
 
     this.results = new Results(this.prefs.direction)
-    let fieldsConfig = this.config.fields[this.dsConfig().fields]
-    if (!fieldsConfig) {
-      this.error(`dataSource field reference is invalid.\ndataSource.fields=${this.dsConfig().fields}`)
-    }
+
+    let fieldsConfig = this.fieldsConfig()
+
     this.results.attach(resultsElement, fieldsConfig, {
       getQuery: () => this.query,
       changeQuery: (q: Query) => this.newSearch(q, true),
@@ -151,7 +150,13 @@ export class Logquacious {
         return undefined
       }
 
-      return this.config.dataSources.find(ds => ds.id == id)
+      const dsc = this.config.dataSources.find(ds => ds.id == id)
+      if (dsc) {
+        return dsc
+      } else {
+        // Our selected data source has been renamed or removed. Let us just pick the first.
+        return this.config.dataSources[0]
+      }
     }
   }
 
@@ -414,5 +419,19 @@ export class Logquacious {
                                            \n",
         'background: #123456; color: #ffffff')
     }
+  }
+
+  private fieldsConfig(): FieldsConfig {
+    const dsConfig = this.dsConfig()
+    if (!dsConfig) {
+      throw new Error('dsConfig is broken')
+    }
+
+    let fieldsConfig = this.config.fields[this.dsConfig().fields]
+    if (!fieldsConfig) {
+      throw new Error(`dataSource field reference is invalid.\ndataSource.fields=${this.dsConfig().fields}`)
+    }
+
+    return fieldsConfig
   }
 }

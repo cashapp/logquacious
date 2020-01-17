@@ -3,6 +3,7 @@ import { CopyHelper } from "../helpers/copyHelper"
 import { escape } from "he"
 import { Query } from "./query"
 import { Filter } from "../components/app"
+import moment from "moment"
 
 export type FieldsConfig = {
   timestamp?: string
@@ -430,7 +431,7 @@ function timestamp(): CollapsedTransform {
     if (!input.original) {
       return input
     }
-    const date = new Date(Date.parse(input.original))
+    const date = moment(input.original).toDate()
 
     function pad(number) {
       if (number < 10) {

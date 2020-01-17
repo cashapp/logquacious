@@ -3,8 +3,10 @@ import { CopyHelper } from "../helpers/copyHelper"
 import { escape } from "he"
 import { Query } from "./query"
 import { Filter } from "../components/app"
+import moment from "moment"
 
 export type FieldsConfig = {
+  timestamp?: string
   collapsedFormatting: ILogRule[]
   expandedFormatting?: ILogRule[]
   collapsedIgnore?: string[]
@@ -145,7 +147,7 @@ export class LogFormatter {
 
     let fragment = document.importNode(this.templateContent, true)
     fragment.firstElementChild.dataset.cursor = JSON.stringify(cursor)
-    fragment.firstElementChild.dataset.ts = entry['@timestamp']
+    fragment.firstElementChild.dataset.ts = entry[this.config.timestamp]
     fragment.firstElementChild.dataset.id = entry['_id']
 
     let fields = ''
@@ -429,7 +431,7 @@ function timestamp(): CollapsedTransform {
     if (!input.original) {
       return input
     }
-    const date = new Date(Date.parse(input.original))
+    const date = moment(input.original).toDate()
 
     function pad(number) {
       if (number < 10) {

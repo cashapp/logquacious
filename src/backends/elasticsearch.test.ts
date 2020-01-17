@@ -23,7 +23,19 @@ describe('elasticsearch', () => {
 
   beforeEach(() => {
     fetchMock.resetMocks()
-    es = new Elasticsearch(prefix, index)
+    es = new Elasticsearch(prefix, index, {
+      timestamp: "custom_timestamp",
+      collapsedFormatting: [
+        {
+          field: "message",
+          transforms: [],
+        },
+        {
+          field: "level",
+          transforms: [],
+        }
+      ],
+    })
   })
 
   test('loadDocument', done => {
@@ -67,9 +79,9 @@ describe('elasticsearch', () => {
       // expected _search request
       expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
         "_source": [
-          "@timestamp", "message", "level", "logger", "thread", "container", "service"
+          "custom_timestamp", "message", "level"
         ],
-        "docvalue_fields": [{"field": "@timestamp", "format": "date_time"}],
+        "docvalue_fields": [{"field": "custom_timestamp", "format": "date_time"}],
         "query": {
           "bool": {
             "must": [
@@ -83,7 +95,7 @@ describe('elasticsearch', () => {
                 }
               }, {
                 "range": {
-                  "@timestamp": {
+                  "custom_timestamp": {
                     "format": "strict_date_optional_time",
                     "gte": "now-1w",
                     "lte": "now"
@@ -94,7 +106,7 @@ describe('elasticsearch', () => {
           }
         },
         "size": 5,
-        "sort": [{"@timestamp": {"order": "desc"}}],
+        "sort": [{"custom_timestamp": {"order": "desc"}}],
         "timeout": "30000ms"
       })
 

@@ -60,6 +60,8 @@ export class Logquacious {
     if (!this.config) {
       this.error("config is invalid")
     }
+
+    this.config = Logquacious.cleanConfig(this.config)
   }
 
   run(resultsElement: HTMLElement, histogramElement: SVGElement) {
@@ -79,14 +81,13 @@ export class Logquacious {
     this.dataSources = new Map<string, IDataSource>()
     for (const ds of this.config.dataSources) {
       // We only currently support elasticsearch
-      this.dataSources.set(ds.id, new Elasticsearch(ds.urlPrefix, ds.index))
+      this.dataSources.set(ds.id, new Elasticsearch(ds.urlPrefix, ds.index, this.config.fields[ds.fields]))
     }
 
     this.results = new Results(this.prefs.direction)
-    let fieldsConfig = this.config.fields[this.dsConfig().fields]
-    if (!fieldsConfig) {
-      this.error(`dataSource field reference is invalid.\ndataSource.fields=${this.dsConfig().fields}`)
-    }
+
+    let fieldsConfig = this.dsFieldsConfig()
+
     this.results.attach(resultsElement, fieldsConfig, {
       getQuery: () => this.query,
       changeQuery: (q: Query) => this.newSearch(q, true),
@@ -130,6 +131,14 @@ export class Logquacious {
     }, 100)
   }
 
+  static cleanConfig(oldConfig: Config): Config {
+    const config = {...oldConfig} as Config
+    for (const k in config.fields) {
+      config.fields[k].timestamp = config.fields[k].timestamp || "@timestamp"
+    }
+    return config
+  }
+
   dsConfig(): DataSourceConfig {
     let id: string
     if (this.config.dataSources.length == 1) {
@@ -141,8 +150,28 @@ export class Logquacious {
         return undefined
       }
 
-      return this.config.dataSources.find(ds => ds.id == id)
+      const dsc = this.config.dataSources.find(ds => ds.id == id)
+      if (dsc) {
+        return dsc
+      } else {
+        // Our selected data source has been renamed or removed. Let us just pick the first.
+        return this.config.dataSources[0]
+      }
     }
+  }
+
+  dsFieldsConfig(): FieldsConfig {
+    const dsConfig = this.dsConfig()
+    if (!dsConfig) {
+      throw new Error('dsConfig is broken')
+    }
+
+    let fieldsConfig = this.config.fields[dsConfig.fields]
+    if (!fieldsConfig) {
+      throw new Error(`dataSource field reference is invalid: dataSource.fields=${dsConfig.fields}`)
+    }
+
+    return fieldsConfig
   }
 
   ds(): IDataSource {

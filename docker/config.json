@@ -10,6 +10,7 @@
   ],
   "fields": {
     "main": {
+      "timestamp": "{{.TimestampField}}",
       "collapsedFormatting": [
         {
           "field": "{{.TimestampField}}",

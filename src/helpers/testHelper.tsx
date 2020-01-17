@@ -3,14 +3,18 @@ import HTML from "../../index.html"
 import { Lookup } from "./lookup"
 import { App } from "../components/app"
 import { render } from "inferno"
-import { Logquacious } from "../services/logquacious"
+import { DataSourceType, Logquacious } from "../services/logquacious"
 
 export function prepareApp(app?: Logquacious) {
   document.body.innerHTML = HTML
   window.scrollTo = jest.fn()
   app = app || new Logquacious({
-    dataSources: [{id: "", urlPrefix: "", index: "", type: "elasticsearch", fields: ""}],
-    fields: {},
+    dataSources: [{id: "", urlPrefix: "", index: "", type: DataSourceType.ElasticSearch, fields: "main"}],
+    fields: {
+      main: {
+        collapsedFormatting: [],
+      },
+    },
     filters: [],
   })
   render(<App log={app}/>, document.getElementById('app'))

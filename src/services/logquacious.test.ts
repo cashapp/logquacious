@@ -30,6 +30,15 @@ class MockedElastic implements IDataSource {
 }
 
 describe('logquacious', () => {
+  describe('clean config', () => {
+    test('correctly defaults timestamp', () => {
+      expect(Logquacious.cleanConfig(
+        // @ts-ignore
+        {fields: {test: {}}}
+        )).toEqual({fields: {test: {timestamp: "@timestamp"}}})
+    })
+  })
+
   describe('log order', () => {
     const pageSize = 200
 
@@ -58,7 +67,7 @@ describe('logquacious', () => {
               },
             ],
             collapsedIgnore: [],
-            expandedFormatting: {},
+            expandedFormatting: [],
           }
         }
       }

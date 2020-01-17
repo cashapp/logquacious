@@ -11,6 +11,7 @@
 
   "fields": {
     "main": {
+      "timestamp": "@timestamp",
       "collapsedFormatting": [
         {
           "field": "@timestamp",

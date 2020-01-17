@@ -86,7 +86,7 @@ export class Logquacious {
 
     this.results = new Results(this.prefs.direction)
 
-    let fieldsConfig = this.fieldsConfig()
+    let fieldsConfig = this.dsFieldsConfig()
 
     this.results.attach(resultsElement, fieldsConfig, {
       getQuery: () => this.query,
@@ -158,6 +158,20 @@ export class Logquacious {
         return this.config.dataSources[0]
       }
     }
+  }
+
+  dsFieldsConfig(): FieldsConfig {
+    const dsConfig = this.dsConfig()
+    if (!dsConfig) {
+      throw new Error('dsConfig is broken')
+    }
+
+    let fieldsConfig = this.config.fields[dsConfig.fields]
+    if (!fieldsConfig) {
+      throw new Error(`dataSource field reference is invalid: dataSource.fields=${dsConfig.fields}`)
+    }
+
+    return fieldsConfig
   }
 
   ds(): IDataSource {
@@ -419,19 +433,5 @@ export class Logquacious {
                                            \n",
         'background: #123456; color: #ffffff')
     }
-  }
-
-  private fieldsConfig(): FieldsConfig {
-    const dsConfig = this.dsConfig()
-    if (!dsConfig) {
-      throw new Error('dsConfig is broken')
-    }
-
-    let fieldsConfig = this.config.fields[this.dsConfig().fields]
-    if (!fieldsConfig) {
-      throw new Error(`dataSource field reference is invalid.\ndataSource.fields=${this.dsConfig().fields}`)
-    }
-
-    return fieldsConfig
   }
 }

@@ -67,12 +67,7 @@ export class Logquacious {
   run(resultsElement: HTMLElement, histogramElement: SVGElement) {
     this.logo()
 
-    this.query = Query
-      .load(this.config.filters, {storage: window.localStorage})
-
-    console.log('after query load')
-    console.log(JSON.stringify(this.query.filters))
-
+    this.query = Query.load(this.config.filters, {storage: window.localStorage})
     this.onQuery(this.query)
     this.onFilter(this.query.filters)
 

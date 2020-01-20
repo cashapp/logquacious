@@ -80,14 +80,12 @@ export class Query {
       const emptyItem = filter.items.find(i => i.id == "")
       const undefinedItem = filter.items.find(i => i.id == undefined)
 
-      let selected = storageFilters.get(filter.urlKey)
+      let selected = result[filter.urlKey]
       if (selected == undefined) {
-        selected = result[filter.urlKey]
-      }
-
-      if (selected == undefined) {
-        console.log(filter.urlKey, 'set to default')
-        selected = filter.default
+        selected = storageFilters.get(filter.urlKey)
+        if (selected == undefined) {
+          selected = filter.default
+        }
       } else if (selected == "") {
         if (emptyItem) {
           selected = ""

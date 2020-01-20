@@ -24,6 +24,11 @@ const fruitFilter: Filter = {
       shortTitle: "bananas",
       title: "🍌",
     },
+    {
+      id: "cuc",
+      shortTitle: "cucumber",
+      title: "🥒",
+    },
   ],
 }
 
@@ -37,6 +42,7 @@ const fruitAllowEmpty: Filter = {
     },
     fruitFilter.items[1],
     fruitFilter.items[2],
+    fruitFilter.items[3],
   ]
 }
 
@@ -47,7 +53,7 @@ describe('query', () => {
     })
 
     describe('fruits with undefined', () => {
-      test('filter on empty', () => {
+      test('empty', () => {
         expect(Query.load([fruitFilter], {urlQuery: ""}).toURL()).toEqual("fru=banana")
       })
       test('filter on selected', () => {
@@ -62,7 +68,7 @@ describe('query', () => {
     })
 
     describe('fruits with empty', () => {
-      test('filter on empty', () => {
+      test('empty url should use default', () => {
         expect(Query.load([fruitAllowEmpty], {urlQuery: ""}).toURL()).toEqual("fru=banana")
       })
       test('filter on selected', () => {
@@ -79,10 +85,28 @@ describe('query', () => {
 
   describe('storage', () => {
     const storage: Storage = window.localStorage
-    test('remember filter', () => {
+    test('fruit is unset in url (default), remember filter', () => {
       storage.setItem("query", JSON.stringify({"fru": "app"}))
       const q = Query.load([fruitFilter], {storage})
       expect(q.filters[0].selected).toEqual("app")
+    })
+
+    test('fruit is empty string (undefined), must not use storage', () => {
+      storage.setItem("query", JSON.stringify({"fru": "app"}))
+      const q = Query.load([fruitFilter], {urlQuery: 'fru=', storage})
+      expect(q.filters[0].selected).toEqual(undefined)
+    })
+
+    test('fruit is empty string (empty), must not use storage', () => {
+      storage.setItem("query", JSON.stringify({"fru": "app"}))
+      const q = Query.load([fruitAllowEmpty], {urlQuery: 'fru=', storage})
+      expect(q.filters[0].selected).toEqual("")
+    })
+
+    test('url is set, must ignore storage', () => {
+      storage.setItem("query", JSON.stringify({"fru": "app"}))
+      const q = Query.load([fruitFilter], {urlQuery: 'fru=cuc', storage})
+      expect(q.filters[0].selected).toEqual("cuc")
     })
   })
 })

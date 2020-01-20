@@ -67,8 +67,7 @@ export class Logquacious {
   run(resultsElement: HTMLElement, histogramElement: SVGElement) {
     this.logo()
 
-    this.query = Query.fromURL(this.config.filters)
-
+    this.query = Query.load(this.config.filters, {storage: window.localStorage})
     this.onQuery(this.query)
     this.onFilter(this.query.filters)
 
@@ -104,7 +103,7 @@ export class Logquacious {
     this.themeChanger.setTheme(this.prefs.theme)
 
     window.onpopstate = () => {
-      let q = Query.fromURL(this.config.filters)
+      let q = Query.load(this.config.filters)
       if (!q.equals(this.query)) {
         this.newSearch(q)
       }
@@ -327,7 +326,9 @@ export class Logquacious {
 
   handleFilterChanged(filter: string, selected: string) {
     this.config.filters = this.config.filters.map(f => f.id === filter ? {...f, selected} : f)
-    this.query = this.query.withAppendFilter(filter, selected)
+    this.query = this.query
+      .withAppendFilter(filter, selected)
+      .toStorage(window.localStorage)
     this.newSearch(this.query, true)
     this.onFilter(this.query.filters)
   }

@@ -50,6 +50,9 @@ export type Filter = {
   items: FilterItem[]
   type: FilterType
   urlKey: string
+
+  // The last selected value will be remembered on a fresh search.
+  remember?: boolean
 }
 
 export class App extends Component<Props, State> {

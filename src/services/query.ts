@@ -45,7 +45,7 @@ export class Query {
   static fromURL(filters: Filter[], urlQuery?: string): Query {
     const result: any = {}
     urlQuery = urlQuery || window.location.search
-    urlQuery = urlQuery.split(/\??(.+)/)[1] || ""
+    urlQuery = urlQuery.split(/\?(.+)/)[1] || ""
     if (urlQuery != "") {
       urlQuery.split("&").forEach(function (part) {
         const item = part.split("=")
@@ -65,19 +65,7 @@ export class Query {
 
     for (const idx in filters) {
       const filter = filters[idx]
-      const emptyItem = filter.items.find(i => i.id == "")
-      const undefinedItem = filter.items.find(i => i.id == undefined)
-
-      let selected = result[filter.urlKey]
-      if (selected == undefined) {
-        selected = filter.default
-      } else if (selected == "") {
-        if (emptyItem) {
-          selected = ""
-        } else if (undefinedItem) {
-          selected = undefined
-        }
-      }
+      const selected = result[filter.urlKey] || filter.default
       q.filters[idx] = {...filter, selected}
     }
 
@@ -109,15 +97,14 @@ export class Query {
   }
 
   toURL(): string {
-    const values: { [id: string]: string | undefined} = {}
+    const values: { [id: string]: string } = {
+      t: Time.whenToText(this.startTime),
+    }
     if (this.terms != undefined) {
       values.q = this.terms
     }
     if (this.pageSize != DefaultPageSize) {
       values.n = String(this.pageSize)
-    }
-    if (this.startTime != DefaultStartTime) {
-      values.t = Time.whenToMoment(this.startTime).toISOString()
     }
     if (this.endTime != DefaultEndTime) {
       values.u = Time.whenToMoment(this.endTime).toISOString()

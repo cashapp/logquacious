@@ -458,7 +458,6 @@ type ReplaceTransform = {
 }
 
 function replace(rt: ReplaceTransform): CollapsedTransform {
-  console.log("wut", rt)
   const re = new RegExp(rt.search)
   return function (input: CollapsedFormatField) {
     input.current = String(input.current).replace(re, rt.replace)

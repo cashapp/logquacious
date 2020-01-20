@@ -7,6 +7,7 @@ const fruitFilter: Filter = {
   title: "Fruit",
   type: FilterType.singleValue,
   urlKey: "fru",
+  remember: true,
   items: [
     {
       id: undefined,
@@ -42,37 +43,46 @@ const fruitAllowEmpty: Filter = {
 describe('query', () => {
   describe('from/to url', () => {
     test('empty', () => {
-      expect(Query.fromURL([], "").toURL()).toEqual("")
+      expect(Query.load([], {urlQuery: ""}).toURL()).toEqual("")
     })
 
     describe('fruits with undefined', () => {
       test('filter on empty', () => {
-        expect(Query.fromURL([fruitFilter], "").toURL()).toEqual("fru=banana")
+        expect(Query.load([fruitFilter], {urlQuery: ""}).toURL()).toEqual("fru=banana")
       })
       test('filter on selected', () => {
-        expect(Query.fromURL([fruitFilter], "fru=app").toURL()).toEqual("fru=app")
+        expect(Query.load([fruitFilter], {urlQuery: "fru=app"}).toURL()).toEqual("fru=app")
       })
       test('filter on undefined', () => {
-        expect(Query.fromURL([fruitFilter], "fru=").toURL()).toEqual("fru=")
+        expect(Query.load([fruitFilter], {urlQuery: "fru="}).toURL()).toEqual("fru=")
       })
       test('filter on undefined check', () => {
-        expect(Query.fromURL([fruitFilter], "fru=").filters[0].selected).toEqual(undefined)
+        expect(Query.load([fruitFilter], {urlQuery: "fru="}).filters[0].selected).toEqual(undefined)
       })
     })
 
     describe('fruits with empty', () => {
       test('filter on empty', () => {
-        expect(Query.fromURL([fruitAllowEmpty], "").toURL()).toEqual("fru=banana")
+        expect(Query.load([fruitAllowEmpty], {urlQuery: ""}).toURL()).toEqual("fru=banana")
       })
       test('filter on selected', () => {
-        expect(Query.fromURL([fruitAllowEmpty], "fru=app").toURL()).toEqual("fru=app")
+        expect(Query.load([fruitAllowEmpty], {urlQuery: "fru=app"}).toURL()).toEqual("fru=app")
       })
       test('filter on undefined', () => {
-        expect(Query.fromURL([fruitAllowEmpty], "fru=").toURL()).toEqual("fru=")
+        expect(Query.load([fruitAllowEmpty], {urlQuery: "fru="}).toURL()).toEqual("fru=")
       })
       test('filter on undefined check', () => {
-        expect(Query.fromURL([fruitAllowEmpty], "fru=").filters[0].selected).toEqual("")
+        expect(Query.load([fruitAllowEmpty], {urlQuery: "fru="}).filters[0].selected).toEqual("")
       })
+    })
+  })
+
+  describe('storage', () => {
+    const storage: Storage = window.localStorage
+    test('remember filter', () => {
+      storage.setItem("query", JSON.stringify({"fru": "app"}))
+      const q = Query.load([fruitFilter], {storage})
+      expect(q.filters[0].selected).toEqual("app")
     })
   })
 })

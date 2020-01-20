@@ -50,6 +50,7 @@ export type Filter = {
   items: FilterItem[]
   type: FilterType
   urlKey: string
+  remember?: boolean
 }
 
 export class App extends Component<Props, State> {

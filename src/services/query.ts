@@ -5,6 +5,13 @@ export const DefaultPageSize = 200
 const DefaultStartTime = Time.wrapRelative(-1, "h")
 const DefaultEndTime = Now
 
+export type LoadOptions = {
+  urlQuery?: string
+  storage?: Storage
+}
+
+const storageKey = "query"
+
 // Query state data object with encoding/decoding to query parameters.
 export class Query {
   terms?: string
@@ -42,9 +49,9 @@ export class Query {
     return this.toURL() == other.toURL()
   }
 
-  static fromURL(filters: Filter[], urlQuery?: string): Query {
+  static load(filters: Filter[], options: LoadOptions = {}): Query {
     const result: any = {}
-    urlQuery = urlQuery || window.location.search
+    let urlQuery = options.urlQuery || window.location.search
     urlQuery = urlQuery.split(/\??(.+)/)[1] || ""
     if (urlQuery != "") {
       urlQuery.split("&").forEach(function (part) {
@@ -63,13 +70,23 @@ export class Query {
     q.focusCursor = result["cursor"]
     q.focusId = result["id"]
 
+    let storageFilters: Map<string, string> = new Map<string, string>()
+    if (options.storage) {
+      storageFilters = this.loadStorage(options.storage)
+    }
+
     for (const idx in filters) {
       const filter = filters[idx]
       const emptyItem = filter.items.find(i => i.id == "")
       const undefinedItem = filter.items.find(i => i.id == undefined)
 
-      let selected = result[filter.urlKey]
+      let selected = storageFilters.get(filter.urlKey)
       if (selected == undefined) {
+        selected = result[filter.urlKey]
+      }
+
+      if (selected == undefined) {
+        console.log(filter.urlKey, 'set to default')
         selected = filter.default
       } else if (selected == "") {
         if (emptyItem) {
@@ -109,7 +126,7 @@ export class Query {
   }
 
   toURL(): string {
-    const values: { [id: string]: string | undefined} = {}
+    const values: { [id: string]: string | undefined } = {}
     if (this.terms != undefined) {
       values.q = this.terms
     }
@@ -188,6 +205,28 @@ export class Query {
     q.focusId = id
     q.focusCursor = cursor
     return q
+  }
+
+  // Load certain filter defaults from localStorage.
+  static loadStorage(storage: Storage): Map<string, string> {
+    const raw = storage.getItem(storageKey)
+    if (!raw) {
+      return new Map<string, string>()
+    }
+    return new Map(Object.entries(JSON.parse(raw)))
+  }
+
+  toStorage(storage: Storage) {
+    const data = this.filters
+      .filter(f => f.remember)
+      .filter(f => f.selected != undefined)
+      .reduce((d, f) => {
+        d[f.urlKey] = f.selected
+        return d
+      }, {})
+
+    storage.setItem(storageKey, JSON.stringify(data))
+    return this
   }
 }
 

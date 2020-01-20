@@ -1,5 +1,5 @@
 import { Endpoint, Now, Range, Time, When } from "../helpers/time"
-import { Filter, FilterType } from "../components/app"
+import { Filter, FilterEnableRule, FilterType } from "../components/app"
 
 export const DefaultPageSize = 200
 const DefaultStartTime = Time.wrapRelative(-1, "h")
@@ -225,6 +225,34 @@ export class Query {
 
     storage.setItem(storageKey, JSON.stringify(data))
     return this
+  }
+
+  enabledFilters(): Filter[] {
+    return this.filters.filter(f => {
+      if (!f.enabled) {
+        return true
+      }
+
+      return f.enabled.find(rule => {
+        // We only have one kind, which is a filter rule.
+        rule = rule as FilterEnableRule
+        const foundFilter = this.filters.find(ff => ff.id == rule.id)
+        if (!foundFilter) {
+          throw new Error(`enabled rule ${rule} is referencing an unknown filter: ${rule.id}`)
+        }
+
+        let values: (string | undefined)[]
+        if (typeof rule.value == "string") {
+          values = [rule.value]
+        } else if (rule.value == undefined) {
+          values = [undefined]
+        } else {
+          values = rule.value
+        }
+
+        return values.find(v => foundFilter.selected == v)
+      })
+    })
   }
 }
 

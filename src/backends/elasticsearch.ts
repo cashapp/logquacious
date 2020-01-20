@@ -251,7 +251,7 @@ export class Elasticsearch implements IDataSource {
     }
 
     const filterQuery = []
-    for (const filter of query.filters) {
+    for (const filter of query.enabledFilters()) {
       // TODO: Work out why this is sometimes an empty string instead of undefined
       if (filter.selected == undefined || filter.selected == "") {
         continue

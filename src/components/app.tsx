@@ -42,6 +42,15 @@ interface State {
   focusInput: boolean,
 }
 
+
+export type FilterEnableRule = {
+  kind: 'filter'
+  id: string
+  value: string | string[] | undefined
+}
+
+export type EnableRule = FilterEnableRule
+
 export type Filter = {
   id: string
   title: string
@@ -53,6 +62,9 @@ export type Filter = {
 
   // The last selected value will be remembered on a fresh search.
   remember?: boolean
+
+  // Filters can be enabled/visible based on other filter selections.
+  enabled?: EnableRule[]
 }
 
 export class App extends Component<Props, State> {

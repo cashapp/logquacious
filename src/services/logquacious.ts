@@ -3,7 +3,7 @@ import { Loading } from "./loading"
 import { Elasticsearch, IDataSource, Result } from "../backends/elasticsearch"
 import { Query } from "./query"
 import { Histogram } from "./histogram"
-import { Display, DisplayCallback, Filter } from "../components/app"
+import { Display, DisplayCallback, Filter, FilterEnableRule } from "../components/app"
 import { Direction, Prefs, Theme } from "./prefs"
 import { ThemeChanger } from "./themeChanger"
 import { Range } from "../helpers/time"
@@ -69,7 +69,7 @@ export class Logquacious {
 
     this.query = Query.load(this.config.filters, {storage: window.localStorage})
     this.onQuery(this.query)
-    this.onFilter(this.query.filters)
+    this.onFilter(this.query.enabledFilters())
 
     this.prefs = new Prefs().load()
     this.onTheme(this.prefs.theme)
@@ -330,7 +330,7 @@ export class Logquacious {
       .withAppendFilter(filter, selected)
       .toStorage(window.localStorage)
     this.newSearch(this.query, true)
-    this.onFilter(this.query.filters)
+    this.onFilter(this.query.enabledFilters())
   }
 
   handleRangeCallback(range: Range) {

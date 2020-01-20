@@ -166,7 +166,11 @@ export class LogFormatter {
       }
       for (const transform of rule.transforms) {
         const {funcName, data} = this.getTransformData(transform)
-        const tf = collapsedTransformers[funcName](data)
+        const ctf = collapsedTransformers[funcName]
+        if (!ctf) {
+          throw Error(`Could not find collapsed transformer named '${funcName}'`)
+        }
+        const tf = ctf(data)
         format = tf(format)
       }
 

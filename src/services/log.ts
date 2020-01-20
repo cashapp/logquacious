@@ -456,6 +456,19 @@ function timestamp(): CollapsedTransform {
   }
 }
 
+type ReplaceTransform = {
+  search: string
+  replace: string
+}
+
+function replace(rt: ReplaceTransform): CollapsedTransform {
+  const re = new RegExp(rt.search)
+  return function (input: CollapsedFormatField) {
+    input.current = String(input.current).replace(re, rt.replace)
+    return input
+  }
+}
+
 function mapValue(mapping: Record<string, string>): CollapsedTransform {
   return function (input: CollapsedFormatField) {
     const lookup = mapping[input.current]
@@ -622,6 +635,7 @@ export const collapsedTransformers: { [key: string]: (any) => CollapsedTransform
   mapValue,
   mapClass,
   addClass,
+  replace,
   randomStableColor,
   shortenJavaFqcn,
 }

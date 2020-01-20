@@ -41,7 +41,7 @@ describe('elasticsearch', () => {
   test('loadDocument', done => {
     fetchMock.mockResponseOnce(JSON.stringify(docShort))
 
-    es.loadDocument(index, docId).then(data => {
+    es.loadDocument(index, "my-doc", docId).then(data => {
       expect(data).toEqual({
         hello: "12345",
         _index: index,
@@ -51,7 +51,7 @@ describe('elasticsearch', () => {
       done()
     }).catch(e => console.log(e))
     expect(fetchMock.mock.calls.length).toEqual(1)
-    expect(fetchMock.mock.calls[0][0]).toEqual(prefix + "/my-index/_doc/docid")
+    expect(fetchMock.mock.calls[0][0]).toEqual(prefix + "/my-index/my-doc/docid")
   })
 
   test('historicSearch', done => {

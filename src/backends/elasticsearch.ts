@@ -18,7 +18,7 @@ export interface Result {
   // Logs with the minimum fields required for display in the listing.
   overview: Array<LogMessage>
   // The full set of log fields. This is asynchronously loaded.
-  full: Promise<Map<string, LogMessage>>
+  full: Promise<Map<string, LogMessage>[]>
 }
 
 // Result of a histogram from ES
@@ -55,6 +55,7 @@ export interface LogMessage {
   _full?: Promise<LogMessage>
   _id?: string
   _index?: string
+  _type?: string
 
   [key: string]: any
 }
@@ -90,6 +91,14 @@ interface ElasticsearchResults {
 }
 
 export type Cursor = (number | string)[]
+
+type Index = string
+type Type = string
+type IdOrLogMsg = string | LogMessage
+
+type TypeIds = Map<Type, Array<IdOrLogMsg>>
+
+type IndexTypeIds = Map<Index, TypeIds>
 
 export interface IDataSource {
   historicSearch(query: Query, cursor?: Cursor, searchAfterAscending?: boolean): Promise<Result>
@@ -152,8 +161,8 @@ export class Elasticsearch implements IDataSource {
   }
 
   // Load a single document.
-  async loadDocument(index: string, id: string): Promise<LogMessage> {
-    const url = this.url(`_doc/${id}`, index)
+  async loadDocument(index: string, type: string, id: string): Promise<LogMessage> {
+    const url = this.url(`${type}/${id}`, index)
     const data = await Elasticsearch.fetch<LogMessage>(url, "GET")
     return this.normaliseLog(data)
   }
@@ -189,14 +198,12 @@ export class Elasticsearch implements IDataSource {
       hits.reverse()
     }
 
-    // Shard request by index.
-    let idsByIndex = new Map<string, Array<string>>()
-    hits.forEach(r => {
-      if (idsByIndex.has(r._index)) {
-        idsByIndex.get(r._index).push(r._id)
-      } else {
-        idsByIndex.set(r._index, [r._id])
-      }
+    // Shard request by index and doc type.
+    let idsByIndex: IndexTypeIds = new Map<Index, TypeIds>()
+    hits.forEach(hit => {
+      idsByIndex.set(hit._index, idsByIndex.get(hit._index) || new Map<Type, IdOrLogMsg[]>())
+      idsByIndex.get(hit._index).set(hit._type, idsByIndex.get(hit._index).get(hit._type) || [])
+      idsByIndex.get(hit._index).get(hit._type).push(hit._id)
     })
 
     const full = this.injectFinalPromise(hits, idsByIndex)
@@ -286,38 +293,31 @@ export class Elasticsearch implements IDataSource {
     }
   }
 
-// Inject "_full" field into hits from async _mget.
-  private injectFinalPromise(hits: Array<LogMessage>, shards: Map<string, Array<string>>): Promise<Map<string, LogMessage>> {
+  // Inject "_full" field into hits from async _mget.
+  private injectFinalPromise(hits: Array<LogMessage>, indexes: IndexTypeIds): Promise<Map<string, LogMessage>[]> {
     if (hits.length === 0) {
-      return Promise.resolve(new Map())
+      return Promise.resolve([])
     }
-    let shardResponses = new Map<string, Promise<Map<string, LogMessage>>>()
-    shards.forEach((ids, index) => shardResponses.set(index, this.bulkGet(index, ids)))
-
-    // Merged results from all shards.
-    let merged: Promise<Map<string, LogMessage>>
-    hits.forEach(hit => {
-      let shard = shardResponses.get(hit['_index'])
-      if (!merged) {
-        merged = shard
-      } else {
-        merged.then(async result => {
-          const current = new Map(result)
-          let next = await shard
-          next.forEach((v, k) => {
-            current.set(k, v)
-          })
-          return next
-        })
-      }
-      hit._full = this.docFromShard(shard, hit._id)
+    const allPromises = []
+    indexes.forEach((typeIds, index) => {
+      typeIds.forEach((ids, type) => {
+        const bulkGetPromise = this.bulkGet(index, type, ids as string[])
+        allPromises.push(bulkGetPromise)
+        hits
+          .filter(hit => hit._index == index)
+          .filter(hit => hit._type == type)
+          .forEach(hit => hit._full = new Promise<LogMessage>(resolve => {
+            bulkGetPromise.then(logMsgs => resolve(logMsgs.get(hit._id)))
+          }))
+      })
     })
-    return merged
+
+    return Promise.all(allPromises)
   }
 
   // Bulk get a set of documents.
-  async bulkGet(index: string, ids: Array<string>): Promise<Map<string, LogMessage>> {
-    const url = this.url(`_doc/_mget`, index)
+  async bulkGet(index: string, type: string, ids: Array<string>): Promise<Map<string, LogMessage>> {
+    const url = this.url(`${type}/_mget`, index)
     let request = {docs: ids.map(id => ({_id: id}))}
     const data = await Elasticsearch.fetch<LogMessages>(url, "POST", request)
     return new Map<string, LogMessage>(data.docs.map((doc: LogMessage) => [doc._id, this.normaliseLog(doc)]))
@@ -330,10 +330,11 @@ export class Elasticsearch implements IDataSource {
 
   private normaliseLog(r: LogMessage): LogMessage {
     return {
-      ...r['_source'],
-      _index: r['_index'],
-      _id: r['_id'],
-      __cursor: r['sort'],
+      ...r._source,
+      _index: r._index,
+      _id: r._id,
+      _type: r._type,
+      __cursor: r.sort,
     }
   }
 

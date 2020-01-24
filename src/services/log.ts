@@ -426,6 +426,9 @@ export class LogFormatter {
   }
 
   private showContextButtons(cursor: any, obj: any) {
+    if (!this.config.contextFilters) {
+      return []
+    }
     return this.config.contextFilters.map(f => showContextButton(f, obj, cursor, this._queryManipulator)).join("")
   }
 }

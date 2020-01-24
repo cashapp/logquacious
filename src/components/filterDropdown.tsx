@@ -9,6 +9,7 @@ export type FilterItem = {
   id: string
   title: string
   shortTitle?: string
+  terms?: string
 }
 
 type Props = {

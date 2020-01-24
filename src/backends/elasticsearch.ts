@@ -225,14 +225,32 @@ export class Elasticsearch implements IDataSource {
 
   private historicRequest(query: Query): SearchQuery {
     let stringQuery: any
-    if (query.terms) {
+
+    let extraTerms = query.enabledFilters()
+      .filter(f => f.type == FilterType.addTerms)
+      .filter(f => f.selected)
+      .map(f => {
+        const item = f.items.find(i => i.id == f.selected)
+        if (!item) {
+          throw new Error(`Could not find selected id: "${f.selected}" in filter ${f.id}`)
+        }
+        return item.terms
+      })
+      .join(" ")
+
+    let terms = query.terms || ""
+    if (extraTerms) {
+      terms += " " + extraTerms
+    }
+
+    if (terms) {
       stringQuery = {
         query_string: {
           analyze_wildcard: true,
           default_field: 'message',
           default_operator: 'AND',
           fuzziness: 0,
-          query: query.terms,
+          query: terms,
         }
       }
     } else {

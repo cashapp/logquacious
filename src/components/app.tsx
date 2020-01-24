@@ -26,6 +26,7 @@ export enum Display {
 export enum FilterType {
   dataSource = "dataSource",
   singleValue = "singleValue",
+  addTerms = "addTerms",
 }
 
 interface Props {

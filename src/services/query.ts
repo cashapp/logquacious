@@ -49,10 +49,19 @@ export class Query {
     return this.toURL() == other.toURL()
   }
 
+  static splitURL(s: string): string {
+    const parts = s.split(/\?(.*)/)
+    if (parts.length == 1) {
+      return parts[0]
+    } else {
+      return parts[1]
+    }
+  }
+
   static load(filters: Filter[], options: LoadOptions = {}): Query {
     const result: any = {}
     let urlQuery = options.urlQuery || window.location.search
-    urlQuery = urlQuery.split(/\??(.+)/)[1] || ""
+    urlQuery = this.splitURL(urlQuery)
     if (urlQuery != "") {
       urlQuery.split("&").forEach(function (part) {
         const item = part.split("=")

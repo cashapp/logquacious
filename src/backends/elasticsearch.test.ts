@@ -88,7 +88,6 @@ describe('elasticsearch', () => {
               {
                 "query_string": {
                   "analyze_wildcard": true,
-                  "default_field": "message",
                   "default_operator": "AND",
                   "fuzziness": 0,
                   "query": "crashy mccrashface"

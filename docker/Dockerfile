@@ -4,6 +4,7 @@ RUN mkdir /lq
 WORKDIR /lq
 
 ADD package.json /lq/
+ADD package-lock.json /lq/
 RUN npm install
 
 ADD tsconfig.json index.html app.sass .babelrc.js lq.png /lq/

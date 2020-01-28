@@ -228,8 +228,8 @@ export class Elasticsearch implements IDataSource {
     if (query.terms) {
       stringQuery = {
         query_string: {
+          fields: this.fieldsConfig.elasticsearch?.queryStringFields,
           analyze_wildcard: true,
-          default_field: 'message',
           default_operator: 'AND',
           fuzziness: 0,
           query: query.terms,

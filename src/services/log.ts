@@ -17,6 +17,11 @@ export type FieldsConfig = {
 
   // Always create links for these fields by prefix. Recommended for them to be indexed.
   maxDepthForLinksExceptions?: string[]
+
+  elasticsearch?: {
+    // Fields to search when a user does not specify a field
+    queryStringFields?: string[]
+  }
 }
 
 export type ContextFilter = {

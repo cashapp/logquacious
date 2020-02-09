@@ -561,9 +561,31 @@ export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string 
   return `<a><span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span></a>`
 }
 
+// https://stackoverflow.com/a/13218838/11125
+function flatten(obj) {
+  const res = {};
+  (function recurse(obj, current) {
+    for (const key in obj) {
+      const value = obj[key]
+      const newKey = (current ? current + "." + key : key)  // joined key with dot
+      if (value && typeof value === "object") {
+        recurse(value, newKey)  // it's a nested object, so do it again
+      } else {
+        res[newKey] = value  // it's not an object, so set the property
+      }
+    }
+  })(obj)
+  return res
+}
+
 export function showContextButton(filter: ContextFilter, obj: any, cursor: any, qm: QueryManipulator): string {
+  const flatObj = flatten(obj)
+
+  console.log(JSON.stringify(flatObj, null, 2))
+
+  // flatten keys
   const newTerms = (filter.keep || [])
-    .filter(k => obj[k])
+    .filter(k => flatObj[k])
     .map(k => `${k}:${JSON.stringify(obj[k])}`)
     .join(" ")
   const contextQuery = qm.getQuery()

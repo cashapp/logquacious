@@ -562,16 +562,29 @@ export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string 
 }
 
 // https://stackoverflow.com/a/13218838/11125
+// Modified to include elasticsearch "searchable" replacement key
 function flatten(obj) {
   const res = {};
-  (function recurse(obj, current) {
+  (function recurse(obj, current, currentNonIndexKey) {
     for (const key in obj) {
+      // XXX: Sometimes key is an index of an array, rather than a key of an object.
+      // XXX: This number will have to be stripped when filtering in ES.
       const value = obj[key]
       const newKey = (current ? current + "." + key : key)  // joined key with dot
-      if (value && typeof value === "object") {
-        recurse(value, newKey)  // it's a nested object, so do it again
+      let newNonIndexKey
+      if (Array.isArray(obj)) {
+        newNonIndexKey = (currentNonIndexKey ? currentNonIndexKey : "")
       } else {
-        res[newKey] = value  // it's not an object, so set the property
+        newNonIndexKey = (currentNonIndexKey ? currentNonIndexKey + `.${key}` : key)
+      }
+
+      if (value && typeof value === "object") {
+        recurse(value, newKey, newNonIndexKey)  // it's a nested object, so do it again
+      } else {
+        res[newKey] = {
+          value,
+          searchableKey: newNonIndexKey,
+        }
       }
     }
   })(obj)
@@ -581,13 +594,18 @@ function flatten(obj) {
 export function showContextButton(filter: ContextFilter, obj: any, cursor: any, qm: QueryManipulator): string {
   const flatObj = flatten(obj)
 
-  console.log(JSON.stringify(flatObj, null, 2))
-
-  // flatten keys
+  // Search for key specified in context filter.
   const newTerms = (filter.keep || [])
-    .filter(k => flatObj[k])
-    .map(k => `${k}:${JSON.stringify(obj[k])}`)
+    .map(k => Object.keys(flatObj).find(field => field.match(new RegExp(k)) ? k : undefined))
+    .filter(k => k)
+    .map(k => `${flatObj[k].searchableKey}:${JSON.stringify(flatObj[k].value)}`)
     .join(" ")
+
+  // Only create a link when the context field is in the log entry.
+  if (!newTerms) {
+    return undefined
+  }
+
   const contextQuery = qm.getQuery()
     .withFocus(obj._id, JSON.stringify(cursor))
     .withFixedTimeRange()

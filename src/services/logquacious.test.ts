@@ -4,7 +4,6 @@ import { Query } from "./query"
 import { Cursor, HistogramResults, IDataSource, LogMessage, Result } from "../backends/elasticsearch"
 import { Direction } from "./prefs"
 import { IRelative, Time } from "../helpers/time"
-import { addClass } from "./log"
 
 class MockedElastic implements IDataSource {
   private logMessages: LogMessage[]

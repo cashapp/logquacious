@@ -561,11 +561,51 @@ export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string 
   return `<a><span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span></a>`
 }
 
+// https://stackoverflow.com/a/13218838/11125
+// Modified to include elasticsearch "searchable" replacement key
+function flatten(obj) {
+  const res = {};
+  (function recurse(obj, current, currentNonIndexKey) {
+    for (const key in obj) {
+      // XXX: Sometimes key is an index of an array, rather than a key of an object.
+      // XXX: This number will have to be stripped when filtering in ES.
+      const value = obj[key]
+      const newKey = (current ? current + "." + key : key)  // joined key with dot
+      let newNonIndexKey
+      if (Array.isArray(obj)) {
+        newNonIndexKey = (currentNonIndexKey ? currentNonIndexKey : "")
+      } else {
+        newNonIndexKey = (currentNonIndexKey ? currentNonIndexKey + `.${key}` : key)
+      }
+
+      if (value && typeof value === "object") {
+        recurse(value, newKey, newNonIndexKey)  // it's a nested object, so do it again
+      } else {
+        res[newKey] = {
+          value,
+          searchableKey: newNonIndexKey,
+        }
+      }
+    }
+  })(obj)
+  return res
+}
+
 export function showContextButton(filter: ContextFilter, obj: any, cursor: any, qm: QueryManipulator): string {
+  const flatObj = flatten(obj)
+
+  // Search for key specified in context filter.
   const newTerms = (filter.keep || [])
-    .filter(k => obj[k])
-    .map(k => `${k}:${JSON.stringify(obj[k])}`)
+    .map(k => Object.keys(flatObj).find(field => field.match(new RegExp(k)) ? k : undefined))
+    .filter(k => k)
+    .map(k => `${flatObj[k].searchableKey}:${JSON.stringify(flatObj[k].value)}`)
     .join(" ")
+
+  // Only create a link when the context field is in the log entry.
+  if (!newTerms) {
+    return undefined
+  }
+
   const contextQuery = qm.getQuery()
     .withFocus(obj._id, JSON.stringify(cursor))
     .withFixedTimeRange()

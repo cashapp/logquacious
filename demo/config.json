@@ -1,0 +1,78 @@
+{
+  "dataSources": [
+    {
+      "id": "elasticsearch-server",
+      "type": "elasticsearch",
+      "index": "*",
+      "urlPrefix": "/es",
+      "fields": "main"
+    }
+  ],
+  "fields": {
+    "main": {
+      "timestamp": "@timestamp",
+      "collapsedFormatting": [
+        {
+          "field": "@timestamp",
+          "transforms": [
+            "timestamp"
+          ]
+        },
+        {
+          "field": "level",
+          "transforms": [
+            "upperCase",
+            {
+              "mapValue": {
+                "DEBUG": "DEBU",
+                "WARNING": "WARN",
+                "ERROR": "ERRO"
+              }
+            },
+            {
+              "mapClass": {
+                "DEBU": "has-text-success",
+                "INFO": "has-text-info",
+                "WARN": "has-text-warning",
+                "ERRO": "has-text-danger"
+              }
+            },
+            {
+              "addClass": "has-text-weight-bold"
+            }
+          ]
+        },
+        {
+          "field": "service",
+          "transforms": [
+            "randomStableColor"
+          ]
+        },
+        {
+          "field": "message",
+          "transforms": [
+            {
+              "addClass": "strong"
+            }
+          ]
+        }
+      ],
+      "collapsedIgnore": [
+        "_id",
+        "_index"
+      ],
+      "contextFilters": [
+        {
+          "title": "View surrounding logs without filters"
+        },
+        {
+          "title": "View surrounding logs for this service",
+          "keep": [
+            "service"
+          ],
+          "icon": "mdi-cloud-circle"
+        }
+      ]
+    }
+  }
+}

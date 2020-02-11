@@ -7,17 +7,96 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 func main() {
-	url := "http://es:9200/test/_doc/"
-	nextCheck, duration := newDurations()
+	baseURL := "http://es:9200/"
+	docURL := fmt.Sprintf("%stest/_doc/", baseURL)
+	err := waitForResponsiveServer(baseURL, time.Now().Add(1 * time.Minute))
+	if err != nil {
+		panic(err)
+	}
+
+	backfill, ok := os.LookupEnv("BACKFILL")
+	if ok && backfill == "1" {
+		go backFill(docURL)
+	}
+	liveFill(docURL)
+}
+
+func waitForResponsiveServer(url string, timeout time.Time) error {
+	for time.Now().Before(timeout) {
+		log.Printf("Waiting for ES to show up at %s", url)
+		time.Sleep(time.Second)
+
+		resp, err := http.Get(url)
+		if err != nil {
+			err = errors.Wrapf(err, "could not get %s", url)
+			continue
+		}
+
+		if resp.StatusCode == 200 {
+			return nil
+		}
+	}
+
+	return errors.New("timed out waiting for ES to respond")
+}
+
+func backFillJob(url string, payloads chan *bytes.Buffer) {
+	for payload := range payloads {
+		resp, err := http.Post(url, "application/json", payload)
+		if err != nil {
+			log.Printf("could not send request: %+v", err)
+			continue
+		}
+		_ = resp.Body.Close()
+	}
+}
+
+func backFill(url string) {
+	queue := make(chan *bytes.Buffer)
+	for i := 0; i < 8; i++ {
+		go backFillJob(url, queue)
+	}
+
+	timeMachine := time.Now()
+	limit := timeMachine.Add(-time.Hour * 24 * 2)
+	nextCheckDelta, duration := newDurations()
+	nextCheck := timeMachine.Add(-nextCheckDelta)
+
+	for timeMachine.After(limit) {
+		timeMachine = timeMachine.Add(-duration)
+
+		payload, err := genPayload(timeMachine)
+		if err != nil {
+			log.Printf("could not send request: %+v", err)
+			continue
+		}
+		queue <- payload
+
+		// To create a more interesting histogram, every so often we change the sleep interval
+		if timeMachine.Before(nextCheck) {
+			nextCheckDelta, duration = newDurations()
+			nextCheck = timeMachine.Add(-nextCheckDelta)
+		}
+	}
+
+	close(queue)
+}
+
+func liveFill(url string) {
+	nextCheckDuration, duration := newDurations()
+	nextCheck := time.Now().Add(nextCheckDuration)
 
 	for {
 		time.Sleep(duration)
 
-		payload, err := genPayload()
+		payload, err := genPayload(time.Now())
 		if err != nil {
 			log.Printf("could not send request: %+v", err)
 			continue
@@ -32,15 +111,17 @@ func main() {
 
 		// To create a more interesting histogram, every so often we change the sleep interval
 		if time.Now().After(nextCheck) {
-			nextCheck, duration = newDurations()
+			nextCheckDuration, duration = newDurations()
+			nextCheck = time.Now().Add(nextCheckDuration)
 		}
 	}
 }
 
-func newDurations() (nextCheck time.Time, duration time.Duration) {
+// newDurations returns newCheck which is when the next call to newDurations should be made.
+func newDurations() (nextCheck time.Duration, duration time.Duration) {
 	// Between 100ms and 5s
 	duration = time.Millisecond * time.Duration(100*(1+rand.Int()%50))
-	nextCheck = time.Now().Add(time.Second * time.Duration(rand.Int()%120))
+	nextCheck = time.Second * time.Duration(rand.Int()%120)
 	log.Printf("Duration: %s Next Change: %s", duration, nextCheck)
 	return
 }
@@ -58,9 +139,9 @@ type Payload struct {
 	} `json:"charge,omitempty"`
 }
 
-func genPayload() (*bytes.Buffer, error) {
+func genPayload(when time.Time) (*bytes.Buffer, error) {
 	payload := Payload{
-		Timestamp: time.Now().UTC().Format("2006-01-02T15:04:05-0700"),
+		Timestamp: when.UTC().Format("2006-01-02T15:04:05-0700"),
 	}
 
 	switch rand.Int() % 3 {

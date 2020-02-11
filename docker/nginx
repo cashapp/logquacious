@@ -6,7 +6,7 @@ server {
   }
 
   {{if and .ESProxy .ESURL}}
-  location /es {
+  location /es/ {
     proxy_pass {{.ESURL}};
   }
   {{end}}

@@ -5,11 +5,16 @@ services:
     build:
       dockerfile: docker/Dockerfile
       context: ..
+    volumes:
+      - "./config.json:/lq/config.json"
     ports:
       - "127.0.0.1:8080:8080"
     command: "--es-url=http://es:9200/" # Trailing slash is important
   generator:
     build: generator
+    environment:
+      # Set this to "1" to fill up log entries in the past for 48 hours worth.
+      BACKFILL: "1"
   es:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.3.2
     environment:

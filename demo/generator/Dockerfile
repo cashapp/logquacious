@@ -1,6 +1,6 @@
 FROM golang:alpine
 
-ADD gen.go /gen/
+ADD * /gen/
 WORKDIR /gen
 
 CMD go run ./gen.go

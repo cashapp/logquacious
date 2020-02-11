@@ -5,20 +5,18 @@
 Logquacious (lq) is a fast and simple log viewer built by Cash App. 
 
 It currently only supports
-exploration of logs stored in [ElasticSearch](https://www.elastic.co/products/elasticsearch),
+exploration of logs stored in [Elasticsearch](https://www.elastic.co/products/elasticsearch),
 however the storage/indexing backend is pluggable. If you are interested in
 contributing more backends, open a pull request!
 
-![Overview](./screenshots/overview.png)
-
-[More screenshots](./screenshots/README.md) that show off other parts of the UI.
+![Demo use of Logquacious](./demo.gif)
 
 ## Rationale
-Putting application and system logs in an ElasticSearch index is a common
+Putting application and system logs in an Elasticsearch index is a common
 way to store logs from multiple sources in a single place that can be searched.
-However, while there are many web-based user interfaces for ElasticSearch, most
-of them either focus on read/write access, treating ElasticSearch as a general
-purpose database, or are ElasticSearch query builders. We didn't find any modern,
+However, while there are many web-based user interfaces for Elasticsearch, most
+of them either focus on read/write access, treating Elasticsearch as a general
+purpose database, or are Elasticsearch query builders. We didn't find any modern,
 well-designed, minimalist web user interfaces designed with the explicit purpose
 of read-only log exploration.
 
@@ -43,7 +41,7 @@ of read-only log exploration.
 ## Local demo
 
 The local demo runs a basic web server which serves Logquacious.
-It also runs an instance of ElasticSearch with a script to generate demo log entries.
+It also runs an instance of Elasticsearch with a script to generate demo log entries.
 
 You'll need docker and docker-compose installed, then run:
 ```
@@ -75,11 +73,11 @@ Usage: lq-startup
 
 Flags:
   --help                       Show context-sensitive help.
-  --es-proxy                   Use a reverse proxy for ElasticSearch to avoid
+  --es-proxy                   Use a reverse proxy for Elasticsearch to avoid
                                needing CORS. (ES_PROXY)
-  --es-url=STRING              ElasticSearch host to send queries to, e.g.:
+  --es-url=STRING              Elasticsearch host to send queries to, e.g.:
                                http://my-es-server:9200/ (ES_URL)
-  --es-index="*"               ElasticSearch index to search in. (ES_INDEX)
+  --es-index="*"               Elasticsearch index to search in. (ES_INDEX)
   --timestamp-field="@timestamp"
                                The field containing the main timestamp entry.
                                (TIMESTAMP_FIELD)
@@ -94,8 +92,8 @@ Flags:
 ```
 
 For example run the following for this configuration:
-* Your ElasticSearch service is at `192.168.0.1`
-* The ElasticSearch indexes start with `logs-`
+* Your Elasticsearch service is at `192.168.0.1`
+* The Elasticsearch indexes start with `logs-`
 * The message field is `text`
 * You want the host to listen on port `9999`
 
@@ -143,7 +141,7 @@ Configure Logquacious in `config.json`.
 Setting up a web server if you don't already have one:
 
 * Install Caddy: `curl https://getcaddy.com | bash -s personal`
-* Create a `Caddyfile` to listen on port 8080 with http, also to talk to your ElasticSearch server:
+* Create a `Caddyfile` to listen on port 8080 with http, also to talk to your Elasticsearch server:
 ```
 :8080
 proxy /es my-elastic-search-hostname:9200 {
@@ -151,17 +149,17 @@ proxy /es my-elastic-search-hostname:9200 {
 }
 ```
 * Run `caddy` in the same directory as the `Caddyfile`
-* Point your browser at `http://localhost:8080/`. The ElasticSearch endpoint should be working at `http://localhost:8080/es/`.
+* Point your browser at `http://localhost:8080/`. The Elasticsearch endpoint should be working at `http://localhost:8080/es/`.
 
 ## Development
 
 The development workflow is very similar to the "From Source" set up above. You can run a self reloading development server instead of `npm run build`.
 
-You can either set up CORS on ElasticSearch or reverse proxy both the hot server and ElasticSearch. To do this, create `Caddyfile` in the root of the project:
+You can either set up CORS on Elasticsearch or reverse proxy both the hot server and Elasticsearch. To do this, create `Caddyfile` in the root of the project:
 ```
 :8080
 
-# Redirect all /es requests to the ElasticSearch server
+# Redirect all /es requests to the Elasticsearch server
 proxy /es my-elastic-search-hostname:9200 {
   without /es
 }
@@ -194,7 +192,7 @@ The top level structure of the json configuration is as follows:
 
 ### dataSources
 
-Contains the URL, index, etc for querying ElasticSearch. An example:
+Contains the URL, index, etc for querying Elasticsearch. An example:
 
 ```json
 "dataSources": [
@@ -212,9 +210,9 @@ Contains the URL, index, etc for querying ElasticSearch. An example:
 
 `type` must be `elasticsearch` until more data sources are implemented.
 
-`index` is the ElasticSearch index to search in. You can use an asterisk as a wildcard. This corresponds to the URL in a query request, e.g. `http://es:9200/index/_search`
+`index` is the Elasticsearch index to search in. You can use an asterisk as a wildcard. This corresponds to the URL in a query request, e.g. `http://es:9200/index/_search`
 
-`urlPrefix` is the URL to connect to your ElasticSearch server, without a trailing slash. This will resolve to `urlPrefix/index/_search`.
+`urlPrefix` is the URL to connect to your Elasticsearch server, without a trailing slash. This will resolve to `urlPrefix/index/_search`.
 
 `fields` is a reference to the key of the `fields` in the top level of the json configuration.
 
@@ -296,22 +294,22 @@ The `urlKey` is what is used in the URL for this filter. For example the URL mig
 
 The `null` value signifies that the filter was not selected, so it does not filter on that key in that case.
 
-Another type of filter is a `dataSource` filter for when you have multiple ElasticSearch instances.
+Another type of filter is a `dataSource` filter for when you have multiple Elasticsearch instances.
 The `id` of each item must point to the `id` of a data source.
 You can see an example of this in the [example config](./config.example.json) under the `env` filter.
 
 ## Cross-Origin Resource Sharing (CORS)
 
-If you want to be able to communicate to ElasticSearch on a different host and port to Logquacious, you will need to
-configure ElasticSearch to respond with the correct [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
+If you want to be able to communicate to Elasticsearch on a different host and port to Logquacious, you will need to
+configure Elasticsearch to respond with the correct [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
-For example, you are running https://lq.mycompany.com/ which serves the static content. You will need to set these configuration options in ElasticSearch:
+For example, you are running https://lq.mycompany.com/ which serves the static content. You will need to set these configuration options in Elasticsearch:
 ```
 http.cors.enabled: true
 http.cors.allow-origin: "https://lq.mycompany.com/"
 ```
 
-See the ElasticSearch documentation on the [http configuration options](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html) for more information.
+See the Elasticsearch documentation on the [http configuration options](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html) for more information.
 
 ## License
 

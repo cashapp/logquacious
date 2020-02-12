@@ -14,7 +14,7 @@ services:
     build: generator
     environment:
       # Set this to "1" to fill up log entries in the past for 48 hours worth.
-      BACKFILL: "1"
+      BACKFILL: "0"
   es:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.3.2
     environment:

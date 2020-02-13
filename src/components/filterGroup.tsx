@@ -1,7 +1,7 @@
 import { Component, Fragment } from "inferno"
-import { ChangeFilterCallback } from "./FilterDropdown"
 import { Menu } from "./menu"
 import { Filter } from "./app"
+import { ChangeFilterCallback } from "./filterDropdown"
 
 type Props = {
   onChange: ChangeFilterCallback

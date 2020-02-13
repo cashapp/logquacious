@@ -506,6 +506,9 @@ function addClass(c: string): CollapsedTransform {
 
 function upperCase(): CollapsedTransform {
   return function (input: CollapsedFormatField): CollapsedFormatField {
+    if (!input?.current) {
+      return input
+    }
     input.current = input.current.toUpperCase()
     return input
   }

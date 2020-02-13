@@ -1,10 +1,7 @@
 import { Lookup } from "../helpers/lookup"
 import { prepareApp, resultsFlatten } from "../helpers/testHelper"
-import { QueryCallback } from "./log"
 import { Logquacious } from "./logquacious"
 import { Direction } from "./prefs"
-
-const hrefMaker: QueryCallback = (s: string) => s
 
 function resultLookup(chunk: number, entry: number) {
   const logs = Lookup.element("#logs")
@@ -27,8 +24,8 @@ describe('results', () => {
       })
 
       test('should append correctly', () => {
-        app.results.append({"@timestamp": "2022-01-01", message: "log1"}, hrefMaker)
-        app.results.append({"@timestamp": "2022-01-02", message: "log2"}, hrefMaker)
+        app.results.append({"@timestamp": "2022-01-01", message: "log1"})
+        app.results.append({"@timestamp": "2022-01-02", message: "log2"})
 
         const results = resultsFlatten().map(z => z.textContent)
         expect(results[0]).toMatch(/log2/)
@@ -42,8 +39,8 @@ describe('results', () => {
       })
 
       test('should append correctly', () => {
-        app.results.append({"@timestamp": "2022-01-01", message: "log1"}, hrefMaker)
-        app.results.append({"@timestamp": "2022-01-02", message: "log2"}, hrefMaker)
+        app.results.append({"@timestamp": "2022-01-01", message: "log1"})
+        app.results.append({"@timestamp": "2022-01-02", message: "log2"})
 
         const results = resultsFlatten().map(z => z.textContent)
         expect(results[0]).toMatch(/log1/)
@@ -59,8 +56,8 @@ describe('results', () => {
       })
 
       test('should append correctly', () => {
-        app.results.append({"@timestamp": "2022-01-01", message: "log2022"}, hrefMaker)
-        app.results.append({"@timestamp": "2023-01-01", message: "log2023"}, hrefMaker)
+        app.results.append({"@timestamp": "2022-01-01", message: "log2022"})
+        app.results.append({"@timestamp": "2023-01-01", message: "log2023"})
 
         expect(logs.children.length).toEqual(1)
         expect(logs.children[0].children.length).toEqual(2)
@@ -69,8 +66,8 @@ describe('results', () => {
       })
 
       test('should prepend correctly', () => {
-        app.results.prepend({"@timestamp": "2023-01-01", message: "log2023"}, hrefMaker)
-        app.results.prepend({"@timestamp": "2022-01-01", message: "log2022"}, hrefMaker)
+        app.results.prepend({"@timestamp": "2023-01-01", message: "log2023"})
+        app.results.prepend({"@timestamp": "2022-01-01", message: "log2022"})
 
         expect(logs.children.length).toEqual(1)
         expect(logs.children[0].children.length).toEqual(2)
@@ -79,10 +76,10 @@ describe('results', () => {
       })
 
       test('should append then prepend correctly', () => {
-        app.results.append({"@timestamp": "2022-01-02", message: "log2"}, hrefMaker)
-        app.results.append({"@timestamp": "2022-01-03", message: "log3"}, hrefMaker)
-        app.results.prepend({"@timestamp": "2022-01-01", message: "log1"}, hrefMaker)
-        app.results.append({"@timestamp": "2022-01-04", message: "log4"}, hrefMaker)
+        app.results.append({"@timestamp": "2022-01-02", message: "log2"})
+        app.results.append({"@timestamp": "2022-01-03", message: "log3"})
+        app.results.prepend({"@timestamp": "2022-01-01", message: "log1"})
+        app.results.append({"@timestamp": "2022-01-04", message: "log4"})
 
         // Two chunks should be created
         expect(logs.children.length).toEqual(3)
@@ -101,8 +98,8 @@ describe('results', () => {
     })
 
     test('should append correctly', () => {
-      app.results.append({"@timestamp": "2022-01-01", message: "log2022"}, hrefMaker)
-      app.results.append({"@timestamp": "2023-01-01", message: "log2023"}, hrefMaker)
+      app.results.append({"@timestamp": "2022-01-01", message: "log2022"})
+      app.results.append({"@timestamp": "2023-01-01", message: "log2023"})
 
       expect(logs.children.length).toEqual(1)
       expect(logs.children[0].children.length).toEqual(2)
@@ -111,8 +108,8 @@ describe('results', () => {
     })
 
     test('should prepend correctly', () => {
-      app.results.prepend({"@timestamp": "2023-01-01", message: "log2023"}, hrefMaker)
-      app.results.prepend({"@timestamp": "2022-01-01", message: "log2022"}, hrefMaker)
+      app.results.prepend({"@timestamp": "2023-01-01", message: "log2023"})
+      app.results.prepend({"@timestamp": "2022-01-01", message: "log2022"})
 
       expect(logs.children.length).toEqual(1)
       expect(logs.children[0].children.length).toEqual(2)
@@ -121,10 +118,10 @@ describe('results', () => {
     })
 
     test('should append then prepend correctly', () => {
-      app.results.append({"@timestamp": "2022-01-02", message: "log2"}, hrefMaker)
-      app.results.append({"@timestamp": "2022-01-03", message: "log3"}, hrefMaker)
-      app.results.prepend({"@timestamp": "2022-01-01", message: "log1"}, hrefMaker)
-      app.results.append({"@timestamp": "2022-01-04", message: "log4"}, hrefMaker)
+      app.results.append({"@timestamp": "2022-01-02", message: "log2"})
+      app.results.append({"@timestamp": "2022-01-03", message: "log3"})
+      app.results.prepend({"@timestamp": "2022-01-01", message: "log1"})
+      app.results.append({"@timestamp": "2022-01-04", message: "log4"})
 
       // Two chunks should be created
       expect(logs.children.length).toEqual(3)

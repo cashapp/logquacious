@@ -45,8 +45,6 @@ describe("picker", () => {
       }
       expect(Time.whenToDate(Time.wrapRelative(-2, "h")).getHours())
         .toEqual(hour)
-      expect(Time.whenToDate(Time.wrapRelative(-2, "H")).getHours())
-        .toEqual(hour)
     })
   })
 

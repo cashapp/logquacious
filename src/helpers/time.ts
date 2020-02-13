@@ -1,4 +1,4 @@
-import moment from "moment"
+import moment, { unitOfTime } from "moment"
 
 interface IWhen {
   kind: string
@@ -97,11 +97,11 @@ export class Time {
     }
   }
 
-  static wrapRelative(count: number, unit: string): When {
+  static wrapRelative(count: number, unit: unitOfTime.Base): When {
     return {
       kind: "relative",
       count: count,
-      unit: moment.normalizeUnits(unit),
+      unit: unit,
     }
   }
 
@@ -117,7 +117,7 @@ export class Time {
         const amount = moment.duration(when.count, when.unit)
         return moment().add(amount).toDate()
       default:
-        console.error("not a When type: ", when)
+        throw new Error(`not a When type: ${when}`)
     }
   }
 
@@ -146,7 +146,7 @@ export class Time {
       case "relative":
         return `now${when.count}${when.unit.substring(0, 1)}`
       default:
-        console.error("not a When type: ", when)
+        throw new Error(`not a When type: ${when}`)
     }
   }
 
@@ -161,14 +161,13 @@ export class Time {
       case "relative":
         return `${when.count}${when.unit.substring(0, 1)}`
       default:
-        console.error("not a When type: ", when)
+        throw new Error(`not a When type: ${when}`)
     }
   }
 
   static whenToDuration(when: When): moment.Duration {
     if (when.kind != "relative") {
-      console.error(`${when.kind} not supported yet`)
-      return undefined
+      throw new Error(`${when.kind} not supported yet`)
     }
 
     return moment.duration(when.count, when.unit)
@@ -189,7 +188,7 @@ export class Time {
     // TODO: Also handy would be able to apply a diff to a full timestamp, e.g. "2011-11-11T12:34 +1h"
     const re = new RegExp(/^(now)?(-\d+) ?(\w)/).exec(text)
     if (re !== null) {
-      return Time.wrapRelative(Number(re[2]), re[3])
+      return Time.wrapRelative(Number(re[2]), re[3] as unitOfTime.Base)
     }
 
     // TODO: Fix the warning here:

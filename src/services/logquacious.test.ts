@@ -26,6 +26,10 @@ class MockedElastic implements IDataSource {
   histogram(query: Query, interval: IRelative, tz: string): Promise<HistogramResults> {
     return Promise.resolve({buckets: []})
   }
+
+  surroundSearch(): Promise<Result> {
+    return undefined;
+  }
 }
 
 describe('logquacious', () => {

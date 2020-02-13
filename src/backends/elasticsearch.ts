@@ -341,11 +341,6 @@ export class Elasticsearch implements IDataSource {
     return new Map<string, LogMessage>(data.docs.map((doc: LogMessage) => [doc._id, this.normaliseLog(doc)]))
   }
 
-  private async docFromShard(shard: Promise<Map<string, LogMessage>>, id: string): Promise<LogMessage> {
-    let result = await shard
-    return result.get(id)
-  }
-
   private normaliseLog(r: LogMessage): LogMessage {
     return {
       ...r._source,

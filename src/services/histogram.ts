@@ -2,8 +2,8 @@ import { Query } from "./query"
 import { Bucket, HistogramResults, IDataSource } from "../backends/elasticsearch"
 import { IRelative, Time, When } from "../helpers/time"
 import { Direction } from "./prefs"
-import moment from 'moment'
-import * as d3 from 'd3';
+import moment, { unitOfTime } from 'moment'
+import * as d3 from 'd3'
 
 interface Size {
   width: number
@@ -12,6 +12,14 @@ interface Size {
 
 interface Position {
   x: number;
+  y: number
+}
+
+interface BucketInfo {
+  bucket: Bucket
+  hovering: boolean
+  date?: Date
+  x: number
   y: number
 }
 
@@ -33,7 +41,7 @@ export class Histogram {
   private valueAxis: any
   private timeAxis: any
   private query: Query
-  private buckets: Bucket[]
+  private buckets: BucketInfo[]
   private direction: Direction
   private scaleTime: any
   private valueScale: any
@@ -45,7 +53,7 @@ export class Histogram {
   private drag: [Date, Date]
   private downloadedRange: any
   private tooltip: any
-  private hoveringBucket: Bucket
+  private hoveringBucket: BucketInfo
   private callback: (q: Query) => void
   private interval: IRelative
   private isDragging: boolean
@@ -144,7 +152,7 @@ export class Histogram {
       [3, "M"],
       [1, "y"],
     ]
-    // Apply the absolute millisecond difference to the expected bucket duration.
+      // Apply the absolute millisecond difference to the expected bucket duration.
       .map(i => {
         const dur = moment.duration(i[0], i[1] as moment.unitOfTime.Base).asMilliseconds()
         return [i[0], i[1], Math.abs(msPerBucket - dur)]
@@ -152,12 +160,17 @@ export class Histogram {
       // Sort by smallest delta
       .sort((a, b) => (a[2] > b[2]) ? 1 : -1)
 
-    return Time.wrapRelative(durations[0][0] as number, durations[0][1] as string)
+    return Time.wrapRelative(durations[0][0] as number, durations[0][1] as unitOfTime.Base)
   }
 
   update(query: Query, results: HistogramResults) {
     this.query = query
-    this.buckets = results.buckets
+    this.buckets = results.buckets.map(b => ({
+      bucket: b,
+      hovering: false,
+      x: 0,
+      y: 0,
+    }))
     this.mangleResults()
     this.redraw()
   }
@@ -209,7 +222,7 @@ export class Histogram {
       start = this.buckets[0].date
       // Add an extra interval to the end for the last bar, so it doesn't overlap past the end.
       end = Time.whenToDate(Time.whenAdd(
-        this.buckets[this.buckets.length - 1].when,
+        this.buckets[this.buckets.length - 1].bucket.when,
         Time.whenToDuration(this.interval)
       ))
     } else {
@@ -319,7 +332,7 @@ export class Histogram {
     this.buckets = this.buckets.map(r => ({
       ...r,
       // TODO: Separate bucket from date, maybe a local map.
-      date: Time.whenToDate(r.when),
+      date: Time.whenToDate(r.bucket.when),
     }))
   }
 
@@ -335,7 +348,7 @@ export class Histogram {
   }
 
   dragStart = () => {
-    const [ts, bucket] = this.mouseEventInfo()
+    const [ts] = this.mouseEventInfo()
     this.drag = [ts, ts]
     this.updateDragRange()
     this.isDragging = true
@@ -344,7 +357,7 @@ export class Histogram {
   }
 
   dragMove = () => {
-    const [ts, bucket] = this.mouseEventInfo()
+    const [ts] = this.mouseEventInfo()
     this.drag[1] = ts
     this.updateDragRange()
     this.mouseMove()
@@ -371,14 +384,14 @@ export class Histogram {
   }
 
   onClick = () => {
-    const [ts, bucket] = this.mouseEventInfo()
+    const [, bucket] = this.mouseEventInfo()
     this.hoverBucket(bucket)
-    this.query.startTime = this.hoveringBucket.when
-    this.query.endTime = Time.whenAdd(this.hoveringBucket.when, Time.whenToDuration(this.interval))
+    this.query.startTime = this.hoveringBucket.bucket.when
+    this.query.endTime = Time.whenAdd(this.hoveringBucket.bucket.when, Time.whenToDuration(this.interval))
     this.updatedQuery(this.query)
   }
 
-  mouseEventInfo(): [Date, Bucket] {
+  mouseEventInfo(): [Date, BucketInfo] {
     if (this.scaleTime == undefined) {
       return [undefined, undefined]
     }
@@ -435,7 +448,7 @@ export class Histogram {
       }
 
       const duration = Time.whenToDuration(this.interval)
-      text = this.tooltipText(this.hoveringBucket.when, Time.whenAdd(this.hoveringBucket.when, duration), duration, this.hoveringBucket.count)
+      text = this.tooltipText(this.hoveringBucket.bucket.when, Time.whenAdd(this.hoveringBucket.bucket.when, duration), duration, this.hoveringBucket.bucket.count)
     }
 
     this.tooltipVisible(true)
@@ -452,7 +465,7 @@ export class Histogram {
     `
   }
 
-  private hoverBucket(bucket) {
+  private hoverBucket(bucket: BucketInfo) {
     if (this.hoveringBucket == bucket) {
       return
     }
@@ -484,7 +497,7 @@ export class Histogram {
       }
       this.search(this.query)
     }
-    let timer: number
+    let timer: NodeJS.Timeout
     window.addEventListener('resize', () => {
       clearTimeout(timer)
       timer = setTimeout(f, 500)

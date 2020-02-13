@@ -343,6 +343,7 @@ export class Results {
     }
 
     e.scrollIntoView({block: "center"})
-    e.getElementsByClassName("unexpanded")[0].click()
+    const el = e.getElementsByClassName("unexpanded")[0] as HTMLElement
+    el.click()
   }
 }

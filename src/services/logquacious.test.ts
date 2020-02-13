@@ -14,9 +14,9 @@ class MockedElastic implements IDataSource {
 
   // @ts-ignore
   historicSearch(query: Query, cursor?: Cursor, searchAfterAscending?: boolean): Promise<Result> {
-    const r = {
+    const r: Result = {
       overview: this.logMessages,
-      full: Promise.resolve(new Map()),
+      full: Promise.resolve([new Map<string, LogMessage>()]),
     }
     this.logMessages = []
     return Promise.resolve(r)

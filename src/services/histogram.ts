@@ -231,7 +231,7 @@ export class Histogram {
     }
 
     this.scaleBand = d3.scaleBand()
-      .domain(this.buckets.map(b => b.date))
+      .domain(this.buckets.map(b => b.date.toISOString()))
       .range([
         this.scaleTime(start),
         this.scaleTime(end),
@@ -240,7 +240,7 @@ export class Histogram {
 
   private updateValueAxis() {
     this.valueScale = d3.scaleLinear()
-      .domain([0, d3.max(this.buckets, d => d.count)])
+      .domain([0, d3.max(this.buckets, d => d.bucket.count)])
       .range([0, this.innerSize.width])
     const labels = d3
       .axisBottom(this.valueScale.interpolate(d3.interpolateRound))
@@ -436,7 +436,7 @@ export class Histogram {
       const diff = Time.diff(start, end)
       const countInBuckets = this.buckets
         .filter(b => b.date.getTime() >= startDate.getTime() && b.date.getTime() <= endDate.getTime())
-        .map(b => b.count)
+        .map(b => b.bucket.count)
         .reduce((a, b) => a + b, 0)
       text = this.tooltipText(start, end, diff, countInBuckets)
     } else {

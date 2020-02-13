@@ -151,9 +151,9 @@ export class App extends Component<Props, State> {
           <progress id="loading" class="progress is-info log-progress"/>
         </nav>
 
-        <Logs visible={this.state.display == Display.logs} onAttachResults={this.handleAttachResults}/>
-        <Welcome visible={this.state.display == Display.welcome}/>
-        <Error visible={this.state.display == Display.error} message={this.state.errorMessage}/>
+        <Logs visible={this.state.display === Display.logs} onAttachResults={this.handleAttachResults}/>
+        <Welcome visible={this.state.display === Display.welcome}/>
+        <Error visible={this.state.display === Display.error} message={this.state.errorMessage}/>
 
         <textarea id="copy-helper"/>
       </Fragment>

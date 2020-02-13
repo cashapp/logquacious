@@ -21,7 +21,7 @@ export class MenuSetting<T> extends Component<Props<T>, any> {
   onChange = e => this.props.onChange(e.target.checked ? this.props.on.value : this.props.off.value)
 
   render() {
-    const checked = this.props.value == this.props.on.value
+    const checked = this.props.value === this.props.on.value
     const info = checked ? this.props.on : this.props.off
     const title = <Fragment>{this.props.title}: <b>{info.title}</b></Fragment>
     return (

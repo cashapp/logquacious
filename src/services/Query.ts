@@ -46,12 +46,12 @@ export class Query {
   }
 
   equals(other: Query): boolean {
-    return this.toURL() == other.toURL()
+    return this.toURL() === other.toURL()
   }
 
   static splitURL(s: string): string {
     const parts = s.split(/\?(.*)/)
-    if (parts.length == 1) {
+    if (parts.length === 1) {
       return parts[0]
     } else {
       return parts[1]
@@ -62,8 +62,8 @@ export class Query {
     const result: any = {}
     let urlQuery = options.urlQuery || window.location.search
     urlQuery = this.splitURL(urlQuery)
-    if (urlQuery != "") {
-      urlQuery.split("&").forEach(function (part) {
+    if (urlQuery !== "") {
+      urlQuery.split("&").forEach(part => {
         const item = part.split("=")
         if (item.length === 2) {
           result[item[0]] = decodeURIComponent(item[1].replace(/:/g, '%3A').replace(/\+/g, '%20'))
@@ -73,7 +73,7 @@ export class Query {
 
     const q = new Query()
     q.terms = result.q
-    q.pageSize = parseInt(result.n) || DefaultPageSize
+    q.pageSize = parseInt(result.n, 10) || DefaultPageSize
     q.startTime = result.t ? Time.parseText(result.t) : DefaultStartTime
     q.endTime = result.u ? Time.parseText(result.u) : DefaultEndTime // u for until
     q.focusCursor = result.cursor
@@ -84,18 +84,18 @@ export class Query {
       storageFilters = this.loadStorage(options.storage)
     }
 
-    for (const idx in filters) {
+    for (const idx of Object.keys(filters)) {
       const filter = filters[idx]
-      const emptyItem = filter.items.find(i => i.id == "")
-      const undefinedItem = filter.items.find(i => i.id == undefined)
+      const emptyItem = filter.items.find(i => i.id === "")
+      const undefinedItem = filter.items.find(i => i.id === undefined)
 
       let selected = result[filter.urlKey]
-      if (selected == undefined) {
+      if (selected === undefined) {
         selected = storageFilters.get(filter.urlKey)
-        if (selected == undefined) {
+        if (selected === undefined) {
           selected = filter.default
         }
-      } else if (selected == "") {
+      } else if (selected === "") {
         if (emptyItem) {
           selected = ""
         } else if (undefinedItem) {
@@ -116,7 +116,7 @@ export class Query {
   }
 
   isEmpty(): boolean {
-    return this.terms == undefined
+    return this.terms === undefined
   }
 
   selectedDataSource(): string | undefined {
@@ -124,7 +124,7 @@ export class Query {
       return undefined
     }
 
-    const filter = this.filters.find(ds => ds.type == FilterType.dataSource)
+    const filter = this.filters.find(ds => ds.type === FilterType.dataSource)
     if (!filter) {
       return undefined
     }
@@ -134,16 +134,16 @@ export class Query {
 
   toURL(): string {
     const values: { [id: string]: string | undefined } = {}
-    if (this.terms != undefined) {
+    if (this.terms !== undefined) {
       values.q = this.terms
     }
-    if (this.pageSize != DefaultPageSize) {
+    if (this.pageSize !== DefaultPageSize) {
       values.n = String(this.pageSize)
     }
-    if (this.startTime != DefaultStartTime) {
+    if (this.startTime !== DefaultStartTime) {
       values.t = Time.whenToMoment(this.startTime).toISOString()
     }
-    if (this.endTime != DefaultEndTime) {
+    if (this.endTime !== DefaultEndTime) {
       values.u = Time.whenToMoment(this.endTime).toISOString()
     }
     if (this.focusCursor) {
@@ -203,7 +203,7 @@ export class Query {
 
   withAppendFilter(filter: string, selected: string): Query {
     const q = this.clone()
-    q.filters = this.filters.map(f => f.id == filter ? {...f, selected} : f)
+    q.filters = this.filters.map(f => f.id === filter ? {...f, selected} : f)
     return q
   }
 
@@ -226,7 +226,7 @@ export class Query {
   toStorage(storage: Storage) {
     const data = this.filters
       .filter(f => f.remember)
-      .filter(f => f.selected != undefined)
+      .filter(f => f.selected !== undefined)
       .reduce((d, f) => {
         d[f.urlKey] = f.selected
         return d
@@ -245,21 +245,21 @@ export class Query {
       return f.enabled.find(rule => {
         // We only have one kind, which is a filter rule.
         rule = rule as FilterEnableRule
-        const foundFilter = this.filters.find(ff => ff.id == rule.id)
+        const foundFilter = this.filters.find(ff => ff.id === rule.id)
         if (!foundFilter) {
           throw new Error(`enabled rule ${rule} is referencing an unknown filter: ${rule.id}`)
         }
 
         let values: (string | undefined)[]
-        if (typeof rule.value == "string") {
+        if (typeof rule.value === "string") {
           values = [rule.value]
-        } else if (rule.value == undefined) {
+        } else if (rule.value === undefined) {
           values = [undefined]
         } else {
           values = rule.value
         }
 
-        return values.find(v => foundFilter.selected == v)
+        return values.find(v => foundFilter.selected === v)
       })
     })
   }

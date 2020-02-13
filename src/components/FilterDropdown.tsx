@@ -26,10 +26,10 @@ export class FilterDropdown extends Component<Props> {
     const items = this.props.filters.map(f => <FilterGroup onChange={this.props.onChange} filter={f}/>)
     const active = this.props.filters
       .map(f => {
-      const selectedItem = f.items.find(i => i.id == f.selected)
+      const selectedItem = f.items.find(i => i.id === f.selected)
       return selectedItem && (selectedItem.shortTitle || selectedItem.title) || ""
     })
-      .filter(f => f != "")
+      .filter(f => f !== "")
       .join(", ")
 
     return (

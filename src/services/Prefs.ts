@@ -4,7 +4,7 @@ export enum Direction {
 }
 
 export function SwapDirection(d: Direction) {
-  return (d == Direction.Up) ? Direction.Down : Direction.Up
+  return (d === Direction.Up) ? Direction.Down : Direction.Up
 }
 
 export enum Theme {
@@ -57,7 +57,7 @@ export class Prefs {
 
   applyDefaults() {
     const s = this.data
-    for (const key in this.defaultSettings) {
+    for (const key of Object.keys(this.defaultSettings)) {
       s[key] = (s[key] === undefined) ? this.defaultSettings[key] : s[key]
     }
   }

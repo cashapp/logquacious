@@ -122,7 +122,7 @@ export class Logquacious {
     })
 
     setInterval(() => {
-      if (this.histogram == undefined) {
+      if (this.histogram === undefined) {
         return
       }
       this.histogram.setDownloadedRange(this.results.getRange())
@@ -132,7 +132,7 @@ export class Logquacious {
 
   static cleanConfig(oldConfig: Config): Config {
     const config = {...oldConfig} as Config
-    for (const k in config.fields) {
+    for (const k of Object.keys(config.fields)) {
       config.fields[k].timestamp = config.fields[k].timestamp || "@timestamp"
     }
     return config
@@ -140,7 +140,7 @@ export class Logquacious {
 
   dsConfig(): DataSourceConfig {
     let id: string
-    if (this.config.dataSources.length == 1) {
+    if (this.config.dataSources.length === 1) {
       return this.config.dataSources[0]
     } else {
       id = this.query.selectedDataSource()
@@ -149,7 +149,7 @@ export class Logquacious {
         return undefined
       }
 
-      const dsc = this.config.dataSources.find(ds => ds.id == id)
+      const dsc = this.config.dataSources.find(ds => ds.id === id)
       if (dsc) {
         return dsc
       } else {
@@ -204,7 +204,7 @@ export class Logquacious {
     this.trackSearch(query)
     this.showLogs()
 
-    if (this.histogram != undefined) {
+    if (this.histogram !== undefined) {
       this.histogram.search(query).catch(reason => {
         this.loading.deactivate()
         this.error(reason)
@@ -384,6 +384,7 @@ export class Logquacious {
   }
 
   error(error) {
+    // tslint:disable-next-line:no-console
     console.error(error)
 
     if (!this.onDisplay) {
@@ -402,7 +403,7 @@ export class Logquacious {
       if (error.stack !== undefined) {
         message += error.stack + "\n"
       }
-      if (message == "") {
+      if (message === "") {
         message = JSON.stringify(error)
       }
     } else {
@@ -423,6 +424,7 @@ export class Logquacious {
   private logo() {
     // Don't print when testing.
     if (process.env.JEST_WORKER_ID === undefined) {
+      // tslint:disable-next-line:no-console
       console.log("%c\n\
                                            \n\
     /)                       ,             \n\

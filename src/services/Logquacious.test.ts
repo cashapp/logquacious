@@ -28,7 +28,7 @@ class MockedElastic implements IDataSource {
   }
 
   surroundSearch(): Promise<Result> {
-    return undefined;
+    return undefined
   }
 }
 
@@ -38,7 +38,7 @@ describe('logquacious', () => {
       expect(Logquacious.cleanConfig(
         // @ts-ignore
         {fields: {test: {}}}
-        )).toEqual({fields: {test: {timestamp: "@timestamp"}}})
+      )).toEqual({fields: {test: {timestamp: "@timestamp"}}})
     })
   })
 
@@ -80,10 +80,10 @@ describe('logquacious', () => {
       app.histogram = undefined
     })
 
-    const injectElasticData = (app: Logquacious, number, nOffset: number = 0): LogMessage[] => {
+    const injectElasticData = (lq: Logquacious, n, nOffset: number = 0): LogMessage[] => {
       const start = Time.whenToDate(Time.parseText("2020-01-01T00:00:00Z"))
       const messages: LogMessage[] = []
-      for (let i = 0; i < number; i++) {
+      for (let i = 0; i < n; i++) {
         const io = i + nOffset
         const ms = start.getTime()
         messages.push({
@@ -95,31 +95,29 @@ describe('logquacious', () => {
           }
         })
       }
-      app.dataSources.set("moo", new MockedElastic(messages))
+      lq.dataSources.set("moo", new MockedElastic(messages))
       return messages
     }
 
-    const check = (app, expected, direction, done?, nextPage: boolean = false, nextPageOlder?: boolean) => {
-      app.results.setDirection(direction)
+    const check = (lq, expected, direction, done?, nextPage: boolean = false, nextPageOlder?: boolean) => {
+      lq.results.setDirection(direction)
 
-      app.search(q, nextPage, nextPageOlder).then(() => {
+      lq.search(q, nextPage, nextPageOlder).then(() => {
         // Wait for the stagger to finish.
         // TODO: Don't rely on a timer.
         setTimeout(() => {
           expected = expected.map(a => a.message)
           const items = resultsFlatten()
-          if (direction == Direction.Up) {
+          if (direction === Direction.Up) {
             items.reverse()
           }
           const received = items.map(a => a.getElementsByClassName("strong")[0].innerHTML)
           expect(received).toEqual(expected)
 
-          if (done != undefined) {
+          if (done !== undefined) {
             done()
           }
         }, 500)
-      }).catch(e => {
-        console.error(e)
       })
     }
 

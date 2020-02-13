@@ -67,13 +67,13 @@ describe("picker", () => {
       const anHourAgo = {
         kind: "relative",
         count: -1,
-        unit: "hour",
+        unit: "h",
       }
 
       expect(Time.parseText("-1h")).toEqual(anHourAgo)
-      expect(Time.parseText("now-1H")).toEqual(anHourAgo)
+      expect(Time.parseText("now-1h")).toEqual(anHourAgo)
       expect(Time.parseText("-1 hour")).toEqual(anHourAgo)
-      expect(Time.parseText("now-1 HoUr")).toEqual(anHourAgo)
+      expect(Time.parseText("now-1 hoUr")).toEqual(anHourAgo)
     })
 
     test("should parse dates", () => {

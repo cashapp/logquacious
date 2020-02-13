@@ -1,7 +1,7 @@
 {
   "scripts": {
     "hot": "parcel index.html",
-    "tsc-no-emit": "tsc --noEmit",
+    "tsc-check": "tsc --noEmit",
     "build": "parcel build --public-url=./ index.html",
     "test": "jest"
   },

@@ -1,7 +1,7 @@
-import { Query } from "./query"
-import { Bucket, HistogramResults, IDataSource } from "../backends/elasticsearch"
-import { IRelative, Time, When } from "../helpers/time"
-import { Direction } from "./prefs"
+import { Query } from "./Query"
+import { Bucket, HistogramResults, IDataSource } from "../backends/elasticsearch/Elasticsearch"
+import { IRelative, Time, When } from "../helpers/Time"
+import { Direction } from "./Prefs"
 import moment, { unitOfTime } from 'moment'
 import * as d3 from 'd3'
 

@@ -1,5 +1,5 @@
 import { Component } from "inferno"
-import { Endpoint, Now, Time, When, Range } from "../../helpers/time"
+import { Endpoint, Now, Time, When, Range } from "../../helpers/Time"
 
 export type ClickNewRangeHandler = (delta: When) => void
 

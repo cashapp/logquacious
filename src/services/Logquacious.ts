@@ -1,13 +1,13 @@
-import { Results } from "./results"
-import { Loading } from "./loading"
-import { Elasticsearch, IDataSource, Result } from "../backends/elasticsearch"
-import { Query } from "./query"
-import { Histogram } from "./histogram"
-import { Display, DisplayCallback, Filter } from "../components/app"
-import { Direction, Prefs, Theme } from "./prefs"
-import { ThemeChanger } from "./themeChanger"
-import { Range } from "../helpers/time"
-import { FieldsConfig } from "./log"
+import { Results } from "./Results"
+import { Loading } from "./Loading"
+import { Elasticsearch, IDataSource, Result } from "../backends/elasticsearch/Elasticsearch"
+import { Query } from "./Query"
+import { Histogram } from "./Histogram"
+import { Display, DisplayCallback, Filter } from "../components/App"
+import { Direction, Prefs, Theme } from "./Prefs"
+import { ThemeChanger } from "./ThemeChanger"
+import { Range } from "../helpers/Time"
+import { FieldsConfig } from "./Log"
 
 export type QueryCallback = (q: Query) => void
 export type ThemeCallback = (theme: Theme) => void

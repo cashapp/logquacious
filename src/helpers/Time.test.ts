@@ -1,6 +1,6 @@
-import { IMoment, InvalidDate, Now, Time } from "./time"
+import { IMoment, InvalidDate, Now, Time } from "./Time"
 import moment from 'moment'
-import { prepareApp } from "./testHelper"
+import { prepareApp } from "./TestHelper"
 
 describe("picker", () => {
   beforeAll(() => {

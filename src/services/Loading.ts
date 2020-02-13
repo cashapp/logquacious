@@ -1,4 +1,4 @@
-import { Lookup } from "../helpers/lookup"
+import { Lookup } from "../helpers/Lookup"
 
 export class Loading {
   private depth: number = 0

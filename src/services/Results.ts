@@ -1,7 +1,7 @@
-import { FieldsConfig, LogFormatter, QueryManipulator } from "./log"
-import { Lookup } from "../helpers/lookup"
-import { LogMessage } from "../backends/elasticsearch"
-import { Direction, SwapDirection } from "./prefs"
+import { FieldsConfig, LogFormatter, QueryManipulator } from "./Log"
+import { Lookup } from "../helpers/Lookup"
+import { LogMessage } from "../backends/elasticsearch/Elasticsearch"
+import { Direction, SwapDirection } from "./Prefs"
 
 export interface IStats {
   visible: number

@@ -1,7 +1,7 @@
 import { render } from 'inferno'
-import { App } from "./components/app"
-import { Logquacious } from "./services/logquacious"
-import { Error } from "./components/error"
+import { App } from "./components/App"
+import { Logquacious } from "./services/Logquacious"
+import { Error } from "./components/Error"
 
 const app = document.getElementById('app')
 

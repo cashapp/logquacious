@@ -1,9 +1,9 @@
 // @ts-ignore
 import HTML from "../../index.html"
-import { Lookup } from "./lookup"
-import { App } from "../components/app"
+import { Lookup } from "./Lookup"
+import { App } from "../components/App"
 import { render } from "inferno"
-import { DataSourceType, Logquacious } from "../services/logquacious"
+import { DataSourceType, Logquacious } from "../services/Logquacious"
 
 export function prepareApp(app?: Logquacious) {
   document.body.innerHTML = HTML

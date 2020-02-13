@@ -1,6 +1,6 @@
-import { Elasticsearch } from "./elasticsearch"
-import { Query } from "../services/query"
-import { Now, Time } from "../helpers/time"
+import { Elasticsearch } from "./Elasticsearch"
+import { Query } from "../../services/Query"
+import { Now, Time } from "../../helpers/Time"
 
 const prefix = 'https://es-server'
 const index = "my-index"
@@ -49,7 +49,7 @@ describe('elasticsearch', () => {
         __cursor: undefined,
       })
       done()
-    }).catch(e => console.log(e))
+    })
     expect(fetchMock.mock.calls.length).toEqual(1)
     expect(fetchMock.mock.calls[0][0]).toEqual(prefix + "/my-index/my-doc/docid")
   })
@@ -132,6 +132,6 @@ describe('elasticsearch', () => {
 
         done()
       })
-    }).catch(e => console.log(e))
+    })
   })
 })

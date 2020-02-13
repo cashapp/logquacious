@@ -1,9 +1,9 @@
-import { Config, DataSourceType, Logquacious } from "./logquacious"
-import { prepareApp, resultsFlatten } from "../helpers/testHelper"
-import { Query } from "./query"
-import { Cursor, HistogramResults, IDataSource, LogMessage, Result } from "../backends/elasticsearch"
-import { Direction } from "./prefs"
-import { IRelative, Time } from "../helpers/time"
+import { Config, DataSourceType, Logquacious } from "./Logquacious"
+import { prepareApp, resultsFlatten } from "../helpers/TestHelper"
+import { Query } from "./Query"
+import { Cursor, HistogramResults, IDataSource, LogMessage, Result } from "../backends/elasticsearch/Elasticsearch"
+import { Direction } from "./Prefs"
+import { IRelative, Time } from "../helpers/Time"
 
 class MockedElastic implements IDataSource {
   private logMessages: LogMessage[]

@@ -1,7 +1,7 @@
 import { Component } from "inferno"
-import { FilterGroup } from "./filterGroup"
+import { FilterGroup } from "./FilterGroup"
 import { Menu } from "./menu"
-import { Filter } from "./app"
+import { Filter } from "./App"
 
 export type ChangeFilterCallback = (filter: string, item: string) => void
 

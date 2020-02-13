@@ -31,7 +31,7 @@
       "./testSetup.ts"
     ],
     "moduleNameMapper": {
-      "\\.png$": "<rootDir>/src/helpers/fileMock.ts"
+      "\\.png$": "<rootDir>/src/helpers/FileMock.ts"
     }
   },
   "dependencies": {

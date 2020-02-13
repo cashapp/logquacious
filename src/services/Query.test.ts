@@ -1,5 +1,5 @@
-import { Query } from "./query"
-import { Filter, FilterType } from "../components/app"
+import { Query } from "./Query"
+import { Filter, FilterType } from "../components/App"
 
 const fruitFilter: Filter = {
   id: "fruit",

@@ -1,4 +1,4 @@
-import { Lookup } from "./lookup"
+import { Lookup } from "./Lookup"
 
 export class CopyHelper {
     private textarea: HTMLTextAreaElement

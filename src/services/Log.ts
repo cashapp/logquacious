@@ -1,8 +1,8 @@
-import { LogMessage } from "../backends/elasticsearch"
-import { CopyHelper } from "../helpers/copyHelper"
+import { LogMessage } from "../backends/elasticsearch/Elasticsearch"
+import { CopyHelper } from "../helpers/CopyHelper"
 import { escape } from "he"
-import { Query } from "./query"
-import { Filter } from "../components/app"
+import { Query } from "./Query"
+import { Filter } from "../components/App"
 import moment from "moment"
 
 export type FieldsConfig = {

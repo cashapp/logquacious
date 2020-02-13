@@ -1,5 +1,5 @@
-import { Endpoint, Now, Range, Time, When } from "../helpers/time"
-import { Filter, FilterEnableRule, FilterType } from "../components/app"
+import { Endpoint, Now, Range, Time, When } from "../helpers/Time"
+import { Filter, FilterEnableRule, FilterType } from "../components/App"
 
 export const DefaultPageSize = 200
 const DefaultStartTime = Time.wrapRelative(-1, "h")

@@ -1,5 +1,5 @@
 import { Component } from "inferno"
-import { Time } from "../../helpers/time"
+import { Time } from "../../helpers/Time"
 import { InputInfo } from "./picker"
 
 interface Props {

@@ -1,7 +1,7 @@
-import { Lookup } from "../helpers/lookup"
-import { prepareApp, resultsFlatten } from "../helpers/testHelper"
-import { Logquacious } from "./logquacious"
-import { Direction } from "./prefs"
+import { Lookup } from "../helpers/Lookup"
+import { prepareApp, resultsFlatten } from "../helpers/TestHelper"
+import { Logquacious } from "./Logquacious"
+import { Direction } from "./Prefs"
 
 function resultLookup(chunk: number, entry: number) {
   const logs = Lookup.element("#logs")

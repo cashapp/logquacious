@@ -1,5 +1,5 @@
 import { Component } from "inferno"
-import { AttachResultsCallback } from "./app"
+import { AttachResultsCallback } from "./App"
 
 interface Props {
   onAttachResults: AttachResultsCallback

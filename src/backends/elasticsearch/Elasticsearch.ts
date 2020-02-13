@@ -1,17 +1,8 @@
-import { IRelative, Time, When } from "../helpers/time"
-import { Query } from "../services/query"
-import { FilterType } from "../components/app"
-import { FieldsConfig } from "../services/log"
-
-class ElasticsearchException implements Error {
-  constructor(name: string, s: string) {
-    this.name = name
-    this.message = s
-  }
-
-  message: string
-  name: string
-}
+import { IRelative, Time, When } from "../../helpers/Time"
+import { Query } from "../../services/Query"
+import { FilterType } from "../../components/App"
+import { FieldsConfig } from "../../services/Log"
+import { ElasticsearchException } from "./ElasticsearchException"
 
 // Result of a search.
 export interface Result {
@@ -216,7 +207,7 @@ export class Elasticsearch implements IDataSource {
     // That should make the focused document in the middle of the results
     const backQuery = query.withPageSize(query.pageSize / 2 + 1)
     const backResults = await this.historicSearch(backQuery, cursor, !searchAfterAscending)
-    if (backResults.overview.length == 0) {
+    if (backResults.overview.length === 0) {
       return Promise.resolve(backResults)
     }
     const backCursor = backResults.overview[0].__cursor
@@ -227,10 +218,10 @@ export class Elasticsearch implements IDataSource {
     let stringQuery: any
 
     const extraTerms = query.enabledFilters()
-      .filter(f => f.type == FilterType.addTerms)
+      .filter(f => f.type === FilterType.addTerms)
       .filter(f => f.selected)
       .map(f => {
-        const item = f.items.find(i => i.id == f.selected)
+        const item = f.items.find(i => i.id === f.selected)
         if (!item) {
           throw new Error(`Could not find selected id: "${f.selected}" in filter ${f.id}`)
         }
@@ -271,7 +262,7 @@ export class Elasticsearch implements IDataSource {
     const filterQuery = []
     for (const filter of query.enabledFilters()) {
       // TODO: Work out why this is sometimes an empty string instead of undefined
-      if (filter.selected == undefined || filter.selected == "") {
+      if (filter.selected === undefined || filter.selected === "") {
         continue
       }
 
@@ -322,8 +313,8 @@ export class Elasticsearch implements IDataSource {
         const bulkGetPromise = this.bulkGet(index, type, ids as string[])
         allPromises.push(bulkGetPromise)
         hits
-          .filter(hit => hit._index == index)
-          .filter(hit => hit._type == type)
+          .filter(hit => hit._index === index)
+          .filter(hit => hit._type === type)
           .forEach(hit => hit._full = new Promise<LogMessage>(resolve => {
             bulkGetPromise.then(logMsgs => resolve(logMsgs.get(hit._id)))
           }))
@@ -355,7 +346,7 @@ export class Elasticsearch implements IDataSource {
     const url = this.url(`_search?size=0`, this.index)
     const search = this.historicRequest(query)
 
-    const unit = (interval.unit == "millisecond") ? "ms" : interval.unit[0]
+    const unit = (interval.unit === "millisecond") ? "ms" : interval.unit[0]
 
     search.aggs = {
       "n": {

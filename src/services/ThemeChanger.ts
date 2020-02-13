@@ -1,5 +1,5 @@
-import { Lookup } from "../helpers/lookup"
-import { Theme } from "./prefs"
+import { Lookup } from "../helpers/Lookup"
+import { Theme } from "./Prefs"
 
 export class ThemeChanger {
   private theme: Theme

@@ -1,5 +1,5 @@
-import { showContextButton } from "./log"
-import { Query } from "./query"
+import { showContextButton } from "./Log"
+import { Query } from "./Query"
 
 function parseHTML(html: string): HTMLDivElement {
   const el = document.createElement('div')

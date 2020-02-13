@@ -85,7 +85,7 @@ export class Logquacious {
 
     this.results = new Results(this.prefs.direction)
 
-    let fieldsConfig = this.dsFieldsConfig()
+    const fieldsConfig = this.dsFieldsConfig()
 
     this.results.attach(resultsElement, fieldsConfig, {
       getQuery: () => this.query,
@@ -103,13 +103,13 @@ export class Logquacious {
     this.themeChanger.setTheme(this.prefs.theme)
 
     window.onpopstate = () => {
-      let q = Query.load(this.config.filters)
+      const q = Query.load(this.config.filters)
       if (!q.equals(this.query)) {
         this.newSearch(q)
       }
     }
 
-    let empty = this.query.isEmpty()
+    const empty = this.query.isEmpty()
     if (!empty) {
       this.search(this.query, false, false)
     }
@@ -165,7 +165,7 @@ export class Logquacious {
       throw new Error('dsConfig is broken')
     }
 
-    let fieldsConfig = this.config.fields[dsConfig.fields]
+    const fieldsConfig = this.config.fields[dsConfig.fields]
     if (!fieldsConfig) {
       throw new Error(`dataSource field reference is invalid: dataSource.fields=${dsConfig.fields}`)
     }
@@ -273,8 +273,8 @@ export class Logquacious {
   private staggerAppend(logs: any, nextPage: boolean, nextPageOlder: boolean): Promise<void> {
     return new Promise(resolve => {
       let idx = 0
-      let chunkSize = 50
-      let length = logs.length
+      const chunkSize = 50
+      const length = logs.length
       if (nextPage && nextPageOlder) {
         logs.reverse()
       }

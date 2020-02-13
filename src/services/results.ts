@@ -152,7 +152,7 @@ export class Results {
   }
 
   updateMoreMarker(older: boolean, loading: boolean) {
-    let marker = this.getMarker(older)
+    const marker = this.getMarker(older)
     marker.hidden = false
     if (loading) {
       marker.innerText = "... Loading ..."
@@ -248,7 +248,7 @@ export class Results {
   }
 
   private swapDirection() {
-    let elements: Element[] = []
+    const elements: Element[] = []
     for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
       const chunk = this.logs.children[chunkIdx]
       for (let elmIdx = 0; elmIdx < chunk.children.length; elmIdx++) {
@@ -259,12 +259,12 @@ export class Results {
 
     this.clear()
     elements.reverse()
-    for (let elm of elements) {
+    for (const elm of elements) {
       this.addFragment(elm, Direction.Down)
     }
 
     // Scroll to an appropriate position so the same data is shown.
-    let y = this.logs.offsetHeight + this.logs.offsetTop - window.scrollY - window.innerHeight
+    const y = this.logs.offsetHeight + this.logs.offsetTop - window.scrollY - window.innerHeight
     this.scroll(y)
   }
 

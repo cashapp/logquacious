@@ -76,7 +76,7 @@ export class Picker extends Component<Props, State> {
       mode: "range",
       inline: true,
       onChange: (d) => {
-        let inputs = [...this.state.inputs] as InputRange
+        const inputs = [...this.state.inputs] as InputRange
 
         inputs[0] = Picker.whenToInput(Time.wrapDate(d[0]))
         this.isPicking = true
@@ -109,7 +109,7 @@ export class Picker extends Component<Props, State> {
   handleChangedText(endpoint: Endpoint, text: string) {
     const when = Time.parseText(text)
     const isValid = when != InvalidDate
-    let inputs = [...this.state.inputs] as InputRange
+    const inputs = [...this.state.inputs] as InputRange
     inputs[endpoint] = {
       when,
       text,
@@ -119,7 +119,7 @@ export class Picker extends Component<Props, State> {
   }
 
   handleNewRange = (delta: When) => {
-    let inputs = [...this.state.inputs] as InputRange
+    const inputs = [...this.state.inputs] as InputRange
     inputs[0].when = delta
     inputs[1].when = Now
     this.setState({inputs}, this.submit)

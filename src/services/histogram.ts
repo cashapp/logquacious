@@ -314,8 +314,8 @@ export class Histogram {
       return
     }
 
-    let y0 = this.scaleTime(range[0])
-    let y1 = this.scaleTime(range[1])
+    const y0 = this.scaleTime(range[0])
+    const y1 = this.scaleTime(range[1])
     const y = (y0 < y1) ? y0 : y1
     const height = Math.abs(y0 - y1)
 

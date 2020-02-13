@@ -16,7 +16,7 @@ class ElasticsearchException implements Error {
 // Result of a search.
 export interface Result {
   // Logs with the minimum fields required for display in the listing.
-  overview: Array<LogMessage>
+  overview: LogMessage[]
   // The full set of log fields. This is asynchronously loaded.
   full: Promise<Map<string, LogMessage>[]>
 }
@@ -80,7 +80,7 @@ interface SearchQuery {
 }
 
 interface ElasticsearchHits {
-  hits: Array<LogMessage>
+  hits: LogMessage[]
 }
 
 interface ElasticsearchResults {
@@ -96,7 +96,7 @@ type Index = string
 type Type = string
 type IdOrLogMsg = string | LogMessage
 
-type TypeIds = Map<Type, Array<IdOrLogMsg>>
+type TypeIds = Map<Type, IdOrLogMsg[]>
 
 type IndexTypeIds = Map<Index, TypeIds>
 
@@ -127,7 +127,7 @@ export class Elasticsearch implements IDataSource {
   }
 
   static async fetch<T>(url, method = "POST", body?: object): Promise<T> {
-    let request: RequestInit = {
+    const request: RequestInit = {
       method,
       credentials: 'include',
       headers: {
@@ -168,7 +168,7 @@ export class Elasticsearch implements IDataSource {
   }
 
   async historicSearch(query: Query, cursor?: Cursor, searchAfterAscending?: boolean): Promise<Result> {
-    let search = this.historicRequest(query)
+    const search = this.historicRequest(query)
     search.sort = [
       {
         [this.fieldsConfig.timestamp]: {
@@ -191,7 +191,7 @@ export class Elasticsearch implements IDataSource {
       return null
     }
 
-    let hits = data.hits.hits.map(r => this.normaliseLog(r))
+    const hits = data.hits.hits.map(r => this.normaliseLog(r))
 
     // We retrieve the data in descending order, but the app expects it to be in ascending order.
     if (searchAfterAscending !== true) {
@@ -199,7 +199,7 @@ export class Elasticsearch implements IDataSource {
     }
 
     // Shard request by index and doc type.
-    let idsByIndex: IndexTypeIds = new Map<Index, TypeIds>()
+    const idsByIndex: IndexTypeIds = new Map<Index, TypeIds>()
     hits.forEach(hit => {
       idsByIndex.set(hit._index, idsByIndex.get(hit._index) || new Map<Type, IdOrLogMsg[]>())
       idsByIndex.get(hit._index).set(hit._type, idsByIndex.get(hit._index).get(hit._type) || [])
@@ -207,7 +207,7 @@ export class Elasticsearch implements IDataSource {
     })
 
     const full = this.injectFinalPromise(hits, idsByIndex)
-    return {overview: hits, full: full}
+    return {overview: hits, full}
   }
 
   async surroundSearch(query: Query, cursor?: Cursor, searchAfterAscending?: boolean): Promise<Result> {
@@ -226,7 +226,7 @@ export class Elasticsearch implements IDataSource {
   private historicRequest(query: Query): SearchQuery {
     let stringQuery: any
 
-    let extraTerms = query.enabledFilters()
+    const extraTerms = query.enabledFilters()
       .filter(f => f.type == FilterType.addTerms)
       .filter(f => f.selected)
       .map(f => {
@@ -312,7 +312,7 @@ export class Elasticsearch implements IDataSource {
   }
 
   // Inject "_full" field into hits from async _mget.
-  private injectFinalPromise(hits: Array<LogMessage>, indexes: IndexTypeIds): Promise<Map<string, LogMessage>[]> {
+  private injectFinalPromise(hits: LogMessage[], indexes: IndexTypeIds): Promise<Map<string, LogMessage>[]> {
     if (hits.length === 0) {
       return Promise.resolve([])
     }
@@ -334,9 +334,9 @@ export class Elasticsearch implements IDataSource {
   }
 
   // Bulk get a set of documents.
-  async bulkGet(index: string, type: string, ids: Array<string>): Promise<Map<string, LogMessage>> {
+  async bulkGet(index: string, type: string, ids: string[]): Promise<Map<string, LogMessage>> {
     const url = this.url(`${type}/_mget`, index)
-    let request = {docs: ids.map(id => ({_id: id}))}
+    const request = {docs: ids.map(id => ({_id: id}))}
     const data = await Elasticsearch.fetch<LogMessages>(url, "POST", request)
     return new Map<string, LogMessage>(data.docs.map((doc: LogMessage) => [doc._id, this.normaliseLog(doc)]))
   }
@@ -353,7 +353,7 @@ export class Elasticsearch implements IDataSource {
 
   async histogram(query: Query, interval: IRelative, tz: string): Promise<HistogramResults> {
     const url = this.url(`_search?size=0`, this.index)
-    let search = this.historicRequest(query)
+    const search = this.historicRequest(query)
 
     const unit = (interval.unit == "millisecond") ? "ms" : interval.unit[0]
 

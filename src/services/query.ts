@@ -72,12 +72,12 @@ export class Query {
     }
 
     const q = new Query()
-    q.terms = result["q"]
-    q.pageSize = parseInt(result["n"]) || DefaultPageSize
-    q.startTime = result["t"] ? Time.parseText(result["t"]) : DefaultStartTime
-    q.endTime = result["u"] ? Time.parseText(result["u"]) : DefaultEndTime // u for until
-    q.focusCursor = result["cursor"]
-    q.focusId = result["id"]
+    q.terms = result.q
+    q.pageSize = parseInt(result.n) || DefaultPageSize
+    q.startTime = result.t ? Time.parseText(result.t) : DefaultStartTime
+    q.endTime = result.u ? Time.parseText(result.u) : DefaultEndTime // u for until
+    q.focusCursor = result.cursor
+    q.focusId = result.id
 
     let storageFilters: Map<string, string> = new Map<string, string>()
     if (options.storage) {

@@ -55,7 +55,7 @@ export interface ExpandedFormatField {
   current: string
   readonly indent: string,
   readonly query: () => Query
-  copyBag: Array<any>
+  copyBag: any[]
 }
 
 /**
@@ -102,8 +102,8 @@ export class LogFormatter {
 
   // Clean a log entry for display.
   private cleanLog(entry: LogMessage): any {
-    let out: LogMessage = {...entry}
-    delete out['__cursor']
+    const out: LogMessage = {...entry}
+    delete out.__cursor
     return out
   }
 
@@ -150,15 +150,15 @@ export class LogFormatter {
     // The expanded part is lazily rendered.
     let isExpandedRendered = false
 
-    let fragment = document.importNode(this.templateContent, true)
+    const fragment = document.importNode(this.templateContent, true)
     const el = fragment.firstElementChild as HTMLElement
     el.dataset.cursor = JSON.stringify(cursor)
     el.dataset.ts = entry[this.config.timestamp]
-    el.dataset.id = entry['_id']
+    el.dataset.id = entry._id
 
     let fields = ''
     for (const rule of this.config.collapsedFormatting) {
-      let value = entry[rule.field]
+      const value = entry[rule.field]
       if (value === undefined) {
         continue
       }
@@ -167,7 +167,7 @@ export class LogFormatter {
         current: value,
         classes: [],
         color: null,
-        entry: entry,
+        entry,
         tooltip: null,
       }
       for (const transform of rule.transforms) {
@@ -305,7 +305,7 @@ export class LogFormatter {
     return {funcName, data}
   }
 
-  renderExpandedRecursively(obj: any, copyBag: Array<any>, path: Array<string> = [], level = 0, cursor?: any): string {
+  renderExpandedRecursively(obj: any, copyBag: any[], path: string[] = [], level = 0, cursor?: any): string {
     const indent = makeIndent(level + 1)
     const lastIndent = makeIndent(level)
     const pathStr = path.join('.')
@@ -324,9 +324,9 @@ export class LogFormatter {
         const r = func({
           original: obj,
           current,
-          indent: indent,
+          indent,
           query: this._queryManipulator.getQuery,
-          copyBag: copyBag,
+          copyBag,
         })
         current = r.current
       })
@@ -341,7 +341,7 @@ export class LogFormatter {
         return '[]'
       }
 
-      let collapse = path.length !== 0
+      const collapse = path.length !== 0
       let ret = '[' + copyToClipboardButton(obj, copyBag)
       obj.forEach((v) => {
         ret += `\n${indent}`
@@ -359,7 +359,7 @@ export class LogFormatter {
       if (keys.length == 0) {
         return '{}'
       }
-      let collapse = path.length !== 0
+      const collapse = path.length !== 0
       let ret = '{' + copyToClipboardButton(obj, copyBag)
 
       if (level == 0) {
@@ -400,7 +400,7 @@ export class LogFormatter {
     return v
   }
 
-  shouldShowLinks(path: Array<string>): boolean {
+  shouldShowLinks(path: string[]): boolean {
     const joinedPath = path.join('.')
     if (this.config.maxDepthForLinks == undefined) {
       return true
@@ -412,7 +412,7 @@ export class LogFormatter {
   }
 
   static toLogfmt(entry: Object): string {
-    let parts = []
+    const parts = []
     const keys = Object.keys(entry).sort()
     for (const k of keys) {
       let v = entry[k]
@@ -530,7 +530,7 @@ function randomStableColor(): CollapsedTransform {
 // Random hash algorithm copied from https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript
 // to generate a random enough number for colors
 function xmur3(str: string): number {
-  for (var i = 0, h = 1779033703 ^ str.length; i < str.length; i++)
+  for (let i = 0, h = 1779033703 ^ str.length; i < str.length; i++)
     h = Math.imul(h ^ str.charCodeAt(i), 3432918353),
       h = h << 13 | h >>> 19
   h = Math.imul(h ^ h >>> 16, 2246822507)
@@ -554,13 +554,13 @@ function nestedCollapseTemplate(placeholder: string, collapsed: string): string 
   return `<span class="show-nested toggle">${placeholder}</span><span class="is-hidden"><span class="hide-nested toggle">[collapse]</span> ${collapsed}</span>`
 }
 
-export function copyToClipboardButton(v: any, copyBag: Array<any>): string {
+export function copyToClipboardButton(v: any, copyBag: any[]): string {
   // Save the reference to the value to the next index in the array, and track index in "data-copy"
   copyBag.push(v)
   return `<a><span class="icon context-button copy-button tooltip is-tooltip-right" data-tooltip="Copy value to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-content-copy"></i></span></a>`
 }
 
-export function linkToClipboardButton(cursor: any, copyBag: Array<any>): string {
+export function linkToClipboardButton(cursor: any, copyBag: any[]): string {
   copyBag.push(cursor)
   return `<a><span class="icon context-button link-button tooltip is-tooltip-right" data-tooltip="Copy sharable link to clipboard" data-copy="${copyBag.length - 1}"><i class="mdi mdi-link"></i></span></a>`
 }

@@ -100,8 +100,8 @@ export class Time {
   static wrapRelative(count: number, unit: unitOfTime.Base): When {
     return {
       kind: "relative",
-      count: count,
-      unit: unit,
+      count,
+      unit,
     }
   }
 

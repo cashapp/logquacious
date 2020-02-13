@@ -23,7 +23,7 @@ export function prepareApp(app?: Logquacious) {
 
 // Find all the log elements from top to bottom, flattening chunks.
 export function resultsFlatten() {
-  let results = []
+  const results = []
   const logs = Lookup.element("#logs")
   for (let chunkIdx = 0; chunkIdx < logs.children.length; chunkIdx++) {
     for (let entryIdx = 0; entryIdx < logs.children[chunkIdx].children.length; entryIdx++) {

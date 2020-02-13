@@ -8,7 +8,7 @@ interface Props {
 
 export class Button extends Component<Props> {
   render() {
-    let {active, onClick, children} = this.props
+    const {active, onClick, children} = this.props
     if (active === true || active === undefined) {
       return <button class="button" onclick={onClick}>{children}</button>
     } else {

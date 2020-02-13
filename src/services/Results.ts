@@ -72,14 +72,13 @@ export class Results {
         this.scroll(0)
         break
       default:
-        console.error("Unknown direction", this.direction)
-        break
+        throw new Error(`Unknown direction: ${this.direction}`)
     }
   }
 
   addFragment(fragment, direction: Direction) {
-    if (direction != this.currentChunkDirection) {
-      if (this.stats.visible == 0) {
+    if (direction !== this.currentChunkDirection) {
+      if (this.stats.visible === 0) {
         this.currentChunkDirection = direction
       } else {
         this.newChunk(direction)
@@ -138,7 +137,7 @@ export class Results {
   }
 
   isOlderAtTop(older: boolean): boolean {
-    return ((older && this.direction == Direction.Down) || (!older && this.direction == Direction.Up))
+    return ((older && this.direction === Direction.Down) || (!older && this.direction === Direction.Up))
   }
 
   getMarker(older: boolean): HTMLElement {
@@ -185,7 +184,7 @@ export class Results {
     for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
       const chunk = this.logs.children[chunkIdx]
       for (let rowIdx = 0; rowIdx < chunk.children.length; rowIdx++) {
-        if (idx == 0) {
+        if (idx === 0) {
           return chunk.children[rowIdx] as HTMLElement
         }
         idx--
@@ -239,7 +238,7 @@ export class Results {
   }
 
   setDirection(direction: Direction) {
-    if (this.direction == direction) {
+    if (this.direction === direction) {
       return
     }
 
@@ -280,7 +279,7 @@ export class Results {
   }
 
   restoreScroll(older: boolean) {
-    if (this.savedScrollEntry == undefined || this.savedScrollEntry.scrollIntoView == undefined) {
+    if (this.savedScrollEntry === undefined || this.savedScrollEntry.scrollIntoView === undefined) {
       return
     }
 
@@ -299,7 +298,7 @@ export class Results {
   }
 
   getRange(): [Date, Date] {
-    if (this.stats.visible == 0) {
+    if (this.stats.visible === 0) {
       return undefined
     }
 
@@ -310,7 +309,7 @@ export class Results {
   }
 
   getVisibleRange(): [Date, Date] {
-    if (this.stats.visible == 0) {
+    if (this.stats.visible === 0) {
       return undefined
     }
 
@@ -336,7 +335,7 @@ export class Results {
   }
 
   focusID(id: string) {
-    const e = this.find((e: HTMLElement) => e.dataset.id == id)
+    const e = this.find((e: HTMLElement) => e.dataset.id === id)
     if (!e) {
       console.error(`Could not find id ${id} in results.`)
       return

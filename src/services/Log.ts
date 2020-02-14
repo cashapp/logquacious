@@ -521,21 +521,22 @@ function randomStableColor(): CollapsedTransform {
       return field
     }
     const RAINBOW_RANGE = 20
-    const idx = xmur3(field.original) % RAINBOW_RANGE
+    const idx = simpleHash(field.original) % RAINBOW_RANGE
     field.classes.push(`rainbow-${idx}`)
     return field
   }
 }
 
-// Random hash algorithm copied from https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript
-// to generate a random enough number for colors
-function xmur3(str: string): number {
-  for (let i = 0, h = 1779033703 ^ str.length; i < str.length; i++)
-    h = Math.imul(h ^ str.charCodeAt(i), 3432918353),
-      h = h << 13 | h >>> 19
-  h = Math.imul(h ^ h >>> 16, 2246822507)
-  h = Math.imul(h ^ h >>> 13, 3266489909)
-  return (h ^= h >>> 16) >>> 0
+// https://stackoverflow.com/a/8831937/11125
+function simpleHash(str: string): number {
+  let hash = 0, i, chr
+  if (str.length === 0) return hash
+  for (i = 0; i < str.length; i++) {
+    chr = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + chr
+    hash |= 0 // Convert to 32bit integer
+  }
+  return Math.abs(hash)
 }
 
 function isObject(obj: any): boolean {

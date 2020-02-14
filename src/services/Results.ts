@@ -160,9 +160,7 @@ export class Results {
   }
 
   getTopEntry(): HTMLElement {
-    this.logs.childNodes
-    // for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
-    for (let chunk of this.logs.children) {
+    for (const chunk of this.logs.children) {
       if (chunk.children.length > 0) {
         return chunk.children[0] as HTMLElement
       }
@@ -171,8 +169,7 @@ export class Results {
   }
 
   getBottomEntry(): HTMLElement {
-    for (let chunkIdx = this.logs.children.length - 1; chunkIdx >= 0; chunkIdx--) {
-      const chunk = this.logs.children[chunkIdx]
+    for (const chunk of this.logs.children) {
       if (chunk.children.length > 0) {
         return chunk.children[chunk.children.length - 1] as HTMLElement
       }
@@ -181,11 +178,10 @@ export class Results {
   }
 
   getEntryAt(idx: number): HTMLElement {
-    for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
-      const chunk = this.logs.children[chunkIdx]
-      for (let rowIdx = 0; rowIdx < chunk.children.length; rowIdx++) {
+    for (const chunk of this.logs.children) {
+      for (const row of chunk.children) {
         if (idx === 0) {
-          return chunk.children[rowIdx] as HTMLElement
+          return row as HTMLElement
         }
         idx--
       }
@@ -194,12 +190,10 @@ export class Results {
   }
 
   find(predicate: (e: HTMLElement) => boolean): HTMLElement {
-    for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
-      const chunk = this.logs.children[chunkIdx]
-      for (let rowIdx = 0; rowIdx < chunk.children.length; rowIdx++) {
-        const element = chunk.children[rowIdx] as HTMLElement
-        if (predicate(element)) {
-          return element
+    for (const chunk of this.logs.children) {
+      for (const row of chunk.children) {
+        if (predicate(row as HTMLElement)) {
+          return row as HTMLElement
         }
       }
     }
@@ -232,8 +226,7 @@ export class Results {
         this.logs.insertBefore(this.chunk, this.logs.children[0])
         break
       default:
-        console.error("Unknown direction", direction)
-        break
+        throw new Error(`Unknown direction ${direction}`)
     }
   }
 
@@ -248,11 +241,9 @@ export class Results {
 
   private swapDirection() {
     const elements: Element[] = []
-    for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
-      const chunk = this.logs.children[chunkIdx]
-      for (let elmIdx = 0; elmIdx < chunk.children.length; elmIdx++) {
-        const elm = chunk.children[elmIdx]
-        elements.push(elm)
+    for (const chunk of this.logs.children) {
+      for (const row of chunk.children) {
+        elements.push(row as HTMLElement)
       }
     }
 
@@ -269,7 +260,6 @@ export class Results {
 
   private scroll(y: number) {
     window.scrollTo(window.scrollX, y)
-    // this.app.globalInput.didSetScroll()
   }
 
   saveScroll(older: boolean) {
@@ -335,8 +325,9 @@ export class Results {
   }
 
   focusID(id: string) {
-    const e = this.find((e: HTMLElement) => e.dataset.id === id)
+    const e = this.find((elm: HTMLElement) => elm.dataset.id === id)
     if (!e) {
+      // tslint:disable-next-line:no-console
       console.error(`Could not find id ${id} in results.`)
       return
     }

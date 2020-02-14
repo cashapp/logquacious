@@ -525,11 +525,16 @@ function randomStableColor(): CollapsedTransform {
 
 // https://stackoverflow.com/a/8831937/11125
 function simpleHash(str: string): number {
-  let hash = 0, i, chr
-  if (str.length === 0) return hash
-  for (i = 0; i < str.length; i++) {
-    chr = str.charCodeAt(i)
+  let hash = 0
+  if (str.length === 0) {
+    return 0
+  }
+  // tslint:disable-next-line:no-bitwise
+  for (let i = 0; i < str.length; i++) {
+    const chr = str.charCodeAt(i)
+    // tslint:disable-next-line:no-bitwise
     hash = ((hash << 5) - hash) + chr
+    // tslint:disable-next-line:no-bitwise
     hash |= 0 // Convert to 32bit integer
   }
   return Math.abs(hash)
@@ -566,14 +571,14 @@ export function linkToClipboardButton(cursor: any, copyBag: any[]): string {
 // Modified to include elasticsearch "searchable" replacement key
 function flatten(obj) {
   const res = {};
-  (function recurse(obj, current, currentNonIndexKey) {
-    for (const key in obj) {
+  (function recurse(o, current, currentNonIndexKey) {
+    for (const key of Object.keys(o)) {
       // XXX: Sometimes key is an index of an array, rather than a key of an object.
       // XXX: This number will have to be stripped when filtering in ES.
-      const value = obj[key]
+      const value = o[key]
       const newKey = (current ? current + "." + key : key)  // joined key with dot
       let newNonIndexKey
-      if (Array.isArray(obj)) {
+      if (Array.isArray(o)) {
         newNonIndexKey = (currentNonIndexKey ? currentNonIndexKey : "")
       } else {
         newNonIndexKey = (currentNonIndexKey ? currentNonIndexKey + `.${key}` : key)
@@ -664,7 +669,7 @@ function javaException(config: JavaExceptionConfig): ExpandedTransform {
 }
 
 function shortenJavaFqcn(): CollapsedTransform {
-  return function (field: CollapsedFormatField): CollapsedFormatField {
+  return (field: CollapsedFormatField): CollapsedFormatField => {
     if (!/^\w+(\.\w+)+$/.test(field.original)) {
       // Only format Java class names
       return field
@@ -678,7 +683,7 @@ function shortenJavaFqcn(): CollapsedTransform {
   }
 }
 
-export const collapsedTransformers: { [key: string]: (any) => CollapsedTransform } = {
+export const collapsedTransformers: { [key: string]: (_: any) => CollapsedTransform } = {
   timestamp,
   upperCase,
   mapValue,
@@ -689,6 +694,6 @@ export const collapsedTransformers: { [key: string]: (any) => CollapsedTransform
   shortenJavaFqcn,
 }
 
-export const expandedTransformers: { [key: string]: (any) => ExpandedTransform } = {
+export const expandedTransformers: { [key: string]: (_: any) => ExpandedTransform } = {
   javaException,
 }

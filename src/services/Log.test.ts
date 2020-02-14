@@ -18,6 +18,7 @@ describe('log', () => {
       getQuery: () => {
         return new Query()
       },
+      // tslint:disable-next-line:no-empty
       changeQuery: () => {
       },
       getFilters: () => {

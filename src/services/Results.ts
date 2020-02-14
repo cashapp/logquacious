@@ -93,7 +93,7 @@ export class Results {
         this.chunk.insertBefore(fragment, this.chunk.children[0])
         break
       default:
-        console.error("Unknown direction", direction)
+        throw new Error(`Unknown direction: ${direction}`)
     }
 
     this.stats.visible++
@@ -108,8 +108,7 @@ export class Results {
           this.logs.removeChild(this.logs.children[this.logs.children.length - 1])
           break
         default:
-          console.error("Unknown direction", direction)
-          break
+          throw new Error(`Unknown direction: ${direction}`)
       }
       this.stats.visible -= this.maxChunkSize
     }
@@ -161,8 +160,9 @@ export class Results {
   }
 
   getTopEntry(): HTMLElement {
-    for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
-      const chunk = this.logs.children[chunkIdx]
+    this.logs.childNodes
+    // for (let chunkIdx = 0; chunkIdx < this.logs.children.length; chunkIdx++) {
+    for (let chunk of this.logs.children) {
       if (chunk.children.length > 0) {
         return chunk.children[0] as HTMLElement
       }

@@ -1,6 +1,6 @@
 import { Component } from "inferno"
 import { Time } from "../../helpers/Time"
-import { InputInfo } from "./picker"
+import { InputInfo } from "./Picker"
 
 interface Props {
   value: InputInfo

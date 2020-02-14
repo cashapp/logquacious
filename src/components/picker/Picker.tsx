@@ -1,11 +1,11 @@
 import { Component } from "inferno"
 import { Endpoint, InvalidDate, Now, Range, Time, When } from "../../helpers/Time"
-import { PickerTextInput } from "./pickerTextInput"
-import { PickerRangeButton } from "./pickerRangeButton"
+import { PickerTextInput } from "./PickerTextInput"
+import { PickerRangeButton } from "./PickerRangeButton"
 import { Button } from "../Button"
 import flatpickr from "flatpickr"
-import { MenuItem } from "../Menu/MenuItem"
-import { MenuDropdown } from "../Menu/MenuDropDown"
+import { MenuItem } from "../menu/MenuItem"
+import { MenuDropdown } from "../menu/MenuDropDown"
 
 export type ChangeRangeCallback = (range: Range) => void
 

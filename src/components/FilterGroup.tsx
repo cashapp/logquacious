@@ -1,11 +1,11 @@
 import { Component, Fragment } from "inferno"
 import { Filter } from "./App"
 import { ChangeFilterCallback } from "./FilterDropdown"
-import { MenuField } from "./Menu/MenuField"
-import { MenuItem } from "./Menu/MenuItem"
-import { MenuTitle } from "./Menu/MenuTitle"
-import { MenuDivider } from "./Menu/MenuDivider"
-import { MenuRadio } from "./Menu/MenuRadio"
+import { MenuField } from "./menu/MenuField"
+import { MenuItem } from "./menu/MenuItem"
+import { MenuTitle } from "./menu/MenuTitle"
+import { MenuDivider } from "./menu/MenuDivider"
+import { MenuRadio } from "./menu/MenuRadio"
 
 type Props = {
   onChange: ChangeFilterCallback

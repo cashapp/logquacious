@@ -37,7 +37,7 @@ export class SearchBar extends Component<Props, any> {
   }
 
   handleSearchKeyPressed = e => {
-    if (e.key == "Enter") {
+    if (e.key === "Enter") {
       this.handleSubmit()
     }
   }

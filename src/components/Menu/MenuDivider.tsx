@@ -1,0 +1,1 @@
+export const MenuDivider = () => <hr class="navbar-divider"/>

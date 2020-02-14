@@ -5,14 +5,15 @@ import { AttachHistogramCallback, Histogram } from "./Histogram"
 import { Logquacious } from "../services/Logquacious"
 import { Query } from "../services/Query"
 import { ChangeFilterCallback, FilterDropdown, FilterItem } from "./FilterDropdown"
-import { ChangeSettingCallback, MenuSetting } from "./MenuSetting"
+import { ChangeSettingCallback, MenuSetting } from "./Menu/MenuSetting"
 import { Direction, Theme } from "../services/Prefs"
 import { Welcome } from "./Welcome"
 import { Error } from "./Error"
 import { Title } from "./Title"
 import { SearchBar, SearchBarCallback } from "./SearchBar"
-import { Menu } from "./menu"
 import { ChangeRangeCallback, Picker } from "./picker/picker"
+import { MenuTitle } from "./Menu/MenuTitle"
+import { MenuDropdown } from "./Menu/MenuDropDown"
 
 export type AttachResultsCallback = (el: HTMLElement) => void
 export type DisplayCallback = (d: Display, errorMessage?: string) => void
@@ -127,8 +128,8 @@ export class App extends Component<Props, State> {
             onChange={this.handleTimeRangeChanged}
           />
 
-          <Menu.Dropdown title="Menu" isActive="auto">
-            <Menu.Title>Settings</Menu.Title>
+          <MenuDropdown title="Menu" isActive="auto">
+            <MenuTitle>Settings</MenuTitle>
             <MenuSetting
               onChange={this.handleThemeChanged}
               setting="theme"
@@ -145,7 +146,7 @@ export class App extends Component<Props, State> {
               on={{title: "Up", value: Direction.Up}}
               off={{title: "Down", value: Direction.Down}}
             />
-          </Menu.Dropdown>
+          </MenuDropdown>
 
           <div id="stats-area" class="log-stats"/>
           <progress id="loading" class="progress is-info log-progress"/>

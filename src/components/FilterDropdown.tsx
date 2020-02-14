@@ -1,7 +1,7 @@
 import { Component } from "inferno"
 import { FilterGroup } from "./FilterGroup"
-import { Menu } from "./menu"
 import { Filter } from "./App"
+import { MenuDropdown } from "./Menu/MenuDropDown"
 
 export type ChangeFilterCallback = (filter: string, item: string) => void
 
@@ -33,9 +33,9 @@ export class FilterDropdown extends Component<Props> {
       .join(", ")
 
     return (
-      <Menu.Dropdown title={active} isActive="auto">
+      <MenuDropdown title={active} isActive="auto">
         {items}
-      </Menu.Dropdown>
+      </MenuDropdown>
     )
   }
 }

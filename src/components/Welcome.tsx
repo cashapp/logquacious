@@ -4,9 +4,13 @@ interface Props {
   visible: boolean
 }
 
-class DefaultWelcome extends Component {
+export class Welcome extends Component<Props> {
   render() {
-    return <article class="message">
+    if (!this.props.visible) {
+      return null
+    }
+
+    return <article id="log-welcome" class="message">
       <div class="message-header">
         <p>Welcome to Logquacious!</p>
       </div>
@@ -59,22 +63,3 @@ class DefaultWelcome extends Component {
   }
 }
 
-export class Welcome extends Component<Props> {
-  render() {
-    let Welcome = <DefaultWelcome/>
-    try {
-      const CustomWelcome = require('../../custom/welcome').default
-      Welcome = <CustomWelcome/>
-    } catch (ex) {
-      if (ex.code != "MODULE_NOT_FOUND") {
-        throw ex
-      }
-    }
-
-    return (
-      <section id="log-welcome" class={`section ${this.props.visible ? "" : "is-hidden"}`}>
-        {Welcome}
-      </section>
-    )
-  }
-}

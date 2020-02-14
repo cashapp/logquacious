@@ -2,7 +2,7 @@ export class Lookup {
   static element<E extends Element = Element>(selector: string): E {
     const elm = document.querySelector(selector) as E;
     if (elm === null) {
-      console.error('Could not find element', selector)
+      throw new Error(`Could not find element: ${selector}`)
     }
     return elm
   }

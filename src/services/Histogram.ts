@@ -102,7 +102,7 @@ export class Histogram {
   async search(query: Query) {
     this.calculateSizes()
     const when = this.calculateBucketSize(query)
-    this.interval = when.kind == "relative" && when as IRelative
+    this.interval = when.kind === "relative" && when as IRelative
     this.update(query, await this.es.histogram(query, this.interval, Intl.DateTimeFormat().resolvedOptions().timeZone))
   }
 
@@ -204,7 +204,7 @@ export class Histogram {
     this.scaleTime = d3.scaleTime()
       .domain([this.query.startTime, this.query.endTime].map(Time.whenToDate)).nice()
 
-    if (this.direction == Direction.Down) {
+    if (this.direction === Direction.Down) {
       this.scaleTime.range([0, this.innerSize.height])
     } else {
       this.scaleTime.range([this.innerSize.height, 0])
@@ -251,17 +251,17 @@ export class Histogram {
   }
 
   private updateChart() {
-    if (this.buckets.length == 0) {
-      const chart = this.chart
+    if (this.buckets.length === 0) {
+      const c = this.chart
         .selectAll("rect")
         .data(this.buckets)
-      chart.exit().remove()
+      c.exit().remove()
       return
     }
 
     // For some reason d3.scaleBand overlaps bars in millisecond intervals,
     // so we fall back to using d3.scaleTime.
-    const isScaleBand = (this.interval.unit != "millisecond")
+    const isScaleBand = (this.interval.unit !== "millisecond")
     const barStep = (isScaleBand) ?
       this.scaleBand.step() :
       Math.abs(this.scaleTime(this.buckets[0].date) - this.scaleTime(this.buckets[this.buckets.length - 1].date)) / this.buckets.length
@@ -270,10 +270,10 @@ export class Histogram {
       el.attr('x', this.margin.left)
         .attr('width', d => this.valueScale(d.count))
         .attr('y', d => {
-          const scale = (this.interval.unit == "millisecond") ? this.scaleTime : this.scaleBand
+          const scale = (this.interval.unit === "millisecond") ? this.scaleTime : this.scaleBand
           const y = scale(d.date) + this.margin.top
           d.y = y
-          if (this.direction == Direction.Down) {
+          if (this.direction === Direction.Down) {
             d.y += barStep
           }
           return y
@@ -309,7 +309,7 @@ export class Histogram {
   }
 
   private rangeBox(el, range?: [Date, Date]) {
-    if (range === undefined || this.scaleTime == undefined) {
+    if (range === undefined || this.scaleTime === undefined) {
       el.style('visibility', 'hidden')
       return
     }
@@ -392,7 +392,7 @@ export class Histogram {
   }
 
   mouseEventInfo(): [Date, BucketInfo] {
-    if (this.scaleTime == undefined) {
+    if (this.scaleTime === undefined) {
       return [undefined, undefined]
     }
 
@@ -401,9 +401,9 @@ export class Histogram {
     // 3 is some sort of magic number i don't know where it's coming from
     // It helps align the mouse position to the actual position in the time scale
     const ts = this.scaleTime.invert(relY - this.margin.top - 3)
-    const bucket = this.buckets.find(bucket => {
-      const found = bucket.y > relY
-      return this.direction == Direction.Down ? found : !found
+    const bucket = this.buckets.find(b => {
+      const found = b.y > relY
+      return this.direction === Direction.Down ? found : !found
     })
 
     return [ts, bucket]
@@ -412,7 +412,7 @@ export class Histogram {
   mouseMove = () => {
     const height = this.tooltip.node().getBoundingClientRect().height
     const [ts, bucket] = this.mouseEventInfo()
-    if (ts == undefined) {
+    if (ts === undefined) {
       this.tooltipVisible(false)
       this.hoverBucket(undefined)
       return
@@ -424,7 +424,7 @@ export class Histogram {
     if (this.isDragging) {
       let startDate = this.drag[0]
       let endDate = this.drag[1]
-      if (this.direction == Direction.Up) {
+      if (this.direction === Direction.Up) {
         [startDate, endDate] = [endDate, startDate]
       }
       if (startDate.getTime() > endDate.getTime()) {
@@ -442,7 +442,7 @@ export class Histogram {
     } else {
       this.hoverBucket(bucket)
 
-      if (bucket == undefined) {
+      if (bucket === undefined) {
         this.tooltipVisible(false)
         return
       }
@@ -466,14 +466,14 @@ export class Histogram {
   }
 
   private hoverBucket(bucket: BucketInfo) {
-    if (this.hoveringBucket == bucket) {
+    if (this.hoveringBucket === bucket) {
       return
     }
-    if (this.hoveringBucket != undefined) {
+    if (this.hoveringBucket !== undefined) {
       // TODO: Move this out of Bucket into its own type, similar to "date".
       this.hoveringBucket.hovering = false
     }
-    if (bucket != undefined) {
+    if (bucket !== undefined) {
       bucket.hovering = true
     }
     this.hoveringBucket = bucket
@@ -523,7 +523,7 @@ function nFormatter(num, digits) {
       break
     }
   }
-  if (i == 0) {
+  if (i === 0) {
     digits = 0
   }
   return (num / si[i].value).toFixed(digits) + si[i].symbol

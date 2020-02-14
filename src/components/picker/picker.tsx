@@ -1,10 +1,11 @@
 import { Component } from "inferno"
 import { Endpoint, InvalidDate, Now, Range, Time, When } from "../../helpers/Time"
 import { PickerTextInput } from "./pickerTextInput"
-import { Menu } from "../menu"
 import { PickerRangeButton } from "./pickerRangeButton"
 import { Button } from "../Button"
 import flatpickr from "flatpickr"
+import { MenuItem } from "../Menu/MenuItem"
+import { MenuDropdown } from "../Menu/MenuDropDown"
 
 export type ChangeRangeCallback = (range: Range) => void
 
@@ -80,7 +81,7 @@ export class Picker extends Component<Props, State> {
 
         inputs[0] = Picker.whenToInput(Time.wrapDate(d[0]))
         this.isPicking = true
-        if (d.length == 2) {
+        if (d.length === 2) {
           this.isPicking = false
           inputs[1] = Picker.whenToInput(Time.wrapDate(d[1]))
         }
@@ -101,14 +102,14 @@ export class Picker extends Component<Props, State> {
   handleStartText = (e: Event) => this.handleChangedText(Endpoint.Start, (e.target as HTMLInputElement).value)
   handleEndText = (e: Event) => this.handleChangedText(Endpoint.End, (e.target as HTMLInputElement).value)
   handleKeyPress = (e: KeyboardEvent) => {
-    if (e.key == "Enter") {
+    if (e.key === "Enter") {
       this.submit()
     }
   }
 
   handleChangedText(endpoint: Endpoint, text: string) {
     const when = Time.parseText(text)
-    const isValid = when != InvalidDate
+    const isValid = when !== InvalidDate
     const inputs = [...this.state.inputs] as InputRange
     inputs[endpoint] = {
       when,
@@ -156,14 +157,14 @@ export class Picker extends Component<Props, State> {
     const humanRange = validRange ? Time.getRangeHuman(diff) : "Invalid range"
 
     return (
-      <Menu.Dropdown
+      <MenuDropdown
         title="Time"
         extraDropdownClass="time-picker"
         isActive={this.state.isActive}
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
       >
-        <Menu.Item id="time-picker-dropdown">
+        <MenuItem id="time-picker-dropdown">
           <div class="columns">
             <div class="column is-narrow">
               <h1 class="title is-6">Picker</h1>
@@ -220,8 +221,8 @@ export class Picker extends Component<Props, State> {
               </div>
             </div>
           </div>
-        </Menu.Item>
-      </Menu.Dropdown>
+        </MenuItem>
+      </MenuDropdown>
     )
   }
 }

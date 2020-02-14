@@ -18,7 +18,7 @@ export class PickerRangeButton extends Component<Props> {
 
   render() {
     const whenStr = JSON.stringify(Time.parseText("-" + this.props.delta))
-    const selected = JSON.stringify(this.props.range[Endpoint.Start]) == whenStr && this.props.range[Endpoint.End] == Now
+    const selected = JSON.stringify(this.props.range[Endpoint.Start]) === whenStr && this.props.range[Endpoint.End] === Now
     return (
       <button class={`button ${selected ? "is-info" : ""}`} onclick={this.handleClick}>{this.props.delta}</button>
     )

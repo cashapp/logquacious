@@ -11,8 +11,11 @@ export async function loadConfig() {
     const manager = new Logquacious(await resp.json())
     render(<App log={manager}/>, app)
   } catch (e) {
+    // tslint:disable-next-line:no-console
     console.log(e)
+    // tslint:disable-next-line:no-console
     console.error("Could not load config.json. Please place it in the same path as index.html.")
+
     render((
       <Error message={`There was an error loading config.json: ${e}`} visible={true}/>
     ), app)

@@ -1,0 +1,1 @@
+export const MenuField = ({children}) => <div class="field">{children}</div>

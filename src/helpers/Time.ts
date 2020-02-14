@@ -53,7 +53,7 @@ export class Time {
   // Shows something like 99y 11M 25d 7h 12m 30s.
   // Does not handle leap years very well.
   static getRangeHuman(d: moment.Duration, maxSignificantIntervals?: number): string {
-    if (d == undefined) {
+    if (d === undefined) {
       return ""
     }
 
@@ -123,7 +123,7 @@ export class Time {
 
   static whenToMoment(when: When): moment.Moment | null {
     const d = Time.whenToDate(when)
-    if (d == null) {
+    if (d === null) {
       return null
     }
 
@@ -166,7 +166,7 @@ export class Time {
   }
 
   static whenToDuration(when: When): moment.Duration {
-    if (when.kind != "relative") {
+    if (when.kind !== "relative") {
       throw new Error(`${when.kind} not supported yet`)
     }
 

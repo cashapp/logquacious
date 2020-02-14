@@ -1,5 +1,5 @@
 import { Component, Fragment } from "inferno"
-import { Menu } from "./menu"
+import { MenuCheckBox } from "./MenuCheckBox"
 
 export type ChangeSettingCallback<T> = (value: T) => void
 
@@ -25,7 +25,7 @@ export class MenuSetting<T> extends Component<Props<T>, any> {
     const info = checked ? this.props.on : this.props.off
     const title = <Fragment>{this.props.title}: <b>{info.title}</b></Fragment>
     return (
-      <Menu.Checkbox id={this.props.setting} onChange={this.onChange} checked={checked}>{title}</Menu.Checkbox>
+      <MenuCheckBox id={this.props.setting} onChange={this.onChange} checked={checked}>{title}</MenuCheckBox>
     )
   }
 }

@@ -1,7 +1,11 @@
 import { Component, Fragment } from "inferno"
-import { Menu } from "./menu"
 import { Filter } from "./App"
 import { ChangeFilterCallback } from "./FilterDropdown"
+import { MenuField } from "./Menu/MenuField"
+import { MenuItem } from "./Menu/MenuItem"
+import { MenuTitle } from "./Menu/MenuTitle"
+import { MenuDivider } from "./Menu/MenuDivider"
+import { MenuRadio } from "./Menu/MenuRadio"
 
 type Props = {
   onChange: ChangeFilterCallback
@@ -17,19 +21,19 @@ export class FilterGroup extends Component<Props> {
       const id = `${filter.id}-${item.id}`
       const checked = (filter.selected === item.id) || (!filter.selected && !item.id)
       return (
-        <Menu.Radio id={id} name={item.id} onChange={this.onChange} checked={checked}>{item.title}</Menu.Radio>
+        <MenuRadio id={id} name={item.id} onChange={this.onChange} checked={checked}>{item.title}</MenuRadio>
       )
     })
 
     return (
       <Fragment>
-        <Menu.Title>{filter.title}</Menu.Title>
-        <Menu.Item>
-          <Menu.Field>
+        <MenuTitle>{filter.title}</MenuTitle>
+        <MenuItem>
+          <MenuField>
             {items}
-          </Menu.Field>
-        </Menu.Item>
-        <Menu.Divider/>
+          </MenuField>
+        </MenuItem>
+        <MenuDivider/>
       </Fragment>
     )
   }

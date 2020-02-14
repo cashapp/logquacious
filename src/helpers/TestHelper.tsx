@@ -1,4 +1,3 @@
-// @ts-ignore
 import HTML from "../../index.html"
 import { Lookup } from "./Lookup"
 import { App } from "../components/App"
@@ -25,9 +24,9 @@ export function prepareApp(app?: Logquacious) {
 export function resultsFlatten() {
   const results = []
   const logs = Lookup.element("#logs")
-  for (let chunkIdx = 0; chunkIdx < logs.children.length; chunkIdx++) {
-    for (let entryIdx = 0; entryIdx < logs.children[chunkIdx].children.length; entryIdx++) {
-      results.push(logs.children[chunkIdx].children[entryIdx])
+  for (const chunk of logs.children) {
+    for (const entry of chunk.children) {
+      results.push(entry)
     }
   }
   return results

@@ -79,7 +79,8 @@ export class LogFormatter {
   private _queryManipulator: QueryManipulator
 
   constructor(config: FieldsConfig) {
-    if (config == undefined) {
+    if (config === undefined) {
+      // tslint:disable-next-line:no-console
       console.warn("fieldsConfig is not set")
       // @ts-ignore
       config = {}
@@ -108,7 +109,7 @@ export class LogFormatter {
   }
 
   private safeHTML(entry: any, recursive: boolean): any {
-    if (typeof entry == "string") {
+    if (typeof entry === "string") {
       return escape(entry)
     }
     if (!recursive) {
@@ -120,7 +121,7 @@ export class LogFormatter {
     }
 
     entry = {...entry}
-    for (const key in entry) {
+    for (const key of Object.keys(entry)) {
       entry[key] = this.safeHTML(entry[key], true)
     }
     return entry
@@ -294,8 +295,9 @@ export class LogFormatter {
   }
 
   private getTransformData(transform: string | object) {
-    let funcName, data
-    if (typeof transform == "string") {
+    let funcName
+    let data
+    if (typeof transform === "string") {
       funcName = transform
       data = {}
     } else {
@@ -314,7 +316,7 @@ export class LogFormatter {
     let current = obj
 
     this.config.expandedFormatting.forEach(rule => {
-      if (rule.field != pathStr) {
+      if (rule.field !== pathStr) {
         return undefined
       }
 
@@ -332,7 +334,7 @@ export class LogFormatter {
       })
     })
 
-    if (current != obj) {
+    if (current !== obj) {
       return current
     }
 
@@ -343,9 +345,9 @@ export class LogFormatter {
 
       const collapse = path.length !== 0
       let ret = '[' + copyToClipboardButton(obj, copyBag)
-      obj.forEach((v) => {
+      obj.forEach(val => {
         ret += `\n${indent}`
-        ret += this.renderExpandedRecursively(v, copyBag, path, level + 1)
+        ret += this.renderExpandedRecursively(val, copyBag, path, level + 1)
       })
       ret += `\n${lastIndent}]`
       if (collapse) {
@@ -356,21 +358,21 @@ export class LogFormatter {
 
     if (isObject(obj)) {
       const keys = Object.keys(obj).sort()
-      if (keys.length == 0) {
+      if (keys.length === 0) {
         return '{}'
       }
       const collapse = path.length !== 0
       let ret = '{' + copyToClipboardButton(obj, copyBag)
 
-      if (level == 0) {
+      if (level === 0) {
         ret += linkToClipboardButton(cursor, copyBag)
         ret += this.showContextButtons(cursor, obj)
       }
 
       keys.forEach((k) => {
-        const v = obj[k]
+        const val = obj[k]
         ret += `\n${indent}${k}: `
-        ret += this.renderExpandedRecursively(v, copyBag, path.concat([k]), level + 1)
+        ret += this.renderExpandedRecursively(val, copyBag, path.concat([k]), level + 1)
       })
       ret += `\n${lastIndent}}`
       if (collapse) {
@@ -402,7 +404,7 @@ export class LogFormatter {
 
   shouldShowLinks(path: string[]): boolean {
     const joinedPath = path.join('.')
-    if (this.config.maxDepthForLinks == undefined) {
+    if (this.config.maxDepthForLinks === undefined) {
       return true
     }
     if (this.config.maxDepthForLinksExceptions.find(p => joinedPath.startsWith(p))) {
@@ -411,12 +413,12 @@ export class LogFormatter {
     return path.length <= this.config.maxDepthForLinks
   }
 
-  static toLogfmt(entry: Object): string {
+  static toLogfmt(entry: any): string {
     const parts = []
     const keys = Object.keys(entry).sort()
     for (const k of keys) {
       let v = entry[k]
-      if (v == null) {
+      if (v === null) {
         continue
       }
       if (isObject(v) || Array.isArray(v)) {
@@ -440,26 +442,20 @@ export class LogFormatter {
 }
 
 function timestamp(): CollapsedTransform {
-  return function (input: CollapsedFormatField): CollapsedFormatField {
+  return (input: CollapsedFormatField): CollapsedFormatField => {
     if (!input.original) {
       return input
     }
     const date = moment(input.original).toDate()
 
-    function pad(number) {
-      if (number < 10) {
-        return '0' + number
-      }
-      return number
-    }
-
     // Render date in local time as YYYY-mm-DD HH:MM:ss.SSS
+    const padTo2 = (n) => n < 10 ? '0' + n : n
     input.current = date.getFullYear() +
-      '-' + pad(date.getMonth() + 1) +
-      '-' + pad(date.getDate()) +
-      ' ' + pad(date.getHours()) +
-      ':' + pad(date.getMinutes()) +
-      ':' + pad(date.getSeconds()) +
+      '-' + padTo2(date.getMonth() + 1) +
+      '-' + padTo2(date.getDate()) +
+      ' ' + padTo2(date.getHours()) +
+      ':' + padTo2(date.getMinutes()) +
+      ':' + padTo2(date.getSeconds()) +
       '.' + (date.getMilliseconds() / 1000).toFixed(3).slice(2, 5)
     return input
   }
@@ -472,14 +468,14 @@ type ReplaceTransform = {
 
 function replace(rt: ReplaceTransform): CollapsedTransform {
   const re = new RegExp(rt.search)
-  return function (input: CollapsedFormatField) {
+  return (input: CollapsedFormatField) => {
     input.current = String(input.current).replace(re, rt.replace)
     return input
   }
 }
 
 function mapValue(mapping: Record<string, string>): CollapsedTransform {
-  return function (input: CollapsedFormatField) {
+  return (input: CollapsedFormatField) => {
     const lookup = mapping[input.current]
     if (lookup !== undefined) {
       input.current = lookup
@@ -489,7 +485,7 @@ function mapValue(mapping: Record<string, string>): CollapsedTransform {
 }
 
 function mapClass(mapping: Record<string, string>): CollapsedTransform {
-  return function (input: CollapsedFormatField) {
+  return (input: CollapsedFormatField) => {
     const lookup = mapping[input.current]
     if (lookup !== undefined) {
       input.classes.push(lookup)
@@ -499,14 +495,14 @@ function mapClass(mapping: Record<string, string>): CollapsedTransform {
 }
 
 function addClass(c: string): CollapsedTransform {
-  return function (input: CollapsedFormatField) {
+  return (input: CollapsedFormatField) => {
     input.classes.push(c)
     return input
   }
 }
 
 function upperCase(): CollapsedTransform {
-  return function (input: CollapsedFormatField): CollapsedFormatField {
+  return (input: CollapsedFormatField): CollapsedFormatField => {
     if (!input?.current) {
       return input
     }
@@ -516,7 +512,7 @@ function upperCase(): CollapsedTransform {
 }
 
 function randomStableColor(): CollapsedTransform {
-  return function (field: CollapsedFormatField): CollapsedFormatField {
+  return (field: CollapsedFormatField): CollapsedFormatField => {
     if (!field.original) {
       return field
     }
@@ -675,7 +671,7 @@ function shortenJavaFqcn(): CollapsedTransform {
     }
     const parts = field.original.split('.')
     field.current = parts
-      .map((p, idx) => (p.length > 1 && idx != parts.length - 1) ? p[0] : p)
+      .map((p, idx) => (p.length > 1 && idx !== parts.length - 1) ? p[0] : p)
       .join('.')
     field.tooltip = field.original
     return field

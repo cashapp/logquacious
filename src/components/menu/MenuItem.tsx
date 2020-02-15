@@ -1,0 +1,1 @@
+export const MenuItem = ({children, id = "", extraClass = ""}) => <a id={id} class={`navbar-item ${extraClass}`}>{children}</a>

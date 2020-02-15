@@ -22,6 +22,8 @@ jobs:
       - checkout
       - run: npm install
       - run: npm test
+      - run: npm run tsc-check
+      - run: npm run lint
 
   build:
     docker:

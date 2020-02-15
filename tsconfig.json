@@ -4,8 +4,8 @@
     "preserveConstEnums": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "target": "esnext",
-    "module": "esnext",
+    "target": "es6",
+    "module": "es6",
     "sourceMap": true,
     "moduleResolution": "node",
     "jsx": "preserve",
@@ -16,10 +16,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "lib": [
-      "dom",
-      "es2019"
-    ],
+    "downlevelIteration": true,
     "types": [
       "node",
       "inferno",

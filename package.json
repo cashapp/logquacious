@@ -1,6 +1,9 @@
 {
   "scripts": {
     "hot": "parcel index.html",
+    "tsc-check": "tsc --noEmit",
+    "lint": "tslint -c tslint.json 'src/**/*.ts*'",
+    "lint-fix": "tslint --fix -c tslint.json 'src/**/*.ts*'",
     "build": "parcel build --public-url=./ index.html",
     "test": "jest"
   },
@@ -28,7 +31,7 @@
       "./testSetup.ts"
     ],
     "moduleNameMapper": {
-      "\\.png$": "<rootDir>/src/helpers/fileMock.ts"
+      "\\.png$": "<rootDir>/src/helpers/FileMock.ts"
     }
   },
   "dependencies": {
@@ -67,6 +70,7 @@
     "json": "^9.0.6",
     "parcel": "^1.12.4",
     "sass": "^1.24.3",
+    "tslint": "^6.0.0",
     "typescript": "^3.7.4"
   }
 }

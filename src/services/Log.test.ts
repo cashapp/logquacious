@@ -88,7 +88,6 @@ describe('log', () => {
         undefined,
         qm,
       )
-      console.log(getLink(html))
       expect(getLink(html)).toContain('service:%22zoot%22')
       expect(getLink(html)).not.toContain('otherfilter')
     })

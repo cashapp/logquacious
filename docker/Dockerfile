@@ -7,7 +7,7 @@ ADD package.json /lq/
 ADD package-lock.json /lq/
 RUN npm install
 
-ADD tsconfig.json index.html app.sass .babelrc.js lq.png /lq/
+ADD tsconfig.json index.html app.sass .babelrc.js lq.png CHANGELOG.json /lq/
 ADD src/ /lq/src/
 ADD themes/ /lq/themes/
 RUN npm run build

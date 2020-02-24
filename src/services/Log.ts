@@ -615,7 +615,7 @@ export function showContextButton(filter: ContextFilter, obj: any, cursor: any, 
   const contextQuery = qm.getQuery()
     .withFocus(obj._id, JSON.stringify(cursor))
     .withFixedTimeRange()
-    .withAddTerms(newTerms)
+    .withNewTerms(newTerms)
   const url = `?${contextQuery.toURL()}`
   const icon = filter.icon || "mdi-filter-variant-remove"
   return `<a href="${url}"><span class="icon context-button show-context-button tooltip is-tooltip-right" data-tooltip="${filter.title}"><i class="mdi ${icon}"></i></span></a>`

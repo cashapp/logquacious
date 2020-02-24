@@ -1,4 +1,4 @@
-import { showContextButton } from "./Log"
+import { QueryManipulator, showContextButton } from "./Log"
 import { Query } from "./Query"
 
 function parseHTML(html: string): HTMLDivElement {
@@ -14,17 +14,21 @@ function getLink(html: string): string {
 
 describe('log', () => {
   describe('showContextButton', () => {
-    const qm = {
-      getQuery: () => {
-        return new Query()
-      },
-      // tslint:disable-next-line:no-empty
-      changeQuery: () => {
-      },
-      getFilters: () => {
-        return []
-      },
-    }
+    let qm: QueryManipulator
+
+    beforeEach(() => {
+      qm = {
+        getQuery: () => {
+          return new Query()
+        },
+        // tslint:disable-next-line:no-empty
+        changeQuery: () => {
+        },
+        getFilters: () => {
+          return []
+        },
+      }
+    })
 
     test('not found', () => {
       const html = showContextButton(
@@ -67,6 +71,25 @@ describe('log', () => {
         qm,
       )
       expect(getLink(html)).toContain('q=nested.with.dots:%22!%22')
+    })
+
+    test('remove non-context query', () => {
+      const q = new Query()
+        .withAddTerms("service:zoot")
+        .withAddTerms("otherfilter:true")
+      qm.getQuery = () => q
+
+      const html = showContextButton(
+        {title: "", keep: ["service"]},
+        {
+          "a": "a",
+          "service": "zoot",
+        },
+        undefined,
+        qm,
+      )
+      expect(getLink(html)).toContain('service:%22zoot%22')
+      expect(getLink(html)).not.toContain('otherfilter')
     })
   })
 })

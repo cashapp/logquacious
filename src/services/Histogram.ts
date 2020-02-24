@@ -64,6 +64,10 @@ export class Histogram {
     this.direction = direction
   }
 
+  setDataSource(ds: IDataSource) {
+    this.es = ds;
+  }
+
   setCallback(f: (q: Query) => void) {
     this.callback = f
     return this
@@ -119,6 +123,11 @@ export class Histogram {
     this.tooltip = d3.select("#histogram-tooltip")
     this.attachMouseEvents()
     this.attachResizeEvents()
+  }
+
+  clear() {
+    this.buckets = []
+    this.updateChart()
   }
 
   calculateBucketSize(query: Query): When {

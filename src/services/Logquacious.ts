@@ -6,7 +6,7 @@ import { Histogram } from "./Histogram"
 import { Display, DisplayCallback, Filter } from "../components/App"
 import { Direction, Prefs, Theme } from "./Prefs"
 import { ThemeChanger } from "./ThemeChanger"
-import { Range, Time } from "../helpers/Time"
+import { Range } from "../helpers/Time"
 import { FieldsConfig } from "./Log"
 
 export type QueryCallback = (q: Query) => void
@@ -205,6 +205,8 @@ export class Logquacious {
     this.showLogs()
 
     if (this.histogram !== undefined) {
+      this.histogram.clear();
+      this.histogram.setDataSource(this.ds())
       this.histogram.search(query).catch(reason => {
         this.loading.deactivate()
         this.error(reason)

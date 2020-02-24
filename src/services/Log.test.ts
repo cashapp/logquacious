@@ -1,4 +1,4 @@
-import { collapsedTransformers, LogFormatter, QueryManipulator, showContextButton } from "./Log"
+import { QueryManipulator, showContextButton } from "./Log"
 import { Query } from "./Query"
 import { prepareApp, prepareAppConfig } from "../helpers/TestHelper"
 import { Logquacious } from "./Logquacious"

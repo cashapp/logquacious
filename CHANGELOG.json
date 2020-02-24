@@ -1,0 +1,32 @@
+[
+  {
+    "when": "2020-02-24",
+    "pr": 114,
+    "what": "Histogram fixes",
+    "type": "bug"
+  },
+  {
+    "when": "2020-02-24",
+    "pr": 108,
+    "what": "Context links should remove other terms from query",
+    "type": "bug"
+  },
+  {
+    "when": "2020-02-24",
+    "pr": 113,
+    "what": "Numbers show as curly brackets",
+    "type": "bug"
+  },
+  {
+    "when": "2020-02-24",
+    "pr": 112,
+    "what": "Always show context icon for \"clear\" context action",
+    "type": "bug"
+  },
+  {
+    "when": "2020-02-24",
+    "pr": 111,
+    "what": "Contexts must explicitly use /slashes/ to use regexp",
+    "type": "enhancement"
+  },
+]

@@ -616,8 +616,9 @@ export function showContextButton(filter: ContextFilter, obj: any, cursor: any, 
     .map(k => `${flatObj[k].searchableKey}:${JSON.stringify(flatObj[k].value)}`)
     .join(" ")
 
-  // Only create a link when the context field is in the log entry.
-  if (!newTerms) {
+  // Only create a link when the context field is in the log entry,
+  // or in the case that "keep" is empty, we always want to show link to clear out terms.
+  if (!newTerms && filter.keep) {
     return undefined
   }
 

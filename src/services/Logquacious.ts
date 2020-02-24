@@ -6,7 +6,7 @@ import { Histogram } from "./Histogram"
 import { Display, DisplayCallback, Filter } from "../components/App"
 import { Direction, Prefs, Theme } from "./Prefs"
 import { ThemeChanger } from "./ThemeChanger"
-import { Range } from "../helpers/Time"
+import { Range, Time } from "../helpers/Time"
 import { FieldsConfig } from "./Log"
 
 export type QueryCallback = (q: Query) => void

@@ -264,14 +264,14 @@ export class Histogram {
     const isScaleBand = (this.interval.unit !== "millisecond")
     const barStep = (isScaleBand) ?
       this.scaleBand.step() :
-      Math.abs(this.scaleTime(this.buckets[0].date) - this.scaleTime(this.buckets[this.buckets.length - 1].date)) / this.buckets.length
+      Math.abs(this.scaleTime(this.buckets[0].date.toISOString()) - this.scaleTime(this.buckets[this.buckets.length - 1].date.toISOString())) / this.buckets.length
 
     const f = el => {
       el.attr('x', this.margin.left)
-        .attr('width', d => this.valueScale(d.count))
+        .attr('width', d => this.valueScale(d.bucket.count))
         .attr('y', d => {
-          const scale = (this.interval.unit === "millisecond") ? this.scaleTime : this.scaleBand
-          const y = scale(d.date) + this.margin.top
+          const scale = isScaleBand ? this.scaleBand : this.scaleTime
+          const y = scale(d.date.toISOString()) + this.margin.top
           d.y = y
           if (this.direction === Direction.Down) {
             d.y += barStep

@@ -120,10 +120,14 @@ export class LogFormatter {
       return entry.map(e => this.safeHTML(e, true))
     }
 
-    entry = {...entry}
-    for (const key of Object.keys(entry)) {
-      entry[key] = this.safeHTML(entry[key], true)
+    if (typeof entry === "object") {
+      entry = {...entry}
+      for (const key of Object.keys(entry)) {
+        entry[key] = this.safeHTML(entry[key], true)
+      }
+      return entry
     }
+
     return entry
   }
 

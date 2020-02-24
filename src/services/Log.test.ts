@@ -15,7 +15,7 @@ function getLink(html: string): string {
 }
 
 describe('log', () => {
-  describe('collapsed', () => {
+  describe('collapsed should show number correctly', () => {
     const config = prepareAppConfig()
     config.fields.main.collapsedFormatting = [
       {

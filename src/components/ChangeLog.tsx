@@ -1,8 +1,8 @@
 import { Component } from "inferno"
 import Changes from "../../CHANGELOG.json"
 
-const groupBy = function (xs, key) {
-  return xs.reduce(function (rv, x) {
+function groupBy(xs, key) {
+  return xs.reduce((rv, x) => {
     (rv[x[key]] = rv[x[key]] || []).push(x)
     return rv
   }, {})

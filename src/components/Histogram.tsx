@@ -1,4 +1,4 @@
-import { Component, Fragment } from "inferno"
+import { Component } from "inferno"
 
 export type AttachHistogramCallback = (el: SVGElement) => void
 

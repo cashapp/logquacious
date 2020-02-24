@@ -4,10 +4,22 @@ export class CopyHelper {
     private textarea: HTMLTextAreaElement
 
     constructor() {
-        this.textarea = Lookup.textarea("#copy-helper")
+        try {
+            this.textarea = Lookup.textarea("#copy-helper")
+        } catch (e) {
+            if (e.message.match("#copy-helper")) {
+              console.error("#copy-helper id not found in dom")
+            } else {
+                throw e
+            }
+        }
     }
 
     copy(s: string) {
+        if (!this.textarea) {
+            return
+        }
+
         const oldFocus = document.activeElement as HTMLElement
         this.textarea.focus()
         this.textarea.value = s

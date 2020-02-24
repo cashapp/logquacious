@@ -1,5 +1,7 @@
-import { QueryManipulator, showContextButton } from "./Log"
+import { collapsedTransformers, LogFormatter, QueryManipulator, showContextButton } from "./Log"
 import { Query } from "./Query"
+import { prepareApp, prepareAppConfig } from "../helpers/TestHelper"
+import { Logquacious } from "./Logquacious"
 
 function parseHTML(html: string): HTMLDivElement {
   const el = document.createElement('div')
@@ -13,6 +15,29 @@ function getLink(html: string): string {
 }
 
 describe('log', () => {
+  describe('collapsed', () => {
+    const config = prepareAppConfig()
+    config.fields.main.collapsedFormatting = [
+      {
+        field: "@timestamp",
+        transforms: ["timestamp"],
+      },
+      {
+        field: "message",
+        transforms: [{addClass: "strong"}]
+      },
+    ]
+    const lq = new Logquacious(config)
+    const app = prepareApp(lq)
+    const doc = app.results.logFormatter.build({
+      "@timestamp": new Date(),
+      "message": "something",
+      "number": 5,
+    })
+
+    expect(doc.textContent).toContain("number=5")
+  })
+
   describe('showContextButton', () => {
     let qm: QueryManipulator
 

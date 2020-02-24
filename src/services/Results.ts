@@ -12,7 +12,7 @@ export class Results {
   private logs: HTMLElement
   private templateElement: HTMLTemplateElement
   private templateContent: DocumentFragment
-  private logFormatter: LogFormatter
+  logFormatter: LogFormatter
   // The range of actual DOM entries will shift dynamically between `maxVisible - maxChunkSize` and `maxVisible`
   private maxVisible = 2000
   private maxChunkSize = 50

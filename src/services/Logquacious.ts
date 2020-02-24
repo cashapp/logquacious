@@ -205,6 +205,8 @@ export class Logquacious {
     this.showLogs()
 
     if (this.histogram !== undefined) {
+      this.histogram.clear();
+      this.histogram.setDataSource(this.ds())
       this.histogram.search(query).catch(reason => {
         this.loading.deactivate()
         this.error(reason)

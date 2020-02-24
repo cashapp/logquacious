@@ -2,6 +2,7 @@ import { FieldsConfig, LogFormatter, QueryManipulator } from "./Log"
 import { Lookup } from "../helpers/Lookup"
 import { LogMessage } from "../backends/elasticsearch/Elasticsearch"
 import { Direction, SwapDirection } from "./Prefs"
+import { Time } from "../helpers/Time"
 
 export interface IStats {
   visible: number
@@ -284,7 +285,7 @@ export class Results {
   }
 
   domEntryToDate(e: HTMLElement): Date {
-    return new Date(e.dataset.ts)
+    return Time.whenToDate(Time.parseText(e.dataset.ts))
   }
 
   getRange(): [Date, Date] {

@@ -112,7 +112,7 @@ export class App extends Component<Props, State> {
     const range: Range = [this.state.query.startTime, this.state.query.endTime]
     return (
       <Fragment>
-        <Histogram onAttachHistogram={this.handleAttachHistogram}/>
+        <Histogram onAttachHistogram={this.handleAttachHistogram} visible={this.state.display === Display.logs}/>
         <nav class="navbar is-fixed-top log-nav">
           <Title/>
           <SearchBar

@@ -1,4 +1,5 @@
 import { Component } from "inferno"
+import { ChangeLog } from "./ChangeLog"
 
 interface Props {
   visible: boolean
@@ -18,16 +19,18 @@ export class Welcome extends Component<Props> {
           </div>
           <div class="message-body">
             <div class="content">
+              <h4>Recent Changes</h4>
+              <ChangeLog/>
+
               <h4>General workflow</h4>
               <ul>
-                <li>Type and press enter to search.</li>
+                <li>Type and press enter to search, or just click on search for all results.</li>
                 <li>Click on a log entry to expand it.</li>
                 <li>Click on a field to filter on it.</li>
               </ul>
               <h4>Search tips</h4>
               <ul>
-                <li>Searches use
-                  <a target="_blank" href="https://www.elastic.co/guide/en/elasticsearch/reference/7.3/query-dsl-query-string-query.html#query-string-syntax"> Lucene Query Syntax</a>.
+                <li>Searches use <a target="_blank" href="https://www.elastic.co/guide/en/elasticsearch/reference/7.3/query-dsl-query-string-query.html#query-string-syntax"> Lucene Query Syntax</a>.
                 </li>
                 <li>
                   Most fields <strong>match on the entire string</strong>. All fields are <strong>case-insensitive</strong>
@@ -49,12 +52,6 @@ export class Welcome extends Component<Props> {
                   Examples: <code>(a AND b) OR (c AND d)</code>
                 </li>
                 <li>To look up part of a word for fields that support phrase search, use wildcards, like <code>except*</code></li>
-              </ul>
-              <h4>Cheat sheet</h4>
-              <ul>
-                <li><a href="?q=service:www"><code>service:apache</code></a> apache logs only</li>
-                <li><a href="?q=level:error"><code>level:error</code></a> errors</li>
-                <li><a href="?q=_exists:exception"><code>_exists_:exception</code></a> all exceptions</li>
               </ul>
               <p>
                 Please feel free to submit suggestions, bugs or feedback on <a href="https://github.com/cashapp/logquacious">Cash App's Logquacious GitHub repository</a>.

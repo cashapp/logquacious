@@ -1,5 +1,11 @@
 [
   {
+    "when": "2020-02-25",
+    "pr": 115,
+    "what": "Display a changelog on the welcome screen",
+    "type": "enhancement"
+  },
+  {
     "when": "2020-02-24",
     "pr": 114,
     "what": "Histogram fixes",

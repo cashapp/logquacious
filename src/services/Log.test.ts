@@ -115,5 +115,23 @@ describe('log', () => {
       expect(getLink(html)).toContain('service:%22zoot%22')
       expect(getLink(html)).not.toContain('otherfilter')
     })
+
+    test('empty context should display and remove all filters', () => {
+      const q = new Query()
+        .withAddTerms("service:zoot")
+        .withAddTerms("otherfilter:true")
+      qm.getQuery = () => q
+
+      const html = showContextButton(
+        {title: "", keep: undefined},
+        {
+          "a": "a",
+          "service": "zoot",
+        },
+        undefined,
+        qm,
+      )
+      expect(getLink(html)).toContain('q=&')  // No terms
+    })
   })
 })

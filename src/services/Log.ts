@@ -600,9 +600,18 @@ function flatten(obj) {
 export function showContextButton(filter: ContextFilter, obj: any, cursor: any, qm: QueryManipulator): string {
   const flatObj = flatten(obj)
 
+  const matchField = (field: string, keep: string) => {
+    if (keep.startsWith("/") && keep.endsWith("/")) {
+      keep = keep.substr(1, keep.length-2);
+      return field.match(new RegExp(keep))
+    } else {
+      return field.match(keep);
+    }
+  }
+
   // Search for key specified in context filter.
   const newTerms = (filter.keep || [])
-    .map(k => Object.keys(flatObj).find(field => field.match(new RegExp(k)) ? k : undefined))
+    .map(k => Object.keys(flatObj).find(field => matchField(field, k) ? k : undefined))
     .filter(k => k)
     .map(k => `${flatObj[k].searchableKey}:${JSON.stringify(flatObj[k].value)}`)
     .join(" ")

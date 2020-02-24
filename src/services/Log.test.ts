@@ -44,7 +44,7 @@ describe('log', () => {
 
     test('a basic regexp', () => {
       const html = showContextButton(
-        {title: "", keep: ["/subt+ring/"]},
+        {title: "", keep: ["/subst+ring/"]},
         {
           "asubsttttringhere": "a",
         },

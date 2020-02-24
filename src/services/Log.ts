@@ -605,7 +605,7 @@ export function showContextButton(filter: ContextFilter, obj: any, cursor: any, 
       keep = keep.substr(1, keep.length-2);
       return field.match(new RegExp(keep))
     } else {
-      return field.match(keep);
+      return field === keep;
     }
   }
 

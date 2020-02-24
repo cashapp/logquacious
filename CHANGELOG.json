@@ -34,5 +34,5 @@
     "pr": 111,
     "what": "Contexts must explicitly use /slashes/ to use regexp",
     "type": "enhancement"
-  },
+  }
 ]

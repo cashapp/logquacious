@@ -30,9 +30,33 @@ describe('log', () => {
       }
     })
 
+    test('not a regexp', () => {
+      const html = showContextButton(
+        {title: "", keep: ["substring"]},
+        {
+          "asubstringhere": "a",
+        },
+        undefined,
+        qm,
+      )
+      expect(html).toBeUndefined()
+    })
+
+    test('a basic regexp', () => {
+      const html = showContextButton(
+        {title: "", keep: ["/subst+ring/"]},
+        {
+          "asubsttttringhere": "a",
+        },
+        undefined,
+        qm,
+      )
+      expect(html).toBeDefined()
+    })
+
     test('not found', () => {
       const html = showContextButton(
-        {title: "", keep: ["with.dots"]},
+        {title: "", keep: ["/with.dots/"]},
         {
           "a": "a",
           "z": "z",
@@ -45,7 +69,7 @@ describe('log', () => {
 
     test('nested array with regexp', () => {
       const html = showContextButton(
-        {title: "", keep: ["with.dots"]},
+        {title: "", keep: ["/with.dots/"]},
         {
           "a": "a",
           "nested": [
@@ -61,7 +85,7 @@ describe('log', () => {
 
     test('nested object with regexp', () => {
       const html = showContextButton(
-        {title: "", keep: ["with.dots"]},
+        {title: "", keep: ["/with.dots/"]},
         {
           "a": "a",
           "nested": {"with.dots": "!"},

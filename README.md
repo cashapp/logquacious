@@ -201,7 +201,8 @@ Contains the URL, index, etc for querying Elasticsearch. An example:
     "type": "elasticsearch",
     "index": "{{.ESIndex}}",
     "urlPrefix": "{{if .ESProxy}}/es{{else}}{{.ESURL}}{{end}}",
-    "fields": "main"
+    "fields": "main",
+    "terms": "-service:lq-nginx"
   }
 ]
 ```
@@ -215,6 +216,8 @@ Contains the URL, index, etc for querying Elasticsearch. An example:
 `urlPrefix` is the URL to connect to your Elasticsearch server, without a trailing slash. This will resolve to `urlPrefix/index/_search`.
 
 `fields` is a reference to the key of the `fields` in the top level of the json configuration.
+
+`terms` is a string containing Elasticsearch terms that will always be added to the user's terms. Useful to hide logs of queries to Logquacious.
 
 ### fields
 

@@ -3,6 +3,7 @@ import { Query } from "../../services/Query"
 import { FilterType } from "../../components/App"
 import { FieldsConfig } from "../../services/Log"
 import { ElasticsearchException } from "./ElasticsearchException"
+import { DataSourceConfig } from "../../services/Logquacious"
 
 // Result of a search.
 export interface Result {
@@ -103,18 +104,16 @@ export interface IDataSource {
  * Manages search queries to Elasticsearch.
  */
 export class Elasticsearch implements IDataSource {
-  private readonly urlPrefix: string
-  private readonly index: string
   private fieldsConfig: FieldsConfig
+  private ds: DataSourceConfig
 
-  constructor(urlPrefix: string, index: string, fieldsConfig: FieldsConfig) {
-    this.urlPrefix = urlPrefix
-    this.index = index
+  constructor(ds: DataSourceConfig, fieldsConfig: FieldsConfig) {
+    this.ds = ds
     this.fieldsConfig = fieldsConfig
   }
 
   url(suffix: string, index: string): string {
-    return `${this.urlPrefix}/${index}/${suffix}`
+    return `${this.ds.urlPrefix}/${index}/${suffix}`
   }
 
   static async fetch<T>(url, method = "POST", body?: object): Promise<T> {
@@ -172,7 +171,7 @@ export class Elasticsearch implements IDataSource {
       search.search_after = cursor
     }
 
-    const url = this.url(`_search`, this.index)
+    const url = this.url(`_search`, this.ds.index)
     const data = await Elasticsearch.fetch<ElasticsearchResults>(url, "POST", search)
     if (data._shards && data._shards.failed) {
       throw new ElasticsearchException("Shard failure", JSON.stringify(data._shards.failures[0], null, 2))
@@ -232,6 +231,9 @@ export class Elasticsearch implements IDataSource {
     let terms = query.terms || ""
     if (extraTerms) {
       terms += " " + extraTerms
+    }
+    if (this.ds.terms) {
+      terms += " " + this.ds.terms
     }
 
     if (terms) {
@@ -342,7 +344,7 @@ export class Elasticsearch implements IDataSource {
   }
 
   async histogram(query: Query, interval: IRelative, tz: string): Promise<HistogramResults> {
-    const url = this.url(`_search?size=0`, this.index)
+    const url = this.url(`_search?size=0`, this.ds.index)
     const search = this.historicRequest(query)
 
     const unit = (interval.unit === "millisecond") ? "ms" : interval.unit[0]

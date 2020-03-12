@@ -24,6 +24,8 @@ export type DataSourceConfig = {
   urlPrefix: string
   index: string
   fields: string
+  // Always include these terms in search.
+  terms?: string
 }
 
 export interface ITracker {
@@ -80,7 +82,7 @@ export class Logquacious {
     this.dataSources = new Map<string, IDataSource>()
     for (const ds of this.config.dataSources) {
       // We only currently support elasticsearch
-      this.dataSources.set(ds.id, new Elasticsearch(ds.urlPrefix, ds.index, this.config.fields[ds.fields]))
+      this.dataSources.set(ds.id, new Elasticsearch(ds, this.config.fields[ds.fields]))
     }
 
     this.results = new Results(this.prefs.direction)
@@ -205,7 +207,7 @@ export class Logquacious {
     this.showLogs()
 
     if (this.histogram !== undefined) {
-      this.histogram.clear();
+      this.histogram.clear()
       this.histogram.setDataSource(this.ds())
       this.histogram.search(query).catch(reason => {
         this.loading.deactivate()

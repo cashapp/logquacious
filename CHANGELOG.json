@@ -1,38 +1,44 @@
 [
   {
+    "when": "2020-03-12",
+    "pr": 0,
+    "what": "Allow default terms per data source.",
+    "type": "enhancement"
+  },
+  {
     "when": "2020-02-25",
     "pr": 115,
-    "what": "Display a changelog on the welcome screen",
+    "what": "Display a changelog on the welcome screen.",
     "type": "enhancement"
   },
   {
     "when": "2020-02-24",
     "pr": 114,
-    "what": "Histogram fixes",
+    "what": "Histogram fixes.",
     "type": "bug"
   },
   {
     "when": "2020-02-24",
     "pr": 108,
-    "what": "Context links should remove other terms from query",
+    "what": "Context links should remove other terms from query.",
     "type": "bug"
   },
   {
     "when": "2020-02-24",
     "pr": 113,
-    "what": "Numbers show as curly brackets",
+    "what": "Numbers show as curly brackets.",
     "type": "bug"
   },
   {
     "when": "2020-02-24",
     "pr": 112,
-    "what": "Always show context icon for \"clear\" context action",
+    "what": "Always show context icon for \"clear\" context action.",
     "type": "bug"
   },
   {
     "when": "2020-02-24",
     "pr": 111,
-    "what": "Contexts must explicitly use /slashes/ to use regexp",
+    "what": "Contexts must explicitly use /slashes/ to use regexp.",
     "type": "enhancement"
   }
 ]

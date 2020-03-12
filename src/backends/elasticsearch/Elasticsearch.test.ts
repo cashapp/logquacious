@@ -1,9 +1,17 @@
 import { Elasticsearch } from "./Elasticsearch"
 import { Query } from "../../services/Query"
 import { Now, Time } from "../../helpers/Time"
+import { DataSourceConfig, DataSourceType } from "../../services/Logquacious"
 
 const prefix = 'https://es-server'
 const index = "my-index"
+const ds: DataSourceConfig = {
+  id: "",
+  type: DataSourceType.ElasticSearch,
+  fields: "f",
+  urlPrefix: prefix,
+  index: index,
+}
 
 describe('elasticsearch', () => {
   let es: Elasticsearch
@@ -23,7 +31,7 @@ describe('elasticsearch', () => {
 
   beforeEach(() => {
     fetchMock.resetMocks()
-    es = new Elasticsearch(prefix, index, {
+    es = new Elasticsearch(ds, {
       timestamp: "custom_timestamp",
       collapsedFormatting: [
         {

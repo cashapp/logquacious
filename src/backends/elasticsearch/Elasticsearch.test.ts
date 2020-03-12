@@ -10,7 +10,7 @@ const ds: DataSourceConfig = {
   type: DataSourceType.ElasticSearch,
   fields: "f",
   urlPrefix: prefix,
-  index: index,
+  index,
 }
 
 describe('elasticsearch', () => {

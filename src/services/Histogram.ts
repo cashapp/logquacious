@@ -57,7 +57,6 @@ export class Histogram {
   private callback: (q: Query) => void
   private interval: IRelative
   private isDragging: boolean
-  private svgOffset: Position
 
   constructor(es: IDataSource, direction: Direction) {
     this.es = es
@@ -198,10 +197,6 @@ export class Histogram {
     this.svgSize = {
       width: rect.width,
       height: rect.height,
-    }
-    this.svgOffset = {
-      x: rect.left,
-      y: rect.top,
     }
     this.innerSize = {
       width: this.svgSize.width - this.margin.left - this.margin.right,

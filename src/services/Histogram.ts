@@ -462,7 +462,7 @@ export class Histogram {
 
     this.tooltipVisible(true)
     this.tooltip
-      .style("top", `${this.svgOffset.y + y - height / 2 + this.margin.top}px`)
+      .style("top", `${y - height / 2 + this.margin.top}px`)
       .html(text)
   }
 

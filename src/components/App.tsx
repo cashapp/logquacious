@@ -1,4 +1,4 @@
-import { Component, Fragment } from "inferno"
+import { Component } from "inferno"
 import { Logs } from "./Logs"
 import { Range } from "../helpers/Time"
 import { AttachHistogramCallback, Histogram } from "./Histogram"
@@ -111,8 +111,7 @@ export class App extends Component<Props, State> {
   render() {
     const range: Range = [this.state.query.startTime, this.state.query.endTime]
     return (
-      <Fragment>
-        <Histogram onAttachHistogram={this.handleAttachHistogram} visible={this.state.display === Display.logs}/>
+      <>
         <nav class="navbar is-fixed-top log-nav">
           <Title/>
           <SearchBar
@@ -152,12 +151,20 @@ export class App extends Component<Props, State> {
           <progress id="loading" class="progress is-info log-progress"/>
         </nav>
 
-        <Logs visible={this.state.display === Display.logs} onAttachResults={this.handleAttachResults}/>
+        <div class="columns main-columns">
+          <div class="column logs-column">
+            <Logs visible={this.state.display === Display.logs} onAttachResults={this.handleAttachResults}/>
+          </div>
+          <div class="column is-2 histogram-column">
+            <Histogram onAttachHistogram={this.handleAttachHistogram} visible={this.state.display === Display.logs}/>
+          </div>
+        </div>
+
         <Welcome visible={this.state.display === Display.welcome}/>
         <Error visible={this.state.display === Display.error} message={this.state.errorMessage}/>
 
         <textarea id="copy-helper"/>
-      </Fragment>
+      </>
     )
   }
 }

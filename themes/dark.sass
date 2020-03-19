@@ -5,6 +5,15 @@ $dark-menu-hover: darken($blue, 5%)
 $danger: hsl(40, 100%, 50%)
 
 html.dark-theme
+  *::-webkit-scrollbar-track
+    background-color: lighten($black-ter, 5%)
+
+  *::-webkit-scrollbar-thumb
+    background-color: darken(desaturate($blue, 20%), 20%)
+
+  *::-webkit-scrollbar-corner
+    background-color: lighten($black-ter, 5%)
+
   .time-picker .is-info
     color: black
     background-color: $warning

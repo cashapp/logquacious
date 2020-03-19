@@ -10,11 +10,6 @@ interface Size {
   height: number
 }
 
-interface Position {
-  x: number;
-  y: number
-}
-
 interface BucketInfo {
   bucket: Bucket
   hovering: boolean

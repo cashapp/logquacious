@@ -1,5 +1,11 @@
 [
   {
+    "when": "2020-03-19",
+    "pr": 121,
+    "what": "Styling and layout fixes for histogram and scrollbars.",
+    "type": "enhancement"
+  },
+  {
     "when": "2020-03-12",
     "pr": 118,
     "what": "Allow default terms per data source.",

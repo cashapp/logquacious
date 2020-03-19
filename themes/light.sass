@@ -1,4 +1,35 @@
 html.light-theme
+  *::-webkit-scrollbar-track
+    background-color: darken($white-ter, 5%)
+
+  *::-webkit-scrollbar-thumb
+    background-color: lighten($blue, 10%)
+
+  *::-webkit-scrollbar-corner
+    background-color: darken($white-ter, 5%)
+
+  #histogram
+    svg
+      text
+        color: $black-ter
+      line, path
+        stroke: $black-bis
+
+    .hovering
+      fill: $blue
+
+    .visible-range
+      fill: rgba(0, 0, 0, 0.2)
+      stroke: none
+
+    .downloaded-range
+      fill: rgba(0, 0, 0, 0.2)
+      stroke: none
+
+    .drag-range
+      fill: rgba(0, 0, 0, 0.3)
+      stroke: none
+
   $yellow-dark: #e88f00
 
   .has-text-warning

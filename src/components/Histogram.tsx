@@ -17,8 +17,8 @@ export class Histogram extends Component<Props> {
 
     return (
       <div style={{visibility}}>
-        <div id="histogram-tooltip"/>
         <div id="histogram">
+          <div id="histogram-tooltip"/>
           <svg ref={this.saveRef}/>
         </div>
       </div>

@@ -28,12 +28,29 @@ $nav-height: 3.25rem
 // Variables don't work with calc! https://github.com/sass/sass/issues/818
 $height-sans-padding: calc(100vh - #{$nav-height})
 
-body
-  // 3.25rem is from html.has-navbar-fixed-top
-  min-height: $height-sans-padding
+html, body
+  height: $height-sans-padding
+  width: 100vw
+  margin: 0
+  padding: 0
+  overflow: hidden
 
 body
-  overflow-x: auto
+  *::-webkit-scrollbar
+    height: 10px
+    width: 10px
+
+.main-columns.columns:not(:last-child)
+  margin: 0
+
+.logs-column
+  height: $height-sans-padding
+  overflow: auto
+  padding: 0
+
+.histogram-column
+  padding: 0
+  margin: 0
 
 .log-wide
   width: 100%
@@ -75,12 +92,13 @@ $stats-height: 1.5rem
   display: block
   font-family: $fixed-font-family
   font-size: 0.9rem
-  padding-top: 0.5rem
-  padding-bottom: 0.5rem
+  margin: 0
+  padding: 0.5rem 0
 
   .entry
     white-space: nowrap
-    margin-left: 0.8rem
+    padding-left: 0.5rem
+    padding-right: 0.5rem
 
     .unexpanded
       cursor: pointer
@@ -204,15 +222,12 @@ $stats-height: 1.5rem
   to
     background-position: -200% 0
 
-$histogram-width: 200px
-
 #histogram
+  position: relative
+
   svg
-    width: $histogram-width
-    position: fixed
-    right: 0
-    height: calc(100% - 52px)
-    background-color: rgba(0, 0, 0, 0.8)
+    width: 100%
+    height: calc(100vh - 52px)
     shape-rendering: geometricPrecision
 
     // We only want pointer events for the SVG itself
@@ -248,7 +263,7 @@ $histogram-width: 200px
 #histogram-tooltip
   background: $link
   color: white
-  position: fixed
+  position: absolute
   width: 200px
   height: 60px
   padding: 2px
@@ -256,7 +271,7 @@ $histogram-width: 200px
   font-family: $fixed-font-family
   border: 0
   pointer-events: none
-  right: $histogram-width
+  left: -200px
   text-align: right
   display: none
 

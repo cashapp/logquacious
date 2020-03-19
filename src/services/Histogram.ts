@@ -10,11 +10,6 @@ interface Size {
   height: number
 }
 
-interface Position {
-  x: number;
-  y: number
-}
-
 interface BucketInfo {
   bucket: Bucket
   hovering: boolean
@@ -57,7 +52,6 @@ export class Histogram {
   private callback: (q: Query) => void
   private interval: IRelative
   private isDragging: boolean
-  private svgOffset: Position
 
   constructor(es: IDataSource, direction: Direction) {
     this.es = es
@@ -198,10 +192,6 @@ export class Histogram {
     this.svgSize = {
       width: rect.width,
       height: rect.height,
-    }
-    this.svgOffset = {
-      x: rect.left,
-      y: rect.top,
     }
     this.innerSize = {
       width: this.svgSize.width - this.margin.left - this.margin.right,
@@ -462,7 +452,7 @@ export class Histogram {
 
     this.tooltipVisible(true)
     this.tooltip
-      .style("top", `${this.svgOffset.y + y - height / 2 + this.margin.top}px`)
+      .style("top", `${y - height / 2 + this.margin.top}px`)
       .html(text)
   }
 

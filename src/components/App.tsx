@@ -151,7 +151,7 @@ export class App extends Component<Props, State> {
           <progress id="loading" class="progress is-info log-progress"/>
         </nav>
 
-        <div class="columns main-columns">
+        <div class={`columns main-columns ${(this.state.display !== Display.logs) ? "is-hidden" : ""}`}>
           <div class="column logs-column">
             <Logs visible={this.state.display === Display.logs} onAttachResults={this.handleAttachResults}/>
           </div>

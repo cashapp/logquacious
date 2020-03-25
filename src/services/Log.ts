@@ -150,6 +150,9 @@ export class LogFormatter {
     const cursor = entry.__cursor
     entry = this.cleanLog(entry)
 
+    // good (service is here)
+    // console.log("good", JSON.stringify(entry, null, 2))
+
     // Make shallow copy here before we mangle entry (we only modify top-level fields).
     const origEntry: LogMessage = {...entry}
     // The expanded part is lazily rendered.
@@ -175,14 +178,19 @@ export class LogFormatter {
         entry,
         tooltip: null,
       }
+      rule.transforms = rule.transforms || []
       for (const transform of rule.transforms) {
+        // console.log("tr", transform, JSON.stringify(entry, null, 2))
         const {funcName, data} = this.getTransformData(transform)
         const ctf = collapsedTransformers[funcName]
         if (!ctf) {
           throw Error(`Could not find collapsed transformer named '${funcName}'`)
         }
+        // console.log("tr prep", transform, JSON.stringify(entry, null, 2))
         const tf = ctf(data)
+        // console.log("tr start", transform, JSON.stringify(entry, null, 2))
         format = tf(format)
+        // console.log("tr end", transform, JSON.stringify(entry, null, 2))
       }
 
       if (format.tooltip) {
@@ -192,9 +200,10 @@ export class LogFormatter {
       const clazz = format.classes.length > 0 ? 'class="' + format.classes.join(' ') + '"' : ''
       const color = format.color ? `style="color:${format.color}"` : ''
 
-      fields += `<div ${clazz} ${color} ${tooltip}>${format.current}</div>&nbsp;`
-
-      delete (entry[rule.field])
+      // If empty or not null
+      if (format.current && format.current != "") {
+        fields += `<div ${clazz} ${color} ${tooltip}>${format.current}</div>&nbsp;`
+      }
     }
 
     const snippetEl = fragment.querySelector(".text") as HTMLElement
@@ -465,6 +474,16 @@ function timestamp(): CollapsedTransform {
   }
 }
 
+function showIfDifferent(field: string): CollapsedTransform {
+  return (input: CollapsedFormatField): CollapsedFormatField => {
+    const other = input.entry[field]
+    if (input.original == other) {
+      input.current = null
+    }
+    return input
+  }
+}
+
 type ReplaceTransform = {
   search: string
   replace: string
@@ -606,10 +625,10 @@ export function showContextButton(filter: ContextFilter, obj: any, cursor: any, 
 
   const matchField = (field: string, keep: string) => {
     if (keep.startsWith("/") && keep.endsWith("/")) {
-      keep = keep.substr(1, keep.length-2);
+      keep = keep.substr(1, keep.length - 2)
       return field.match(new RegExp(keep))
     } else {
-      return field === keep;
+      return field === keep
     }
   }
 
@@ -706,6 +725,7 @@ export const collapsedTransformers: { [key: string]: (_: any) => CollapsedTransf
   replace,
   randomStableColor,
   shortenJavaFqcn,
+  showIfDifferent,
 }
 
 export const expandedTransformers: { [key: string]: (_: any) => ExpandedTransform } = {

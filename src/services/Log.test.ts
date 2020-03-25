@@ -15,7 +15,7 @@ function getLink(html: string): string {
 }
 
 describe('log', () => {
-  describe('collapsed should show number correctly', () => {
+  test('collapsed should show number correctly', () => {
     const config = prepareAppConfig()
     config.fields.main.collapsedFormatting = [
       {
@@ -36,6 +36,58 @@ describe('log', () => {
     })
 
     expect(doc.textContent).toContain("number=5")
+  })
+
+  describe('showIfDifferent', () => {
+    let app: Logquacious
+    beforeEach(() => {
+      const config = prepareAppConfig()
+      config.fields.main.collapsedFormatting = [
+        {
+          field: "@timestamp",
+          transforms: ["timestamp"],
+        },
+        {
+          field: "service",
+        },
+        {
+          field: "container",
+          transforms: [
+            {showIfDifferent: "service"},
+          ]
+        },
+        {
+          field: "message",
+        },
+      ]
+      const lq = new Logquacious(config)
+      app = prepareApp(lq)
+    })
+
+    test('same', () => {
+      const doc = app.results.logFormatter.build({
+        "@timestamp": new Date(),
+        "service": "something",
+        "container": "something",
+        "message": "msg",
+      })
+
+      // \xa0 is a non breaking space
+      expect(doc.textContent).toContain("something\xa0msg")
+      expect(doc.textContent).not.toContain("something\xa0something\xa0msg")
+    })
+
+    test('different', () => {
+      const doc = app.results.logFormatter.build({
+        "@timestamp": new Date(),
+        "service": "something",
+        "container": "moo",
+        "message": "msg",
+      })
+
+      // \xa0 is a non breaking space
+      expect(doc.textContent).toContain("something\xa0moo\xa0msg")
+    })
   })
 
   describe('showContextButton', () => {

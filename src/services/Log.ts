@@ -193,8 +193,7 @@ export class LogFormatter {
       const clazz = format.classes.length > 0 ? 'class="' + format.classes.join(' ') + '"' : ''
       const color = format.color ? `style="color:${format.color}"` : ''
 
-      // If empty or not null
-      if (format.current && format.current != "") {
+      if (format.current && format.current !== "") {
         fields += `<div ${clazz} ${color} ${tooltip}>${format.current}</div>&nbsp;`
       }
     }
@@ -470,7 +469,7 @@ function timestamp(): CollapsedTransform {
 function showIfDifferent(field: string): CollapsedTransform {
   return (input: CollapsedFormatField): CollapsedFormatField => {
     const other = input.entry[field]
-    if (input.original == other) {
+    if (input.original === other) {
       input.current = null
     }
     return input

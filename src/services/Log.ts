@@ -175,6 +175,7 @@ export class LogFormatter {
         entry,
         tooltip: null,
       }
+      rule.transforms = rule.transforms || []
       for (const transform of rule.transforms) {
         const {funcName, data} = this.getTransformData(transform)
         const ctf = collapsedTransformers[funcName]
@@ -192,9 +193,9 @@ export class LogFormatter {
       const clazz = format.classes.length > 0 ? 'class="' + format.classes.join(' ') + '"' : ''
       const color = format.color ? `style="color:${format.color}"` : ''
 
-      fields += `<div ${clazz} ${color} ${tooltip}>${format.current}</div>&nbsp;`
-
-      delete (entry[rule.field])
+      if (format.current && format.current !== "") {
+        fields += `<div ${clazz} ${color} ${tooltip}>${format.current}</div>&nbsp;`
+      }
     }
 
     const snippetEl = fragment.querySelector(".text") as HTMLElement
@@ -465,6 +466,16 @@ function timestamp(): CollapsedTransform {
   }
 }
 
+function showIfDifferent(field: string): CollapsedTransform {
+  return (input: CollapsedFormatField): CollapsedFormatField => {
+    const other = input.entry[field]
+    if (input.original === other) {
+      input.current = null
+    }
+    return input
+  }
+}
+
 type ReplaceTransform = {
   search: string
   replace: string
@@ -606,10 +617,10 @@ export function showContextButton(filter: ContextFilter, obj: any, cursor: any, 
 
   const matchField = (field: string, keep: string) => {
     if (keep.startsWith("/") && keep.endsWith("/")) {
-      keep = keep.substr(1, keep.length-2);
+      keep = keep.substr(1, keep.length - 2)
       return field.match(new RegExp(keep))
     } else {
-      return field === keep;
+      return field === keep
     }
   }
 
@@ -706,6 +717,7 @@ export const collapsedTransformers: { [key: string]: (_: any) => CollapsedTransf
   replace,
   randomStableColor,
   shortenJavaFqcn,
+  showIfDifferent,
 }
 
 export const expandedTransformers: { [key: string]: (_: any) => ExpandedTransform } = {

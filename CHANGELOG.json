@@ -1,5 +1,11 @@
 [
   {
+    "when": "2020-03-26",
+    "pr": 124,
+    "what": "Added a collapsed transformer to display field only if the previous value is different.",
+    "type": "enhancement"
+  },
+  {
     "when": "2020-03-19",
     "pr": 121,
     "what": "Styling and layout fixes for histogram and scrollbars.",

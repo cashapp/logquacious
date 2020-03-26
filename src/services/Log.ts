@@ -150,9 +150,6 @@ export class LogFormatter {
     const cursor = entry.__cursor
     entry = this.cleanLog(entry)
 
-    // good (service is here)
-    // console.log("good", JSON.stringify(entry, null, 2))
-
     // Make shallow copy here before we mangle entry (we only modify top-level fields).
     const origEntry: LogMessage = {...entry}
     // The expanded part is lazily rendered.
@@ -180,17 +177,13 @@ export class LogFormatter {
       }
       rule.transforms = rule.transforms || []
       for (const transform of rule.transforms) {
-        // console.log("tr", transform, JSON.stringify(entry, null, 2))
         const {funcName, data} = this.getTransformData(transform)
         const ctf = collapsedTransformers[funcName]
         if (!ctf) {
           throw Error(`Could not find collapsed transformer named '${funcName}'`)
         }
-        // console.log("tr prep", transform, JSON.stringify(entry, null, 2))
         const tf = ctf(data)
-        // console.log("tr start", transform, JSON.stringify(entry, null, 2))
         format = tf(format)
-        // console.log("tr end", transform, JSON.stringify(entry, null, 2))
       }
 
       if (format.tooltip) {

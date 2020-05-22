@@ -317,6 +317,7 @@ export class LogFormatter {
     const lastIndent = makeIndent(level)
     const pathStr = path.join('.')
 
+    const originalObj = obj;
     obj = this.safeHTML(obj, false)
     let current = obj
 
@@ -402,7 +403,7 @@ export class LogFormatter {
       const query = this._queryManipulator.getQuery().withAddTerms(`${pathStr}:${JSON.stringify(obj)}`)
       v = `<a class="filter-link" href="?${query.toURL()}">${v}</a>`
     }
-    v = `<span class="copyable-wrapper">${v}${copyToClipboardButton(obj, copyBag)}</span>`
+    v = `<span class="copyable-wrapper">${v}${copyToClipboardButton(originalObj, copyBag)}</span>`
 
     return v
   }

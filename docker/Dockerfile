@@ -1,5 +1,5 @@
 # Build the static files.
-FROM node:alpine
+FROM node:12.16.3-alpine3.11
 RUN mkdir /lq
 WORKDIR /lq
 

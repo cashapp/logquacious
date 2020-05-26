@@ -1,9 +1,10 @@
-import { LogMessage } from "../backends/elasticsearch/Elasticsearch"
-import { CopyHelper } from "../helpers/CopyHelper"
-import { escape } from "he"
-import { Query } from "./Query"
-import { Filter } from "../components/App"
+import {LogMessage} from "../backends/elasticsearch/Elasticsearch"
+import {CopyHelper} from "../helpers/CopyHelper"
+import {escape} from "he"
+import {Query} from "./Query"
+import {Filter} from "../components/App"
 import moment from "moment"
+import {TimeZone} from "./Prefs"
 
 export type FieldsConfig = {
   timestamp?: string
@@ -77,8 +78,9 @@ export class LogFormatter {
   private templateContent: DocumentFragment
   private config: FieldsConfig
   private _queryManipulator: QueryManipulator
+  private tz: TimeZone
 
-  constructor(config: FieldsConfig) {
+  constructor(config: FieldsConfig, tz: TimeZone) {
     if (config === undefined) {
       // tslint:disable-next-line:no-console
       console.warn("fieldsConfig is not set")
@@ -90,6 +92,11 @@ export class LogFormatter {
     config.expandedFormatting = config.expandedFormatting || []
     this.config = config
     this.copyHelper = new CopyHelper()
+    this.tz = tz
+  }
+
+  public getTimeZone() {
+    return this.tz
   }
 
   set queryManipulator(qm: QueryManipulator) {
@@ -182,7 +189,7 @@ export class LogFormatter {
         if (!ctf) {
           throw Error(`Could not find collapsed transformer named '${funcName}'`)
         }
-        const tf = ctf(data)
+        const tf = ctf(this, data)
         format = tf(format)
       }
 
@@ -317,7 +324,7 @@ export class LogFormatter {
     const lastIndent = makeIndent(level)
     const pathStr = path.join('.')
 
-    const originalObj = obj;
+    const originalObj = obj
     obj = this.safeHTML(obj, false)
     let current = obj
 
@@ -447,27 +454,22 @@ export class LogFormatter {
   }
 }
 
-function timestamp(): CollapsedTransform {
+function timestamp(logFormatter): CollapsedTransform {
   return (input: CollapsedFormatField): CollapsedFormatField => {
     if (!input.original) {
       return input
     }
-    const date = moment(input.original).toDate()
+    let m = moment(input.original)
+    if (logFormatter.getTimeZone() === TimeZone.UTC) {
+      m = m.utc()
+    }
+    input.current = m.format("YYYY-MM-DD HH:mm:ss.SSSZZ")
 
-    // Render date in local time as YYYY-mm-DD HH:MM:ss.SSS
-    const padTo2 = (n) => n < 10 ? '0' + n : n
-    input.current = date.getFullYear() +
-      '-' + padTo2(date.getMonth() + 1) +
-      '-' + padTo2(date.getDate()) +
-      ' ' + padTo2(date.getHours()) +
-      ':' + padTo2(date.getMinutes()) +
-      ':' + padTo2(date.getSeconds()) +
-      '.' + (date.getMilliseconds() / 1000).toFixed(3).slice(2, 5)
     return input
   }
 }
 
-function showIfDifferent(field: string): CollapsedTransform {
+function showIfDifferent(_: LogFormatter, field: string): CollapsedTransform {
   return (input: CollapsedFormatField): CollapsedFormatField => {
     const other = input.entry[field]
     if (input.original === other) {
@@ -482,7 +484,7 @@ type ReplaceTransform = {
   replace: string
 }
 
-function replace(rt: ReplaceTransform): CollapsedTransform {
+function replace(_: LogFormatter, rt: ReplaceTransform): CollapsedTransform {
   const re = new RegExp(rt.search)
   return (input: CollapsedFormatField) => {
     input.current = String(input.current).replace(re, rt.replace)
@@ -490,7 +492,7 @@ function replace(rt: ReplaceTransform): CollapsedTransform {
   }
 }
 
-function mapValue(mapping: Record<string, string>): CollapsedTransform {
+function mapValue(_: LogFormatter, mapping: Record<string, string>): CollapsedTransform {
   return (input: CollapsedFormatField) => {
     const lookup = mapping[input.current]
     if (lookup !== undefined) {
@@ -500,7 +502,7 @@ function mapValue(mapping: Record<string, string>): CollapsedTransform {
   }
 }
 
-function mapClass(mapping: Record<string, string>): CollapsedTransform {
+function mapClass(_: LogFormatter, mapping: Record<string, string>): CollapsedTransform {
   return (input: CollapsedFormatField) => {
     const lookup = mapping[input.current]
     if (lookup !== undefined) {
@@ -510,7 +512,7 @@ function mapClass(mapping: Record<string, string>): CollapsedTransform {
   }
 }
 
-function addClass(c: string): CollapsedTransform {
+function addClass(_: LogFormatter, c: string): CollapsedTransform {
   return (input: CollapsedFormatField) => {
     input.classes.push(c)
     return input
@@ -709,7 +711,7 @@ function shortenJavaFqcn(): CollapsedTransform {
   }
 }
 
-export const collapsedTransformers: { [key: string]: (_: any) => CollapsedTransform } = {
+export const collapsedTransformers: { [key: string]: (lf: LogFormatter, _: any) => CollapsedTransform } = {
   timestamp,
   upperCase,
   mapValue,

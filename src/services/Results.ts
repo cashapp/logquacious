@@ -1,7 +1,7 @@
 import { FieldsConfig, LogFormatter, QueryManipulator } from "./Log"
 import { Lookup } from "../helpers/Lookup"
 import { LogMessage } from "../backends/elasticsearch/Elasticsearch"
-import { Direction, SwapDirection } from "./Prefs"
+import {Direction, SwapDirection, TimeZone} from "./Prefs"
 import { Time } from "../helpers/Time"
 
 export interface IStats {
@@ -21,14 +21,17 @@ export class Results {
   private currentChunkDirection: Direction
   private chunk: HTMLDivElement
   private direction: Direction
+  private tz: TimeZone
+  private fieldsConfig: FieldsConfig
   private following: boolean
   private beforeLogs: HTMLElement
   private afterLogs: HTMLElement
   private savedScrollEntry: HTMLElement
   private queryManipulator: QueryManipulator
 
-  constructor(direction: Direction) {
+  constructor(direction: Direction, tz: TimeZone) {
     this.direction = direction
+    this.tz = tz
     this.stats = {
       visible: 0,
     }
@@ -44,13 +47,33 @@ export class Results {
     this.templateContent = this.templateElement.content
     this.queryManipulator = queryManipulator
     this.fieldsConfig = fieldsConfig
+    this.newLogFormatter()
     this.newChunk(this.direction)
     this.followInterval()
   }
 
-  set fieldsConfig(fieldsConfig: FieldsConfig) {
-    this.logFormatter = new LogFormatter(fieldsConfig).setTemplate(this.templateContent)
+  private newLogFormatter() {
+    this.logFormatter = new LogFormatter(this.fieldsConfig, this.tz).setTemplate(this.templateContent)
     this.logFormatter.queryManipulator = this.queryManipulator
+  }
+
+  setFieldsConfig(fieldsConfig: FieldsConfig) {
+    this.fieldsConfig = fieldsConfig
+    this.newLogFormatter()
+  }
+
+  setTimeZone(tz: TimeZone) {
+    this.tz = tz
+    this.newLogFormatter()
+  }
+
+  setDirection(direction: Direction) {
+    if (this.direction === direction) {
+      return
+    }
+
+    this.direction = direction
+    this.swapDirection()
   }
 
   followInterval() {
@@ -229,15 +252,6 @@ export class Results {
       default:
         throw new Error(`Unknown direction ${direction}`)
     }
-  }
-
-  setDirection(direction: Direction) {
-    if (this.direction === direction) {
-      return
-    }
-
-    this.direction = direction
-    this.swapDirection()
   }
 
   private swapDirection() {

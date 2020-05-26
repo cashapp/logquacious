@@ -4,7 +4,7 @@ import { Elasticsearch, IDataSource, Result } from "../backends/elasticsearch/El
 import { Query } from "./Query"
 import { Histogram } from "./Histogram"
 import { Display, DisplayCallback, Filter } from "../components/App"
-import { Direction, Prefs, Theme } from "./Prefs"
+import {Direction, Prefs, Theme, TimeZone} from "./Prefs"
 import { ThemeChanger } from "./ThemeChanger"
 import { Range } from "../helpers/Time"
 import { FieldsConfig } from "./Log"
@@ -13,6 +13,7 @@ export type QueryCallback = (q: Query) => void
 export type ThemeCallback = (theme: Theme) => void
 export type FilterCallback = (filters: Filter[]) => void
 export type DirectionCallback = (direction: Direction) => void
+export type TimeZoneCallback = (tz: TimeZone) => void
 
 export enum DataSourceType {
   ElasticSearch = "elasticsearch"
@@ -55,6 +56,7 @@ export class Logquacious {
   private onFilter: FilterCallback
   private onTheme: ThemeCallback
   private onDirection: DirectionCallback
+  private onTimeZone: TimeZoneCallback
   private errorToDisplay: any
 
   constructor(config: Config) {
@@ -76,6 +78,7 @@ export class Logquacious {
     this.prefs = new Prefs().load()
     this.onTheme(this.prefs.theme)
     this.onDirection(this.prefs.direction)
+    this.onTimeZone(this.prefs.tz)
 
     this.loading = new Loading()
 
@@ -85,7 +88,7 @@ export class Logquacious {
       this.dataSources.set(ds.id, new Elasticsearch(ds, this.config.fields[ds.fields]))
     }
 
-    this.results = new Results(this.prefs.direction)
+    this.results = new Results(this.prefs.direction, this.prefs.tz)
 
     const fieldsConfig = this.dsFieldsConfig()
 
@@ -219,7 +222,7 @@ export class Logquacious {
     this.focusInput = inputFocus
 
     if (!nextPage) {
-      this.results.fieldsConfig = this.config.fields[this.dsConfig().fields]
+      this.results.setFieldsConfig(this.config.fields[this.dsConfig().fields])
       this.results.clear()
     }
     this.loading.activate()
@@ -367,6 +370,18 @@ export class Logquacious {
     this.results.setDirection(direction)
     this.histogram.setDirection(direction)
     this.onDirection(direction)
+  }
+
+  set timeZoneCallback(callback: TimeZoneCallback) {
+    this.onTimeZone = callback
+  }
+
+  handleTimeZoneCallback(tz: TimeZone) {
+    this.prefs.tz = tz
+    this.prefs.save()
+    this.results.setTimeZone(tz)
+    this.newSearch(this.query)
+    this.onTimeZone(tz)
   }
 
   set displayCallback(callback: DisplayCallback) {

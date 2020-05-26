@@ -12,9 +12,15 @@ export enum Theme {
   Dark = 'dark',
 }
 
+export enum TimeZone {
+  Local = 'local',
+  UTC = 'utc',
+}
+
 interface IPrefs {
   direction: Direction,
   theme: Theme,
+  tz: TimeZone,
 }
 
 export class Prefs {
@@ -23,6 +29,7 @@ export class Prefs {
   private readonly defaultSettings: IPrefs = {
     direction: Direction.Up,
     theme: Theme.Dark,
+    tz: TimeZone.Local,
   }
 
   set theme(theme: Theme) {
@@ -41,6 +48,15 @@ export class Prefs {
 
   get direction() {
     return this.data.direction
+  }
+
+  set tz(tz: TimeZone) {
+    this.data.tz = tz
+    this.save()
+  }
+
+  get tz() {
+    return this.data.tz
   }
 
   save() {

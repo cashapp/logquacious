@@ -6,7 +6,7 @@ import { Logquacious } from "../services/Logquacious"
 import { Query } from "../services/Query"
 import { ChangeFilterCallback, FilterDropdown, FilterItem } from "./FilterDropdown"
 import { ChangeSettingCallback, MenuSetting } from "./menu/MenuSetting"
-import { Direction, Theme } from "../services/Prefs"
+import {Direction, Theme, TimeZone} from "../services/Prefs"
 import { Welcome } from "./Welcome"
 import { Error } from "./Error"
 import { Title } from "./Title"
@@ -38,6 +38,7 @@ interface State {
   display: Display
   theme: Theme
   direction: Direction
+  tz: TimeZone
   filters: Filter[]
   errorMessage?: string
   query: Query,
@@ -83,6 +84,7 @@ export class App extends Component<Props, State> {
       filters: [],
       theme: Theme.Light,
       direction: Direction.Up,
+      tz: TimeZone.Local,
       display: Display.welcome,
       query: new Query(),
       focusInput: true,
@@ -94,6 +96,7 @@ export class App extends Component<Props, State> {
     this.log.filterCallback = (filters: Filter[]) => this.setState({filters})
     this.log.themeCallback = (theme: Theme) => this.setState({theme})
     this.log.directionCallback = (direction: Direction) => this.setState({direction})
+    this.log.timeZoneCallback = (tz: TimeZone) => this.setState({tz})
     this.log.queryCallback = (query: Query) => this.setState({query})
     this.log.run(this.resultsElement, this.histogramElement)
   }
@@ -107,6 +110,7 @@ export class App extends Component<Props, State> {
 
   handleThemeChanged: ChangeSettingCallback<Theme> = (theme: Theme) => this.log.handleThemeCallback(theme)
   handleDirectionChanged: ChangeSettingCallback<Direction> = (direction: Direction) => this.log.handleDirectionCallback(direction)
+  handleTimeZoneChanged: ChangeSettingCallback<TimeZone> = (tz: TimeZone) => this.log.handleTimeZoneCallback(tz)
 
   render() {
     const range: Range = [this.state.query.startTime, this.state.query.endTime]
@@ -144,6 +148,14 @@ export class App extends Component<Props, State> {
               title="Direction"
               on={{title: "Up", value: Direction.Up}}
               off={{title: "Down", value: Direction.Down}}
+            />
+            <MenuSetting
+              onChange={this.handleTimeZoneChanged}
+              setting="tz"
+              value={this.state.tz}
+              title="TZ"
+              on={{title: "Local", value: TimeZone.Local}}
+              off={{title: "UTC", value: TimeZone.UTC}}
             />
           </MenuDropdown>
 

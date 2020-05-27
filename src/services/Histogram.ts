@@ -1,8 +1,8 @@
-import { Query } from "./Query"
-import { Bucket, HistogramResults, IDataSource } from "../backends/elasticsearch/Elasticsearch"
-import { IRelative, Time, When } from "../helpers/Time"
-import { Direction } from "./Prefs"
-import moment, { unitOfTime } from 'moment'
+import {Query} from "./Query"
+import {Bucket, HistogramResults, IDataSource} from "../backends/elasticsearch/Elasticsearch"
+import {IRelative, Time, When} from "../helpers/Time"
+import {Direction, TimeZone} from "./Prefs"
+import moment, {unitOfTime} from 'moment'
 import * as d3 from 'd3'
 
 interface Size {
@@ -52,14 +52,16 @@ export class Histogram {
   private callback: (q: Query) => void
   private interval: IRelative
   private isDragging: boolean
+  private tz: TimeZone
 
-  constructor(es: IDataSource, direction: Direction) {
+  constructor(es: IDataSource, direction: Direction, tz: TimeZone) {
     this.es = es
     this.direction = direction
+    this.tz = tz
   }
 
   setDataSource(ds: IDataSource) {
-    this.es = ds;
+    this.es = ds
   }
 
   setCallback(f: (q: Query) => void) {
@@ -85,6 +87,10 @@ export class Histogram {
     if (this.query !== undefined) {
       this.redraw()
     }
+  }
+
+  setTimeZone(tz: TimeZone) {
+    this.tz = tz
   }
 
   setVisibleRange(range: [Date, Date]) {
@@ -456,10 +462,19 @@ export class Histogram {
       .html(text)
   }
 
+  formatDate(when: When): string {
+    if (when.kind !== "moment") {
+      return Time.whenToText(when)
+    }
+
+    const m = (this.tz === TimeZone.UTC) ? when.moment.utc() : when.moment
+    return m.format("YYYY-MM-DD HH:mm:ss.SSSZZ")
+  }
+
   tooltipText(start: When, end: When, duration: moment.Duration, count: number): string {
     return `
-    ${Time.whenToText(start)}<br/>
-    ${Time.whenToText(end)}<br/>
+    ${this.formatDate(start)}<br/>
+    ${this.formatDate(end)}<br/>
     ${Time.getRangeHuman(duration, 2)} <b>${nFormatter(count, 2)}</b>
     `
   }

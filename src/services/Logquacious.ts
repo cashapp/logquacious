@@ -100,7 +100,7 @@ export class Logquacious {
 
     this.focusInput = true
 
-    this.histogram = new Histogram(this.ds(), this.prefs.data.direction)
+    this.histogram = new Histogram(this.ds(), this.prefs.data.direction, this.prefs.data.tz)
     this.histogram.attach(histogramElement)
     this.histogram.setCallback((q) => this.newSearch(q, true, false))
 
@@ -382,6 +382,7 @@ export class Logquacious {
     this.prefs.tz = tz
     this.prefs.save()
     this.results.setTimeZone(tz)
+    this.histogram.setTimeZone(tz)
     this.newSearch(this.query)
     this.onTimeZone(tz)
   }

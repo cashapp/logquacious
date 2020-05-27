@@ -2,7 +2,7 @@ import {Query} from "./Query"
 import {Bucket, HistogramResults, IDataSource} from "../backends/elasticsearch/Elasticsearch"
 import {IRelative, Time, When} from "../helpers/Time"
 import {Direction, TimeZone} from "./Prefs"
-import moment, {unitOfTime} from 'moment'
+import moment, {Moment, unitOfTime} from 'moment'
 import * as d3 from 'd3'
 
 interface Size {
@@ -206,8 +206,8 @@ export class Histogram {
   }
 
   private updateTimeAxis() {
-    this.scaleTime = d3.scaleTime()
-      .domain([this.query.startTime, this.query.endTime].map(Time.whenToDate)).nice()
+    this.scaleTime = (this.tz === TimeZone.UTC) ? d3.scaleUtc() : d3.scaleTime()
+    this.scaleTime.domain([this.query.startTime, this.query.endTime].map(Time.whenToDate)).nice()
 
     if (this.direction === Direction.Down) {
       this.scaleTime.range([0, this.innerSize.height])
@@ -221,18 +221,23 @@ export class Histogram {
       .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
       .call(labels)
 
-    let start: Date
-    let end: Date
+    let start: Moment
+    let end: Moment
     if (this.buckets.length > 0) {
-      start = this.buckets[0].date
+      start = moment(this.buckets[0].date)
       // Add an extra interval to the end for the last bar, so it doesn't overlap past the end.
-      end = Time.whenToDate(Time.whenAdd(
+      end = Time.whenToMoment(Time.whenAdd(
         this.buckets[this.buckets.length - 1].bucket.when,
         Time.whenToDuration(this.interval)
       ))
     } else {
-      start = Time.whenToDate(this.query.startTime)
-      end = Time.whenToDate(this.query.endTime)
+      start = Time.whenToMoment(this.query.startTime)
+      end = Time.whenToMoment(this.query.endTime)
+    }
+
+    if (this.tz === TimeZone.UTC) {
+      start = start.utc()
+      end = end.utc()
     }
 
     this.scaleBand = d3.scaleBand()

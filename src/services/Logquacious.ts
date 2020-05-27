@@ -114,17 +114,19 @@ export class Logquacious {
       }
     }
 
-    const empty = this.query.isEmpty()
-    if (!empty) {
-      this.search(this.query, false, false)
-    }
-
     this.results.setMarkerCallback(true, () => {
       this.searchBackwards()
     })
     this.results.setMarkerCallback(false, () => {
       this.searchForwards()
     })
+
+    setTimeout(() => {
+      const empty = this.query.isEmpty()
+      if (!empty) {
+        this.search(this.query, false, false)
+      }
+    }, 100)
 
     setInterval(() => {
       if (this.histogram === undefined) {

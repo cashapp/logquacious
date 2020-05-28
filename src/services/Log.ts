@@ -12,13 +12,6 @@ export type FieldsConfig = {
   expandedFormatting?: ILogRule[]
   collapsedIgnore?: string[]
   contextFilters?: ContextFilter[]
-
-  // Don't create links for values beneath this depth, for when you don't index this deep.
-  maxDepthForLinks?: number
-
-  // Always create links for these fields by prefix. Recommended for them to be indexed.
-  maxDepthForLinksExceptions?: string[]
-
   elasticsearch?: {
     // Fields to search when a user does not specify a field
     queryStringFields?: string[]
@@ -216,6 +209,8 @@ export class LogFormatter {
 
     let visible = false
     const expanded = fragment.querySelector(".expanded")
+    const hover = fragment.querySelector('.hover') as HTMLElement
+
     fragment.querySelector('.unexpanded').addEventListener('click', async () => {
       if (window.getSelection().toString()) {
         // Abort click because user is selecting
@@ -236,6 +231,8 @@ export class LogFormatter {
           // rendering code
           const copyBag = []
           expanded.innerHTML = this.renderExpandedRecursively(this.cleanLog(full), copyBag, undefined, 0, cursor)
+
+          this.valueHover(expanded, hover)
 
           expanded.addEventListener('click', (e) => {
             // Doing some fancy event delegation here since there could be many nested nodes
@@ -304,6 +301,92 @@ export class LogFormatter {
     })
 
     return fragment
+  }
+
+  private valueHover(expanded: Element, hover: HTMLElement) {
+    const value = expanded.querySelectorAll(".value")
+    let lastFocus: HTMLElement | undefined
+    let currentFocus: HTMLElement | undefined
+    let hovering = false
+    let unhoverTimer
+
+    hover.querySelector(".add-to-query").addEventListener('click', () => {
+      // Add to query, for when the user left clicks
+      const key = lastFocus.dataset.key
+      const obj = unescape(lastFocus.dataset.obj)
+      const {changeQuery} = this._queryManipulator
+      changeQuery(this.getAddQuery(key, obj))
+    })
+
+    hover.addEventListener('mouseenter', () => {
+      hovering = true
+      lastFocus?.classList.add('focused')
+    })
+    hover.addEventListener('mouseleave', () => {
+      hovering = false
+      clearTimeout(unhoverTimer)
+      hover.style.visibility = 'hidden'
+      lastFocus?.classList.remove('focused')
+      hover.classList.remove('tooltip')
+    })
+
+    value.forEach(el => el.addEventListener('mouseenter', (e) => {
+      const target = e.target as HTMLElement
+
+      currentFocus?.classList.remove("focused")
+      currentFocus = target
+      lastFocus = currentFocus
+      const key = lastFocus.dataset.key
+      const obj = unescape(lastFocus.dataset.obj)
+
+      hover.style.visibility = 'visible'
+      hover.style.left = `${target.offsetLeft + 5}px`
+      hover.style.top = `${target.offsetTop - 5}px`
+      target.classList.add('focused')
+
+      // Add to query, for when the user middle clicks
+      const query = this.getAddQuery(key, obj)
+      const addToQuery = hover.querySelector(".add-to-query") as HTMLAnchorElement
+      addToQuery.href = `?${query.toURL()}`
+
+      // Copy
+      // https://stackoverflow.com/a/19470348/11125
+      let copy = hover.querySelector(".copy-to-clipboard") as HTMLAnchorElement
+      copy.parentNode.replaceChild(copy.cloneNode(true), copy);
+      copy = hover.querySelector(".copy-to-clipboard") as HTMLAnchorElement
+      copy.addEventListener("click", () => {
+        this.copyHelper.copy(JSON.parse(obj).toString())
+        hover.classList.add('tooltip')
+        hover.classList.add('has-tooltip-active')
+        hover.dataset.tooltip = 'Copied!'
+        setTimeout(() => {
+          hover.classList.remove('tooltip')
+        }, 1000)
+      })
+    }))
+
+    value.forEach(el => el.addEventListener('mouseleave', (e) => {
+      const target = e.target as HTMLElement
+      target.classList.remove('focused')
+      currentFocus = undefined
+
+      clearTimeout(unhoverTimer)
+      // Give some time for the mouse to move from the value text to the hover,
+      // otherwise this mouseleave happens before hover's mouseenter and vanishes immediately.
+      unhoverTimer = setTimeout(() => {
+        if (currentFocus) {
+          return
+        }
+        if (hovering) {
+          return
+        }
+        hover.style.visibility = 'hidden'
+      }, 50)
+    }))
+  }
+
+  private getAddQuery(key, obj) {
+    return this._queryManipulator.getQuery().withAddTerms(`${key}:${obj}`)
   }
 
   private getTransformData(transform: string | object) {
@@ -406,24 +489,9 @@ export class LogFormatter {
       v = JSON.stringify(obj)
     }
 
-    if (this.shouldShowLinks(path)) {
-      const query = this._queryManipulator.getQuery().withAddTerms(`${pathStr}:${JSON.stringify(obj)}`)
-      v = `<a class="filter-link" href="?${query.toURL()}">${v}</a>`
-    }
-    v = `<span class="copyable-wrapper">${v}${copyToClipboardButton(originalObj, copyBag)}</span>`
+    v = `<span class="strong value" data-key="${pathStr}" data-obj="${escape(JSON.stringify(originalObj))}">${v}</span>`
 
     return v
-  }
-
-  shouldShowLinks(path: string[]): boolean {
-    const joinedPath = path.join('.')
-    if (this.config.maxDepthForLinks === undefined) {
-      return true
-    }
-    if (this.config.maxDepthForLinksExceptions.find(p => joinedPath.startsWith(p))) {
-      return true
-    }
-    return path.length <= this.config.maxDepthForLinks
   }
 
   static toLogfmt(entry: any): string {

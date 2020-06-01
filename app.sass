@@ -99,6 +99,22 @@ $stats-height: 1.5rem
     white-space: nowrap
     padding-left: 0.5rem
     padding-right: 0.5rem
+    position: relative
+
+    $hoverHeight: 1.6rem
+    .hover
+      padding-left: 0.5rem
+      position: absolute
+      height: $hoverHeight
+      font-size: 1rem
+      width: 60px
+      z-index: 10
+      border: 2px solid $blue
+      visibility: hidden
+
+    .value.focused
+      padding: 3px
+      margin: -3px
 
     .unexpanded
       cursor: pointer
@@ -109,6 +125,7 @@ $stats-height: 1.5rem
     .expanded
       display: block
       white-space: pre
+      position: relative
 
       .toggle
         cursor: pointer
@@ -147,6 +164,7 @@ $stats-height: 1.5rem
     vertical-align: middle
     color: white
     cursor: pointer
+
 
 #log-welcome, #log-error
   display: flex

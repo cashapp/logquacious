@@ -159,7 +159,6 @@ export class App extends Component<Props, State> {
             />
           </MenuDropdown>
 
-          <div id="stats-area" class="log-stats"/>
           <progress id="loading" class="progress is-info log-progress"/>
         </nav>
 

@@ -71,7 +71,7 @@ export class LogFormatter {
   private templateContent: DocumentFragment
   private config: FieldsConfig
   private _queryManipulator: QueryManipulator
-  private tz: TimeZone
+  private readonly tz: TimeZone
 
   constructor(config: FieldsConfig, tz: TimeZone) {
     if (config === undefined) {
@@ -161,43 +161,6 @@ export class LogFormatter {
     el.dataset.ts = entry[this.config.timestamp]
     el.dataset.id = entry._id
 
-    let fields = ''
-    for (const rule of this.config.collapsedFormatting) {
-      const value = entry[rule.field]
-      if (value === undefined) {
-        continue
-      }
-      let format: CollapsedFormatField = {
-        original: value,
-        current: value,
-        classes: [],
-        color: null,
-        entry,
-        tooltip: null,
-      }
-      rule.transforms = rule.transforms || []
-      for (const transform of rule.transforms) {
-        const {funcName, data} = this.getTransformData(transform)
-        const ctf = collapsedTransformers[funcName]
-        if (!ctf) {
-          throw Error(`Could not find collapsed transformer named '${funcName}'`)
-        }
-        const tf = ctf(this, data)
-        format = tf(format)
-      }
-
-      if (format.tooltip) {
-        format.classes.push("tooltip is-tooltip-bottom")
-      }
-      const tooltip = format.tooltip ? `data-tooltip="${format.tooltip}"` : ''
-      const clazz = format.classes.length > 0 ? 'class="' + format.classes.join(' ') + '"' : ''
-      const color = format.color ? `style="color:${format.color}"` : ''
-
-      if (format.current && format.current !== "") {
-        fields += `<div ${clazz} ${color} ${tooltip}>${format.current}</div>&nbsp;`
-      }
-    }
-
     const snippetEl = fragment.querySelector(".text") as HTMLElement
     if (origEntry._full) {
       origEntry._full.then((logMessage) => this.buildSnippet(snippetEl, logMessage))
@@ -205,7 +168,7 @@ export class LogFormatter {
       this.buildSnippet(snippetEl, origEntry)
     }
 
-    fragment.querySelector(".fields").innerHTML = fields
+    fragment.querySelector(".fields").innerHTML = this.renderUnexpanded(entry)
 
     let visible = false
     const expanded = fragment.querySelector(".expanded")
@@ -218,75 +181,28 @@ export class LogFormatter {
       }
 
       visible = !visible
-      if (visible) {
-        if (!isExpandedRendered) {
-          let full: LogMessage
-          if (origEntry._full) {
-            full = await origEntry._full
-          } else {
-            full = origEntry
-          }
-
-          // Grab bag of references to use for the copy button, that gets filled in by the
-          // rendering code
-          const copyBag = []
-          expanded.innerHTML = this.renderExpandedRecursively(this.cleanLog(full), copyBag, undefined, 0, cursor)
-
-          this.valueHover(expanded, hover)
-
-          expanded.addEventListener('click', (e) => {
-            // Doing some fancy event delegation here since there could be many nested nodes
-            const target = e.target as HTMLElement
-            const oldTooltip = target.dataset.tooltip
-            const data = copyBag[parseInt(target.dataset.copy, 10)]
-            const {getQuery, getFilters, changeQuery} = this._queryManipulator
-
-            const copied = () => {
-              target.dataset.tooltip = "Copied!"
-              setTimeout(() => target.dataset.tooltip = oldTooltip, 1000)
-              e.stopPropagation()
-            }
-
-            if (target.classList.contains('copy-button')) {
-              let v: string
-              if (isObject(data) || Array.isArray(data)) {
-                v = JSON.stringify(data, null, 2)
-              } else {
-                v = data.toString()
-              }
-              this.copyHelper.copy(v)
-              copied()
-
-            } else if (target.classList.contains('link-button')) {
-              const sharedQuery = getQuery()
-                .withFocus(full._id, JSON.stringify(data))
-                .withFixedTimeRange()
-              const w = window.location
-              this.copyHelper.copy(`${w.protocol}//${w.host}${w.pathname}?${sharedQuery.toURL()}`)
-              copied()
-
-            } else if (target.classList.contains('show-context-button')) {
-              // We're hijacking the a href when the user left clicks, so that the page doesn't reload.
-              // This will also allow middle clicks to new tabs.
-              const parent = target.parentNode as HTMLAnchorElement
-              changeQuery(Query.load(getFilters(), {urlQuery: parent.href}))
-              e.stopPropagation()
-              e.preventDefault()
-
-            } else if (target.classList.contains('filter-link')) {
-              const anchor = target as HTMLAnchorElement
-              changeQuery(Query.load(getFilters(), {urlQuery: anchor.href}))
-              e.stopPropagation()
-              e.preventDefault()
-            }
-
-          })
-          isExpandedRendered = true
-        }
-        expanded.classList.remove('is-hidden')
-      } else {
+      if (!visible) {
         expanded.classList.add('is-hidden')
+        return
       }
+
+      if (!isExpandedRendered) {
+        let full: LogMessage
+        if (origEntry._full) {
+          full = await origEntry._full
+        } else {
+          full = origEntry
+        }
+
+        // Grab bag of references to use for the copy button, that gets filled in by the
+        // rendering code
+        const copyBag = []
+        expanded.innerHTML = this.renderExpandedRecursively(this.cleanLog(full), copyBag, undefined, 0, cursor)
+        this.valueHover(expanded, hover)
+        expanded.addEventListener('click', (e) => this.handleExpandedClick(e, full, copyBag))
+        isExpandedRendered = true
+      }
+      expanded.classList.remove('is-hidden')
     })
 
     fragment.querySelector('.expanded').addEventListener('click', (e) => {
@@ -301,6 +217,53 @@ export class LogFormatter {
     })
 
     return fragment
+  }
+
+  private handleExpandedClick(e, full: LogMessage, copyBag: any[]) {
+    // Doing some fancy event delegation here since there could be many nested nodes
+    const target = e.target as HTMLElement
+    const oldTooltip = target.dataset.tooltip
+    const data = copyBag[parseInt(target.dataset.copy, 10)]
+    const {getQuery, getFilters, changeQuery} = this._queryManipulator
+
+    const copied = () => {
+      target.dataset.tooltip = "Copied!"
+      setTimeout(() => target.dataset.tooltip = oldTooltip, 1000)
+      e.stopPropagation()
+    }
+
+    if (target.classList.contains('copy-button')) {
+      let v: string
+      if (isObject(data) || Array.isArray(data)) {
+        v = JSON.stringify(data, null, 2)
+      } else {
+        v = data.toString()
+      }
+      this.copyHelper.copy(v)
+      copied()
+
+    } else if (target.classList.contains('link-button')) {
+      const sharedQuery = getQuery()
+        .withFocus(full._id, JSON.stringify(data))
+        .withFixedTimeRange()
+      const w = window.location
+      this.copyHelper.copy(`${w.protocol}//${w.host}${w.pathname}?${sharedQuery.toURL()}`)
+      copied()
+
+    } else if (target.classList.contains('show-context-button')) {
+      // We're hijacking the a href when the user left clicks, so that the page doesn't reload.
+      // This will also allow middle clicks to new tabs.
+      const parent = target.parentNode as HTMLAnchorElement
+      changeQuery(Query.load(getFilters(), {urlQuery: parent.href}))
+      e.stopPropagation()
+      e.preventDefault()
+
+    } else if (target.classList.contains('filter-link')) {
+      const anchor = target as HTMLAnchorElement
+      changeQuery(Query.load(getFilters(), {urlQuery: anchor.href}))
+      e.stopPropagation()
+      e.preventDefault()
+    }
   }
 
   private valueHover(expanded: Element, hover: HTMLElement) {
@@ -352,7 +315,7 @@ export class LogFormatter {
       // Copy
       // https://stackoverflow.com/a/19470348/11125
       let copy = hover.querySelector(".copy-to-clipboard") as HTMLAnchorElement
-      copy.parentNode.replaceChild(copy.cloneNode(true), copy);
+      copy.parentNode.replaceChild(copy.cloneNode(true), copy)
       copy = hover.querySelector(".copy-to-clipboard") as HTMLAnchorElement
       copy.addEventListener("click", () => {
         this.copyHelper.copy(JSON.parse(obj).toString())
@@ -387,6 +350,46 @@ export class LogFormatter {
 
   private getAddQuery(key, obj) {
     return this._queryManipulator.getQuery().withAddTerms(`${key}:${obj}`)
+  }
+
+  private renderUnexpanded(entry: LogMessage) {
+    let fields = ''
+    for (const rule of this.config.collapsedFormatting) {
+      const value = entry[rule.field]
+      if (value === undefined) {
+        continue
+      }
+      let format: CollapsedFormatField = {
+        original: value,
+        current: value,
+        classes: [],
+        color: null,
+        entry,
+        tooltip: null,
+      }
+      rule.transforms = rule.transforms || []
+      for (const transform of rule.transforms) {
+        const {funcName, data} = this.getTransformData(transform)
+        const ctf = collapsedTransformers[funcName]
+        if (!ctf) {
+          // throw Error(`Could not find collapsed transformer named '${funcName}'`)
+        }
+        const tf = ctf(this, data)
+        format = tf(format)
+      }
+
+      if (format.tooltip) {
+        format.classes.push("tooltip is-tooltip-bottom")
+      }
+      const tooltip = format.tooltip ? `data-tooltip="${format.tooltip}"` : ''
+      const clazz = format.classes.length > 0 ? 'class="' + format.classes.join(' ') + '"' : ''
+      const color = format.color ? `style="color:${format.color}"` : ''
+
+      if (format.current && format.current !== "") {
+        fields += `<div ${clazz} ${color} ${tooltip}>${format.current}</div>&nbsp;`
+      }
+    }
+    return fields
   }
 
   private getTransformData(transform: string | object) {

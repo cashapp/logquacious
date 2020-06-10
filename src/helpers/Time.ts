@@ -184,7 +184,7 @@ export class Time {
 
     // Only support negative deltas with an ES-ish format, e.g. "-1h", "now-10m" "-3 minutes"
     // https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/date-math-expressions.html
-    // TODO: It would be handy to support IS8601 deltas, e.g. "P1H30S", and human like, e.g. "-1h30s"
+    // TODO: It would be handy to support ISO8601 deltas, e.g. "P1H30S", and human like, e.g. "-1h30s"
     // TODO: Also handy would be able to apply a diff to a full timestamp, e.g. "2011-11-11T12:34 +1h"
     const re = new RegExp(/^(now)?(-\d+) ?(\w)/).exec(text)
     if (re !== null) {

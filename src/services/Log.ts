@@ -320,6 +320,22 @@ export class LogFormatter {
           hover.classList.remove('tooltip')
         }, 1000)
       })
+
+      hover.querySelectorAll(".extra").forEach(n => n.remove())
+      this.config.expandedFormatting
+        .filter(f => f.field === key)
+        .flatMap(f => f.transforms as object[])
+        .flatMap(tf => (tf as any).link as LinkConfig)
+        .forEach(lnk => {
+          const re = new RegExp(lnk.match)
+          const val = JSON.parse(obj)
+          if (typeof val !== "string") {
+            return
+          }
+          const url = val.replace(re, lnk.href)
+          const html = `<a class="extra tooltip is-tooltip-right" data-tooltip="${lnk.title}" href="${url}"><i class="mdi ${lnk.icon}"></i></a>`
+          hover.innerHTML += html
+        })
     }))
 
     value.forEach(el => el.addEventListener('mouseleave', (e) => {
@@ -776,6 +792,21 @@ function shortenJavaFqcn(): CollapsedTransform {
   }
 }
 
+type LinkConfig = {
+  title: string
+  match: string
+  href: string
+  icon: string
+}
+
+// This is just a placeholder. The actual functionality is in valueHover.
+function link(_: LinkConfig): ExpandedTransform {
+  return (field: ExpandedFormatField): ExpandedFormatField => {
+    return field
+  }
+}
+
+
 export const collapsedTransformers: { [key: string]: (lf: LogFormatter, _: any) => CollapsedTransform } = {
   timestamp,
   upperCase,
@@ -790,4 +821,5 @@ export const collapsedTransformers: { [key: string]: (lf: LogFormatter, _: any) 
 
 export const expandedTransformers: { [key: string]: (_: any) => ExpandedTransform } = {
   javaException,
+  link,
 }

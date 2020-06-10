@@ -257,12 +257,6 @@ export class LogFormatter {
       changeQuery(Query.load(getFilters(), {urlQuery: parent.href}))
       e.stopPropagation()
       e.preventDefault()
-
-    } else if (target.classList.contains('filter-link')) {
-      const anchor = target as HTMLAnchorElement
-      changeQuery(Query.load(getFilters(), {urlQuery: anchor.href}))
-      e.stopPropagation()
-      e.preventDefault()
     }
   }
 

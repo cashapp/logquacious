@@ -129,7 +129,7 @@ You can also mount your own nginx configuration at `/etc/nginx/conf.d/lq.conf`. 
 
 * Install Node.js
 ```shell script
-git clone https://github.com/square/logquacious
+git clone https://github.com/cashapp/logquacious
 cd logquacious
 npm install
 npm run build

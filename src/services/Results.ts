@@ -193,12 +193,14 @@ export class Results {
   }
 
   getBottomEntry(): HTMLElement {
+    let lastChunk: Element | undefined
     for (const chunk of this.logs.children) {
       if (chunk.children.length > 0) {
-        return chunk.children[chunk.children.length - 1] as HTMLElement
+        lastChunk = chunk
       }
     }
-    return undefined
+
+    return lastChunk ? lastChunk.children[lastChunk.children.length - 1] as HTMLElement : undefined
   }
 
   getEntryAt(idx: number): HTMLElement {

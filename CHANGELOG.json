@@ -1,5 +1,11 @@
 [
   {
+    "when": "2020-07-24",
+    "pr": 141,
+    "what": "Fix older result returns the same result problem",
+    "type": "bug"
+  },
+  {
     "when": "2020-06-10",
     "pr": 135,
     "what": "Fix broken exception links.",

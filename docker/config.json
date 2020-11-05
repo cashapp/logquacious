@@ -11,6 +11,7 @@
   "fields": {
     "main": {
       "timestamp": "{{.TimestampField}}",
+      {{if .SecondaryIndex}}"secondaryIndex": "{{.SecondaryIndex}}" {{end}},
       "collapsedFormatting": [
         {
           "field": "{{.TimestampField}}",

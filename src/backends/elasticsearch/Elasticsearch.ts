@@ -164,8 +164,17 @@ export class Elasticsearch implements IDataSource {
         [this.fieldsConfig.timestamp]: {
           order: (searchAfterAscending === true) ? 'asc' : 'desc'
         }
-      },
+      }
     ]
+    // We now have a secondary index to sort by if timestamps happen to be identical to get
+    // a consistent and in-order sort. (ingested_time)
+    if (!!this.fieldsConfig.secondaryIndex) {
+      search.sort.push({
+        [this.fieldsConfig.secondaryIndex]: {
+          order: (searchAfterAscending === true) ? 'asc' : 'desc'
+        }
+      });
+    }
 
     if (cursor !== undefined) {
       search.search_after = cursor

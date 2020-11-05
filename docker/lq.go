@@ -24,6 +24,7 @@ type Vars struct {
 	ESURL               string   `env:"ES_URL" name:"es-url" help:"ElasticSearch host to send queries to, e.g.: http://my-es-server:9200/ (ES_URL)"`
 	ESIndex             string   `env:"ES_INDEX" default:"*" help:"ElasticSearch index to search in. (ES_INDEX)"`
 	TimestampField      string   `env:"TIMESTAMP_FIELD" default:"@timestamp" help:"The field containing the main timestamp entry. (TIMESTAMP_FIELD)"`
+	SecondaryIndex      string   `env:"SECONDARY_INDEX" default:"" help:"The field containing a secondary index to sort if timestamps are equal. (SECONDARY_INDEX)"`
 	LevelField          string   `env:"LEVEL_FIELD" default:"level" help:"The field containing the log level. (LEVEL_FIELD)"`
 	ServiceField        string   `env:"SERVICE_FIELD" default:"service" help:"The field containing the name of the service. (SERVICE_FIELD)"`
 	MessageField        string   `env:"MESSAGE_FIELD" default:"message" help:"The field containing the main message of the log entry. (MESSAGE_FIELD)"`

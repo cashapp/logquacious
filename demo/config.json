@@ -8,6 +8,75 @@
       "fields": "main"
     }
   ],
+  "filters": [
+    {
+      "id": "level",
+      "urlKey": "ll",
+      "title": "Log Level",
+      "default": null,
+      "type": "singleValue",
+      "items": [
+        {
+          "title": "All levels",
+          "id": null
+        },
+        {
+          "title": "Debug",
+          "id": "debug"
+        },
+        {
+          "title": "Info",
+          "id": "info"
+        },
+        {
+          "title": "Warn",
+          "id": "warn"
+        },
+        {
+          "title": "Error",
+          "id": "error"
+        }
+      ]
+    },
+    {
+      "id": "plevel",
+      "urlKey": "pll",
+      "title": "Log Level",
+      "default": null,
+      "type": "addTerms",
+      "items": [
+        {
+          "title": "All levels",
+          "id": null
+        },
+        {
+          "title": "Debug+",
+          "id": "debug",
+          "terms": "level:>=10000"
+        },
+        {
+          "title": "Info+",
+          "id": "info",
+          "terms": "level:>=20000"
+        },
+        {
+          "title": "Warn+",
+          "id": "warn",
+          "terms": "level:>=30000"
+        },
+        {
+          "title": "Error+",
+          "id": "error",
+          "terms": "level:>=40000"
+        },
+        {
+          "title": "Fatal+",
+          "id": "fatal",
+          "terms": "level:>=50000"
+        }
+      ]
+    }
+  ],
   "fields": {
     "main": {
       "timestamp": "@timestamp",

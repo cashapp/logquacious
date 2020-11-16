@@ -8,6 +8,7 @@ import {TimeZone} from "./Prefs"
 
 export type FieldsConfig = {
   timestamp?: string
+  disableTimestampNano?: boolean
   secondaryIndex?: string
   collapsedFormatting: ILogRule[]
   expandedFormatting?: ILogRule[]

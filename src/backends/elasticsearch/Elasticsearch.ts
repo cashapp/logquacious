@@ -57,7 +57,10 @@ interface ElasticsearchError {
 }
 
 interface SortItem {
-  [key: string]: { order: "asc" | "desc" }
+  [key: string]: {
+    order: "asc" | "desc",
+    numeric_type?: string
+  }
 }
 
 interface SearchQuery {
@@ -166,6 +169,13 @@ export class Elasticsearch implements IDataSource {
         }
       }
     ]
+    // ES versions 7.7-7.9 have a bug when using date_nanos as a sort field. We can avoid this by forcing timestamps
+    // to have ms resolution instead, with the slight regression that logs may not have a stable sorting behavior
+    // (logs within 1ms will be considered as equal, and thus ordering dependent on aggregation.)
+    // see https://github.com/elastic/elasticsearch/issues/63719 for details
+    if (this.fieldsConfig.disableTimestampNano) {
+        search.sort[0][this.fieldsConfig.timestamp].numeric_type = "date"
+    }
     // We now have a secondary index to sort by if timestamps happen to be identical to get
     // a consistent and in-order sort. (ingested_time)
     if (!!this.fieldsConfig.secondaryIndex) {

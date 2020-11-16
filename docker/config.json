@@ -12,7 +12,8 @@
     "main": {
       "timestamp": "{{.TimestampField}}",
       {{if .SecondaryIndex}}"secondaryIndex": "{{.SecondaryIndex}}" {{end}},
-      "collapsedFormatting": [
+      {{if .DisableTimestampNano}}"disableTimestampNano": "{{.DisableTimestampNano}}" {{end}},
+"collapsedFormatting": [
         {
           "field": "{{.TimestampField}}",
           "transforms": [

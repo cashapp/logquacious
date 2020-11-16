@@ -20,16 +20,17 @@ import (
 )
 
 type Vars struct {
-	ESProxy             bool     `env:"ES_PROXY" default:"true" help:"Use a reverse proxy for ElasticSearch to avoid needing CORS. (ES_PROXY)"`
-	ESURL               string   `env:"ES_URL" name:"es-url" help:"ElasticSearch host to send queries to, e.g.: http://my-es-server:9200/ (ES_URL)"`
-	ESIndex             string   `env:"ES_INDEX" default:"*" help:"ElasticSearch index to search in. (ES_INDEX)"`
-	TimestampField      string   `env:"TIMESTAMP_FIELD" default:"@timestamp" help:"The field containing the main timestamp entry. (TIMESTAMP_FIELD)"`
-	SecondaryIndex      string   `env:"SECONDARY_INDEX" default:"" help:"The field containing a secondary index to sort if timestamps are equal. (SECONDARY_INDEX)"`
-	LevelField          string   `env:"LEVEL_FIELD" default:"level" help:"The field containing the log level. (LEVEL_FIELD)"`
-	ServiceField        string   `env:"SERVICE_FIELD" default:"service" help:"The field containing the name of the service. (SERVICE_FIELD)"`
-	MessageField        string   `env:"MESSAGE_FIELD" default:"message" help:"The field containing the main message of the log entry. (MESSAGE_FIELD)"`
-	IgnoredFields       []string `env:"IGNORED_FIELDS" default:"_id,_index" help:"Do not display these fields in the collapsed log line. (IGNORED_FIELDS)"`
-	IgnoredFieldsJoined string   `hidden:""`
+	ESProxy              bool     `env:"ES_PROXY" default:"true" help:"Use a reverse proxy for ElasticSearch to avoid needing CORS. (ES_PROXY)"`
+	ESURL                string   `env:"ES_URL" name:"es-url" help:"ElasticSearch host to send queries to, e.g.: http://my-es-server:9200/ (ES_URL)"`
+	ESIndex              string   `env:"ES_INDEX" default:"*" help:"ElasticSearch index to search in. (ES_INDEX)"`
+	TimestampField       string   `env:"TIMESTAMP_FIELD" default:"@timestamp" help:"The field containing the main timestamp entry. (TIMESTAMP_FIELD)"`
+	DisableTimestampNano bool     `env:"DISABLE_TIMESTAMP_NANO" default:"false" help:"disable using ns precision on timestampfield. (DISABLE_TIMESTAMP_NANO)"`
+	SecondaryIndex       string   `env:"SECONDARY_INDEX" default:"" help:"The field containing a secondary index to sort if timestamps are equal. (SECONDARY_INDEX)"`
+	LevelField           string   `env:"LEVEL_FIELD" default:"level" help:"The field containing the log level. (LEVEL_FIELD)"`
+	ServiceField         string   `env:"SERVICE_FIELD" default:"service" help:"The field containing the name of the service. (SERVICE_FIELD)"`
+	MessageField         string   `env:"MESSAGE_FIELD" default:"message" help:"The field containing the main message of the log entry. (MESSAGE_FIELD)"`
+	IgnoredFields        []string `env:"IGNORED_FIELDS" default:"_id,_index" help:"Do not display these fields in the collapsed log line. (IGNORED_FIELDS)"`
+	IgnoredFieldsJoined  string   `hidden:""`
 }
 
 const lqTemplate = "config.json"

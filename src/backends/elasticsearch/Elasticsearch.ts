@@ -60,6 +60,7 @@ interface SortItem {
   [key: string]: {
     order: "asc" | "desc",
     numeric_type?: string
+    missing?: any
   }
 }
 
@@ -181,7 +182,8 @@ export class Elasticsearch implements IDataSource {
     if (!!this.fieldsConfig.secondaryIndex) {
       search.sort.push({
         [this.fieldsConfig.secondaryIndex]: {
-          order: (searchAfterAscending === true) ? 'asc' : 'desc'
+          order: (searchAfterAscending === true) ? 'asc' : 'desc',
+          missing: 0
         }
       });
     }

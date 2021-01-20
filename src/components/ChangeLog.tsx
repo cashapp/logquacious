@@ -2,6 +2,9 @@ import { Component } from "inferno"
 import Changes from "../../CHANGELOG.json"
 
 function groupBy(xs, key) {
+  if (!xs.reduce) {
+    return {}
+  }
   return xs.reduce((rv, x) => {
     (rv[x[key]] = rv[x[key]] || []).push(x)
     return rv

@@ -14,6 +14,8 @@ import { SearchBar, SearchBarCallback } from "./SearchBar"
 import { ChangeRangeCallback, Picker } from "./picker/Picker"
 import { MenuTitle } from "./menu/MenuTitle"
 import { MenuDropdown } from "./menu/MenuDropDown"
+import {MenuDivider} from "./menu/MenuDivider";
+import {Button} from "./Button";
 
 export type AttachResultsCallback = (el: HTMLElement) => void
 export type DisplayCallback = (d: Display, errorMessage?: string) => void
@@ -157,6 +159,26 @@ export class App extends Component<Props, State> {
               on={{title: "Local", value: TimeZone.Local}}
               off={{title: "UTC", value: TimeZone.UTC}}
             />
+            <MenuDivider/>
+            <MenuTitle>Actions</MenuTitle>
+            <div className="navbar-action">
+                <Button className="level-item" onClick={() => {
+                  this.log.results.getLogEntries().then(async (logs) => {
+                    // @ts-ignore
+                    const newHandle = await window.showSaveFilePicker();
+
+                    // create a FileSystemWritableFileStream to write to
+                    const writableStream = await newHandle.createWritable();
+
+                    // write our file
+                    await writableStream.write(JSON.stringify(logs, null, 2));
+
+                    // close the file and write the contents to disk.
+                    await writableStream.close();
+                  })
+                }}>Export</Button>
+            </div>
+
           </MenuDropdown>
 
           <progress id="loading" class="progress is-info log-progress"/>

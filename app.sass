@@ -9,6 +9,7 @@ $danger: hsl(10, 75%, 61%)
 @import "node_modules/bulma/sass/elements/content"
 @import "node_modules/bulma/sass/elements/title"
 @import "node_modules/bulma/sass/components/navbar"
+@import "node_modules/bulma/sass/components/level"
 @import "node_modules/bulma/sass/components/message"
 @import "node_modules/bulma/sass/grid/columns"
 
@@ -67,6 +68,11 @@ body
   .navbar-dropdown.time-picker
     .navbar-item
       padding-right: 0
+
+  .navbar-dropdown .navbar-action
+    display: flex
+    flex-direction: row-reverse
+    padding-right: 1rem
 
   img
     margin-right: 0.5rem

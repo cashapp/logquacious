@@ -48,19 +48,19 @@
     "randomcolor": "^0.5.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.7",
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.8.3",
-    "@babel/plugin-transform-runtime": "^7.7.6",
-    "@babel/plugin-transform-typescript": "^7.7.4",
-    "@babel/preset-env": "^7.7.7",
-    "@babel/preset-typescript": "^7.7.7",
-    "@babel/runtime": "^7.7.7",
+    "@babel/core": "7.7.7",
+    "@babel/plugin-proposal-class-properties": "7.7.4",
+    "@babel/plugin-proposal-optional-chaining": "7.8.3",
+    "@babel/plugin-transform-runtime": "7.7.6",
+    "@babel/plugin-transform-typescript": "7.7.4",
+    "@babel/preset-env": "7.7.7",
+    "@babel/preset-typescript": "7.7.7",
+    "@babel/runtime": "7.7.7",
     "@types/d3": "^5.7.2",
     "@types/jest": "^24.0.25",
     "@types/node": "^12.12.24",
     "babel-jest": "*",
-    "babel-plugin-inferno": "^6.1.0",
+    "babel-plugin-inferno": "6.1.0",
     "core-js": "^3.6.2",
     "cssnano": "^4.1.10",
     "d3": "^5.15.0",
@@ -71,6 +71,6 @@
     "parcel": "^1.12.4",
     "sass": "^1.24.3",
     "tslint": "^6.0.0",
-    "typescript": "^3.7.4"
+    "typescript": "3.7.4"
   }
 }

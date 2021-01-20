@@ -1,5 +1,11 @@
 [
   {
+    "when": "2021-01-20",
+    "pr": 149,
+    "what": "Add the ability to export log entries out as file",
+    "type": "feature"
+  },
+  {
     "when": "2020-07-24",
     "pr": 141,
     "what": "Fix older result returns the same result problem",

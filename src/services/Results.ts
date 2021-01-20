@@ -1,8 +1,8 @@
-import { FieldsConfig, LogFormatter, QueryManipulator } from "./Log"
-import { Lookup } from "../helpers/Lookup"
-import { LogMessage } from "../backends/elasticsearch/Elasticsearch"
+import {FieldsConfig, LogFormatter, QueryManipulator} from "./Log"
+import {Lookup} from "../helpers/Lookup"
+import {LogMessage} from "../backends/elasticsearch/Elasticsearch"
 import {Direction, SwapDirection, TimeZone} from "./Prefs"
-import { Time } from "../helpers/Time"
+import {Time} from "../helpers/Time"
 
 export interface IStats {
   visible: number
@@ -28,10 +28,12 @@ export class Results {
   private afterLogs: HTMLElement
   private savedScrollEntry: HTMLElement
   private queryManipulator: QueryManipulator
+  private entries: any[]
 
   constructor(direction: Direction, tz: TimeZone) {
     this.direction = direction
     this.tz = tz
+    this.entries = []
     this.stats = {
       visible: 0,
     }
@@ -144,11 +146,13 @@ export class Results {
   }
 
   append(entry: LogMessage) {
+    this.entries.push(entry)
     const fragment = this.logFormatter.build(entry)
     this.addFragment(fragment, this.direction)
   }
 
   prepend(entry: any) {
+    this.entries.unshift(entry)
     const fragment = this.logFormatter.build(entry)
     this.addFragment(fragment, SwapDirection(this.direction))
   }
@@ -237,6 +241,7 @@ export class Results {
     this.logs.innerHTML = ''
     this.beforeLogs.hidden = true
     this.afterLogs.hidden = true
+    this.entries = []
     this.newChunk(this.direction)
   }
 
@@ -263,9 +268,12 @@ export class Results {
         elements.push(row as HTMLElement)
       }
     }
+    const entries = this.entries
 
     this.clear()
     elements.reverse()
+    entries.reverse()
+    this.entries = entries
     for (const elm of elements) {
       this.addFragment(elm, Direction.Down)
     }
@@ -352,5 +360,18 @@ export class Results {
     e.scrollIntoView({block: "center"})
     const el = e.getElementsByClassName("unexpanded")[0] as HTMLElement
     el.click()
+  }
+
+  getLogEntries(): Promise<any[]> {
+    let entries = this.entries
+    switch (this.direction) {
+      case Direction.Up:
+        entries = this.entries.reverse()
+        break;
+      case Direction.Down:
+      default:
+        break;
+    }
+    return Promise.all(entries.map(e => e._full))
   }
 }

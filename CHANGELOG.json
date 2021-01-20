@@ -2,7 +2,7 @@
   {
     "when": "2021-01-20",
     "pr": 149,
-    "what": "Add the ability to export log entries out as file",
+    "what": "Add the ability to export log entries out as file.",
     "type": "feature"
   },
   {

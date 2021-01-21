@@ -45,8 +45,13 @@ interface State {
   errorMessage?: string
   query: Query,
   focusInput: boolean,
+  logExportFormat: ExportLogFormat,
 }
 
+enum ExportLogFormat {
+  JSON = "JSON",
+  JSON_PER_LINE = "JSON_PER_LINE",
+}
 
 export type FilterEnableRule = {
   kind: 'filter'
@@ -90,6 +95,7 @@ export class App extends Component<Props, State> {
       display: Display.welcome,
       query: new Query(),
       focusInput: true,
+      logExportFormat: ExportLogFormat.JSON_PER_LINE,
     }
   }
 
@@ -113,6 +119,34 @@ export class App extends Component<Props, State> {
   handleThemeChanged: ChangeSettingCallback<Theme> = (theme: Theme) => this.log.handleThemeCallback(theme)
   handleDirectionChanged: ChangeSettingCallback<Direction> = (direction: Direction) => this.log.handleDirectionCallback(direction)
   handleTimeZoneChanged: ChangeSettingCallback<TimeZone> = (tz: TimeZone) => this.log.handleTimeZoneCallback(tz)
+
+  handleLogFormatChanged: ChangeSettingCallback<ExportLogFormat> = (format: ExportLogFormat) => this.setState({logExportFormat: format})
+
+  exportLog = () => {
+    this.log.results.getLogEntries().then(async (logs) => {
+      // @ts-ignore
+      const newHandle = await window.showSaveFilePicker();
+
+      // create a FileSystemWritableFileStream to write to
+      const writableStream = await newHandle.createWritable();
+
+      switch (this.state.logExportFormat) {
+        case ExportLogFormat.JSON:
+          // write our file
+          await writableStream.write(JSON.stringify(logs, null, 2));
+          break;
+        case ExportLogFormat.JSON_PER_LINE:
+          // write JSON per line file
+          await writableStream.write(logs.map(l => JSON.stringify(l)).join("\n"))
+          break;
+        default:
+          break;
+      }
+
+      // close the file and write the contents to disk.
+      await writableStream.close();
+    })
+  }
 
   render() {
     const range: Range = [this.state.query.startTime, this.state.query.endTime]
@@ -161,22 +195,16 @@ export class App extends Component<Props, State> {
             />
             <MenuDivider/>
             <MenuTitle>Actions</MenuTitle>
+            <MenuSetting
+              onChange={this.handleLogFormatChanged}
+              setting="export-log-format"
+              value={this.state.logExportFormat}
+              title="Log Format"
+              on={{title: "JSON Per Line", value: ExportLogFormat.JSON_PER_LINE}}
+              off={{title: "JSON", value: ExportLogFormat.JSON}}
+            />
             <div className="navbar-action">
-                <Button className="level-item" onClick={() => {
-                  this.log.results.getLogEntries().then(async (logs) => {
-                    // @ts-ignore
-                    const newHandle = await window.showSaveFilePicker();
-
-                    // create a FileSystemWritableFileStream to write to
-                    const writableStream = await newHandle.createWritable();
-
-                    // write our file
-                    await writableStream.write(JSON.stringify(logs, null, 2));
-
-                    // close the file and write the contents to disk.
-                    await writableStream.close();
-                  })
-                }}>Export</Button>
+                <Button className="level-item" onClick={this.exportLog}>Export</Button>
             </div>
 
           </MenuDropdown>

@@ -144,7 +144,7 @@ func genPayload(when time.Time) (*bytes.Buffer, error) {
 		Timestamp: when.UTC().Format("2006-01-02T15:04:05-0700"),
 	}
 
-	switch rand.Int() % 3 {
+	switch rand.Int() % 4 {
 	case 0:
 		payload.Level = "INFO"
 		payload.Message = fmt.Sprintf("A descriptive info message %d", rand.Int())
@@ -154,6 +154,9 @@ func genPayload(when time.Time) (*bytes.Buffer, error) {
 	case 2:
 		payload.Level = "ERROR"
 		payload.Message = fmt.Sprintf("error running process %d with command %d", rand.Int()%32767, rand.Int())
+	case 3:
+		payload.Level = "INFO"
+		payload.Message = fmt.Sprintf("<!DOCTYPE html><html><head><title>Error: 404</title><style type=\"text/css\">body{background-color:#fff;color:#666;text-align:center;font-family:arial,sans-serif}div.dialog{width:25em;padding:0 4em;margin:4em auto 0 auto;border:1px solid #ccc;border-right-color:#999;border-bottom-color:#999}h1{font-size:100%;color:#f00;line-height:1.5em}</style></head><body><div class=\"dialog\"><h1>Test HTML Escaping</h1><p>This is a test for if HTML gets logged</p></div></body></html>")
 	}
 
 	switch rand.Int() % 5 {

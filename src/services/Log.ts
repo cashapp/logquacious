@@ -398,7 +398,7 @@ export class LogFormatter {
       const color = format.color ? `style="color:${format.color}"` : ''
 
       if (format.current && format.current !== "") {
-        fields += `<div ${clazz} ${color} ${tooltip}>${format.current}</div>&nbsp;`
+        fields += `<div ${clazz} ${color} ${tooltip}>${escape(format.current)}</div>&nbsp;`
       }
     }
     return fields
@@ -504,7 +504,7 @@ export class LogFormatter {
       v = JSON.stringify(obj)
     }
 
-    v = `<span class="strong value" data-key="${pathStr}" data-obj="${escape(JSON.stringify(originalObj))}">${v}</span>`
+    v = `<span class="strong value" data-key="${escape(pathStr)}" data-obj="${escape(JSON.stringify(originalObj))}">${v}</span>`
 
     return v
   }

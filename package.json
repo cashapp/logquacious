@@ -67,7 +67,7 @@
     "html-loader-jest": "^0.2.1",
     "jest": "*",
     "jest-fetch-mock": "^2.1.2",
-    "json": "^9.0.6",
+    "json": "^10.0.0",
     "parcel": "^1.12.4",
     "sass": "^1.24.3",
     "tslint": "^6.0.0",

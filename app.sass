@@ -8,6 +8,7 @@ $danger: hsl(10, 75%, 61%)
 @import "node_modules/bulma/sass/elements/progress"
 @import "node_modules/bulma/sass/elements/content"
 @import "node_modules/bulma/sass/elements/title"
+@import "node_modules/bulma/sass/elements/tag"
 @import "node_modules/bulma/sass/components/navbar"
 @import "node_modules/bulma/sass/components/level"
 @import "node_modules/bulma/sass/components/message"
@@ -34,7 +35,6 @@ html, body
   width: 100vw
   margin: 0
   padding: 0
-  overflow: hidden
 
 body
   *::-webkit-scrollbar
@@ -164,7 +164,7 @@ $progress-height: 0.3rem
     cursor: pointer
 
 
-#log-welcome, #log-error
+#log-welcome, #log-error, #recent-searches
   display: flex
   align-items: center
   justify-content: center
@@ -178,6 +178,10 @@ $progress-height: 0.3rem
 #log-error
   .message-header
     background-color: #a23e3e
+
+#recent-searches
+  .message-header
+    background-color: #3273dc
 
 .log-divider
   padding: 0
@@ -294,3 +298,26 @@ $progress-height: 0.3rem
 //input[type=radio]
 //  margin-top: 0.5rem
 //  margin-right: 0.3rem
+
+.recent-search-entry
+  padding: 3px 0 7px
+  border-bottom: 1px solid #ededed
+  cursor: pointer
+
+  &:hover
+    background: #ededed
+
+  .search-terms
+    display: block
+    font-weight: 500
+
+  .search-dates
+    display: block
+    color: #999999
+
+  .tag
+    margin-right: 5px
+
+    &.is-primary.is-light
+      background-color: #ebfffc
+      color: #00947e

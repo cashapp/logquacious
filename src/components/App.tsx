@@ -16,6 +16,7 @@ import { MenuTitle } from "./menu/MenuTitle"
 import { MenuDropdown } from "./menu/MenuDropDown"
 import {MenuDivider} from "./menu/MenuDivider";
 import {Button} from "./Button";
+import { RecentSearches } from "./RecentSearches"
 
 export type AttachResultsCallback = (el: HTMLElement) => void
 export type DisplayCallback = (d: Display, errorMessage?: string) => void
@@ -221,6 +222,12 @@ export class App extends Component<Props, State> {
           </div>
         </div>
 
+        {
+          this.state.display == Display.welcome && this.log.isTrackingEnabled()
+            && <RecentSearches
+              queries={this.log.trackedSearches()}
+              onQuerySelection={query => this.log.newSearch(query, true, true)} />
+        }
         <Welcome visible={this.state.display === Display.welcome}/>
         <Error visible={this.state.display === Display.error} message={this.state.errorMessage}/>
 

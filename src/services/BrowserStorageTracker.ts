@@ -14,7 +14,7 @@ export class BrowserStorageTracker implements ITracker {
     this.queries = new Map()
     const persistedQueries = this.storage.getItem(TRACKER_STORAGE_KEY)
     if(persistedQueries != null) {
-      const queries: Array<SerializedData> = JSON.parse(persistedQueries)
+      const queries: SerializedData[] = JSON.parse(persistedQueries)
       queries.forEach(serializedData => {
         const query = Query.deserialize(serializedData, filters)
         this.queries.set(query.toURL(), query)

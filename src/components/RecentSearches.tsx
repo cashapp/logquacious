@@ -9,7 +9,7 @@ interface Props {
 
 export const RecentSearches = ({queries, onQuerySelection}: Props) => {
   const queryListing = Array.from(queries, ([url, query]) =>
-    (query.terms == null || query.terms == "") ? null :
+    (query.terms === null || query.terms === "") ? null :
       <QueryListing
         key={url}
         query={query}
@@ -17,7 +17,7 @@ export const RecentSearches = ({queries, onQuerySelection}: Props) => {
       />
     )
 
-  if(queryListing.filter(item => item != null).length == 0) return null
+  if(queryListing.filter(item => item !== null).length === 0) return null
 
   return (
     <section id="recent-searches" class="section">
@@ -41,10 +41,10 @@ interface QueryListingProps {
 const QueryListing = ({query, onSelection}: QueryListingProps) => {
 
   const activeFilters = query.filters.filter(
-    filter => filter.selected != "" && filter.selected !== filter.default);
+    filter => filter.selected !== "" && filter.selected !== filter.default);
 
   const filterTitle = (filter: Filter, value: string | null) => {
-    const filterItem = filter.items.find(item => item.id == value)
+    const filterItem = filter.items.find(item => item.id === value)
     return filterItem.shortTitle === undefined ? filterItem.title : filterItem.shortTitle
   }
 

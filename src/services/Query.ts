@@ -12,6 +12,8 @@ export type LoadOptions = {
 
 const storageKey = "query"
 
+export type SerializedData = { [id: string]: string | undefined }
+
 // Query state data object with encoding/decoding to query parameters.
 export class Query {
   terms?: string
@@ -71,6 +73,19 @@ export class Query {
       })
     }
 
+    let storageFilters: Map<string, string> = new Map<string, string>()
+    if (options.storage) {
+      storageFilters = this.loadStorage(options.storage)
+    }
+
+    return this.deserialize(result, filters, storageFilters)
+  }
+
+  static deserialize(
+      result: SerializedData,
+      filters: Filter[],
+      storageFilters: Map<string, string> = new Map<string, string>()
+  ) {
     const q = new Query()
     q.terms = result.q
     q.pageSize = parseInt(result.n, 10) || DefaultPageSize
@@ -78,11 +93,6 @@ export class Query {
     q.endTime = result.u ? Time.parseText(result.u) : DefaultEndTime // u for until
     q.focusCursor = result.cursor
     q.focusId = result.id
-
-    let storageFilters: Map<string, string> = new Map<string, string>()
-    if (options.storage) {
-      storageFilters = this.loadStorage(options.storage)
-    }
 
     for (const idx of Object.keys(filters)) {
       const filter = filters[idx]
@@ -133,7 +143,22 @@ export class Query {
   }
 
   toURL(): string {
-    const values: { [id: string]: string | undefined } = {}
+    const values = this.serialize();
+
+    return Object.keys(values)
+      // Space can be encoded as +, and : can be left alone. encodeURIComponent is a bit overly aggressive
+      // to be support poor URI standards.
+      .map(k =>
+        encodeURIComponent(k) + '=' +
+        encodeURIComponent(values[k])
+          .replace(/%20/g, '+')
+          .replace(/%3A/g, ':')
+      )
+      .join('&')
+  }
+
+  serialize(): SerializedData {
+    const values: SerializedData = {}
     if (this.terms !== undefined) {
       values.q = this.terms
     }
@@ -155,17 +180,7 @@ export class Query {
     for (const f of this.filters) {
       values[f.urlKey] = f.selected || ""
     }
-
-    return Object.keys(values)
-      // Space can be encoded as +, and : can be left alone. encodeURIComponent is a bit overly aggressive
-      // to be support poor URI standards.
-      .map(k =>
-        encodeURIComponent(k) + '=' +
-        encodeURIComponent(values[k])
-          .replace(/%20/g, '+')
-          .replace(/%3A/g, ':')
-      )
-      .join('&')
+    return values;
   }
 
   withNewTerms(terms: string): Query {

@@ -8,7 +8,6 @@ import {Direction, Prefs, Theme, TimeZone} from "./Prefs"
 import { ThemeChanger } from "./ThemeChanger"
 import { Range } from "../helpers/Time"
 import { FieldsConfig } from "./Log"
-import { HistoryTracker } from "./HistoryTracker"
 
 export type QueryCallback = (q: Query) => void
 export type ThemeCallback = (theme: Theme) => void
@@ -32,7 +31,6 @@ export type DataSourceConfig = {
 
 export interface ITracker {
   trackSearch(q: Query)
-  trackedSearches(): Map<string, Query>
 }
 
 export type Config = {
@@ -144,20 +142,7 @@ export class Logquacious {
     for (const k of Object.keys(config.fields)) {
       config.fields[k].timestamp = config.fields[k].timestamp || "@timestamp"
     }
-    config.tracker = new HistoryTracker(window.localStorage, config.filters)
     return config
-  }
-
-  isTrackingEnabled(): boolean {
-    return this.config.tracker != null
-  }
-
-  trackedSearches(): Map<string, Query> {
-    if(!this.isTrackingEnabled()) {
-      return (new Map())
-    }
-
-    return this.config.tracker.trackedSearches()
   }
 
   dsConfig(): DataSourceConfig {
@@ -215,7 +200,6 @@ export class Logquacious {
   newSearch(q: Query, pushHistory?: boolean, inputFocus: boolean = true) {
     this.query = q
     this.onQuery(this.query)
-    this.onFilter(this.query.enabledFilters())
     document.title = q.title()
     if (pushHistory) {
       history.pushState(null, q.title(), "?" + q.toURL())
@@ -355,6 +339,7 @@ export class Logquacious {
       .withAppendFilter(filter, selected)
       .toStorage(window.localStorage)
     this.newSearch(this.query, true)
+    this.onFilter(this.query.enabledFilters())
   }
 
   handleRangeCallback(range: Range) {

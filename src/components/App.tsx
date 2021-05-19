@@ -223,7 +223,7 @@ export class App extends Component<Props, State> {
         </div>
 
         {
-          this.state.display === Display.welcome && this.log.isTrackingEnabled()
+          this.state.display == Display.welcome && this.log.isTrackingEnabled()
             && <RecentSearches
               queries={this.log.trackedSearches()}
               onQuerySelection={query => this.log.newSearch(query, true, true)} />

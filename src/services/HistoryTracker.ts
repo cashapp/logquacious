@@ -1,20 +1,20 @@
 import { ITracker } from "./Logquacious";
 import { Query, SerializedData } from "./Query";
-import { Filter } from "../components/App";
+import {Filter} from "../components/App";
 
-const TRACKER_STORAGE_KEY = "historicalQueries"
+const HISTORY_TRACKER_STORAGE_KEY = "historicalQueries"
 const MAX_ITEMS_ALLOWED = 20
 
-export class BrowserStorageTracker implements ITracker {
+export class HistoryTracker implements ITracker {
   storage: Storage
   queries: Map<string, Query>
 
   constructor(storage: Storage, filters: Filter[]) {
     this.storage = storage;
     this.queries = new Map()
-    const persistedQueries = this.storage.getItem(TRACKER_STORAGE_KEY)
-    if(persistedQueries != null) {
-      const queries: Array<SerializedData> = JSON.parse(persistedQueries)
+    const historicalQueries = this.storage.getItem(HISTORY_TRACKER_STORAGE_KEY)
+    if(historicalQueries != null) {
+      const queries: Array<SerializedData> = JSON.parse(historicalQueries)
       queries.forEach(serializedData => {
         const query = Query.deserialize(serializedData, filters)
         this.queries.set(query.toURL(), query)
@@ -33,15 +33,15 @@ export class BrowserStorageTracker implements ITracker {
       this.queries.delete(this.queries.keys()[0])
     }
 
-    this.updateStorage()
+    this.updateLocalStorage()
   }
 
   trackedSearches(): Map<string, Query> {
     return this.queries;
   }
 
-  private updateStorage() {
+  updateLocalStorage() {
     const serializedData = Array.from(this.queries.values(), query => query.serialize())
-    this.storage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(serializedData))
+    this.storage.setItem(HISTORY_TRACKER_STORAGE_KEY, JSON.stringify(serializedData))
   }
 }

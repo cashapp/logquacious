@@ -8,7 +8,7 @@ import {Direction, Prefs, Theme, TimeZone} from "./Prefs"
 import { ThemeChanger } from "./ThemeChanger"
 import { Range } from "../helpers/Time"
 import { FieldsConfig } from "./Log"
-import { BrowserStorageTracker } from "./BrowserStorageTracker"
+import { HistoryTracker } from "./HistoryTracker"
 
 export type QueryCallback = (q: Query) => void
 export type ThemeCallback = (theme: Theme) => void
@@ -52,7 +52,6 @@ export class Logquacious {
   histogram: Histogram
   focusInput: boolean = true
   themeChanger: ThemeChanger
-  tracker: ITracker
 
   private onQuery: QueryCallback
   private onDisplay: DisplayCallback
@@ -69,9 +68,6 @@ export class Logquacious {
     }
 
     this.config = Logquacious.cleanConfig(this.config)
-
-    // TODO: Create appropriate tracker based on the config option
-    this.tracker = new BrowserStorageTracker(window.localStorage, this.config.filters)
   }
 
   run(resultsElement: HTMLElement, histogramElement: SVGElement) {
@@ -148,13 +144,12 @@ export class Logquacious {
     for (const k of Object.keys(config.fields)) {
       config.fields[k].timestamp = config.fields[k].timestamp || "@timestamp"
     }
+    config.tracker = new HistoryTracker(window.localStorage, config.filters)
     return config
   }
 
   isTrackingEnabled(): boolean {
-    // TODO: Use the config option for this
-    // return this.config.tracker != null
-    return true
+    return this.config.tracker != null
   }
 
   trackedSearches(): Map<string, Query> {
@@ -162,7 +157,7 @@ export class Logquacious {
       return (new Map())
     }
 
-    return this.tracker.trackedSearches()
+    return this.config.tracker.trackedSearches()
   }
 
   dsConfig(): DataSourceConfig {
@@ -456,11 +451,11 @@ export class Logquacious {
   }
 
   private trackSearch(query: Query) {
-    if (!this.isTrackingEnabled()) {
+    if (!this.config.tracker) {
       return
     }
 
-    this.tracker.trackSearch(query)
+    this.config.tracker.trackSearch(query)
   }
 
   private logo() {

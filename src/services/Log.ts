@@ -277,6 +277,14 @@ export class LogFormatter {
       changeQuery(this.getAddQuery(key, obj))
     })
 
+    hover.querySelector(".exclude-from-query").addEventListener('click', () => {
+      // Exclude from query, for when the user left clicks
+      const key = lastFocus.dataset.key
+      const obj = unescape(lastFocus.dataset.obj)
+      const {changeQuery} = this._queryManipulator
+      changeQuery(this.getAddQuery(`-${key}`, obj))
+    })
+
     hover.addEventListener('mouseenter', () => {
       hovering = true
       lastFocus?.classList.add('focused')
@@ -307,6 +315,11 @@ export class LogFormatter {
       const query = this.getAddQuery(key, obj)
       const addToQuery = hover.querySelector(".add-to-query") as HTMLAnchorElement
       addToQuery.href = `?${query.toURL()}`
+
+      // Exclude from query, for when the user middle clicks
+      const excludeQuery = this.getAddQuery(`-${key}`, obj)
+      const excludeFromQuery = hover.querySelector(".exclude-from-query") as HTMLAnchorElement
+      excludeFromQuery.href = `?${excludeQuery.toURL()}`
 
       // Copy
       // https://stackoverflow.com/a/19470348/11125

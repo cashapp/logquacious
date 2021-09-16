@@ -25,7 +25,7 @@ export class BrowserStorageTracker implements ITracker {
   trackSearch(query: Query) {
     const queryUrl = query.toURL()
     if(this.queries.has(queryUrl)) {
-      return
+      this.queries.delete(queryUrl) // so that it can get added as a recent search.
     }
 
     this.queries.set(queryUrl, query)
@@ -37,7 +37,10 @@ export class BrowserStorageTracker implements ITracker {
   }
 
   trackedSearches(): Map<string, Query> {
-    return this.queries;
+    const reversedQueries = new Map()
+    Array.from(this.queries.keys()).reverse()
+    .forEach(key =>reversedQueries.set(key, this.queries.get(key)))
+    return reversedQueries // show recent searches first
   }
 
   private updateStorage() {

@@ -322,6 +322,7 @@ export class Logquacious {
             that.results.append(logs[idx])
           }
         }
+        that.results.updateLogsCount()
         if (chunkEnd === length) {
           resolve()
           return

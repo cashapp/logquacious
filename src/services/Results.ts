@@ -24,6 +24,7 @@ export class Results {
   private tz: TimeZone
   private fieldsConfig: FieldsConfig
   private following: boolean
+  private logsCount: HTMLElement // the total count of logs in the selected time-frame
   private beforeLogs: HTMLElement
   private afterLogs: HTMLElement
   private savedScrollEntry: HTMLElement
@@ -41,6 +42,7 @@ export class Results {
 
   attach(element: HTMLElement, fieldsConfig: FieldsConfig, queryManipulator: QueryManipulator) {
     this.logs = element
+    this.logsCount = Lookup.element("#logs-count")
     this.beforeLogs = Lookup.element("#before-logs")
     this.beforeLogs.hidden = true
     this.afterLogs = Lookup.element("#after-logs")
@@ -76,6 +78,10 @@ export class Results {
 
     this.direction = direction
     this.swapDirection()
+  }
+
+  updateLogsCount() {
+    this.logsCount.innerHTML = "Total results = " + this.entries.length.toString()
   }
 
   followInterval() {
@@ -242,6 +248,7 @@ export class Results {
     this.beforeLogs.hidden = true
     this.afterLogs.hidden = true
     this.entries = []
+    this.logsCount.innerHTML = ''
     this.newChunk(this.direction)
   }
 

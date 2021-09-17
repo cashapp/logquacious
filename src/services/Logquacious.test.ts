@@ -1,7 +1,7 @@
 import { Config, DataSourceType, Logquacious } from "./Logquacious"
 import { prepareApp, resultsFlatten } from "../helpers/TestHelper"
 import { Query } from "./Query"
-import { Cursor, HistogramResults, IDataSource, LogMessage, Result } from "../backends/elasticsearch/Elasticsearch"
+import { Cursor, HistogramResults, IDataSource, LogMessage, Result, TotalStats } from "../backends/elasticsearch/Elasticsearch"
 import { Direction } from "./Prefs"
 import { IRelative, Time } from "../helpers/Time"
 
@@ -14,9 +14,14 @@ class MockedElastic implements IDataSource {
 
   // @ts-ignore
   historicSearch(query: Query, cursor?: Cursor, searchAfterAscending?: boolean): Promise<Result> {
+    const total: TotalStats = {
+      value: this.logMessages.length,
+      relation: "eq"
+    }
     const r: Result = {
       overview: this.logMessages,
       full: Promise.resolve([new Map<string, LogMessage>()]),
+      totalStats: total
     }
     this.logMessages = []
     return Promise.resolve(r)

@@ -276,7 +276,7 @@ export class Logquacious {
     if (nextPage) {
       this.results.saveScroll(nextPageOlder)
     }
-
+    this.results.updateLogsCount(logs.totalStats.value, logs.totalStats.relation)
     await this.staggerAppend(logs.overview, nextPage, nextPageOlder)
 
     this.results.updateMoreMarker(true, false)
@@ -322,7 +322,6 @@ export class Logquacious {
             that.results.append(logs[idx])
           }
         }
-        that.results.updateLogsCount()
         if (chunkEnd === length) {
           resolve()
           return

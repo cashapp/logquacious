@@ -11,6 +11,8 @@ export interface Result {
   overview: LogMessage[]
   // The full set of log fields. This is asynchronously loaded.
   full: Promise<Map<string, LogMessage>[]>
+  // stats around total matches found in Elasticsearch
+  totalStats: TotalStats
 }
 
 // Result of a histogram from ES
@@ -75,8 +77,14 @@ interface SearchQuery {
   timeout?: string
 }
 
+export interface TotalStats {
+  value: number
+  relation: string
+}
+
 interface ElasticsearchHits {
   hits: LogMessage[]
+  total: TotalStats
 }
 
 interface ElasticsearchResults {
@@ -202,6 +210,7 @@ export class Elasticsearch implements IDataSource {
       return null
     }
 
+    const totalStats = data.hits.total
     const hits = data.hits.hits.map(r => this.normaliseLog(r))
 
     // We retrieve the data in descending order, but the app expects it to be in ascending order.
@@ -218,7 +227,7 @@ export class Elasticsearch implements IDataSource {
     })
 
     const full = this.injectFinalPromise(hits, idsByIndex)
-    return {overview: hits, full}
+    return {overview: hits, full, totalStats}
   }
 
   async surroundSearch(query: Query, cursor?: Cursor, searchAfterAscending?: boolean): Promise<Result> {

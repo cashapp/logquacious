@@ -24,7 +24,7 @@ export class Results {
   private tz: TimeZone
   private fieldsConfig: FieldsConfig
   private following: boolean
-  private logsCount: HTMLElement // the total count of logs in the selected time-frame
+  private logsCount: HTMLElement
   private beforeLogs: HTMLElement
   private afterLogs: HTMLElement
   private savedScrollEntry: HTMLElement
@@ -80,8 +80,14 @@ export class Results {
     this.swapDirection()
   }
 
-  updateLogsCount() {
-    this.logsCount.innerHTML = "Total results = " + this.entries.length.toString()
+  updateLogsCount(value: number, relation: string) {
+    if (relation === "eq") {
+      this.logsCount.innerHTML = "Total results = " + value
+    } else if (relation === "gte") {
+      this.logsCount.innerHTML = "Found at least " + value + " results"
+    } else {
+      this.logsCount.innerHTML = ""
+    }
   }
 
   followInterval() {

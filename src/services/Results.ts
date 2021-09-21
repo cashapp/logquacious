@@ -82,7 +82,7 @@ export class Results {
 
   updateLogsCount(value: number, relation: string) {
     if (relation === "eq") {
-      this.logsCount.innerHTML = "Total results = " + value
+      this.logsCount.innerHTML = "Found exactly " + value + " results"
     } else if (relation === "gte") {
       this.logsCount.innerHTML = "Found at least " + value + " results"
     } else {

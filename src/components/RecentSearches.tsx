@@ -15,7 +15,7 @@ export const RecentSearches = ({queries, onQuerySelection}: Props) => {
         query={query}
         onSelection={() => onQuerySelection(query)}
       />
-    )
+    ).reverse() // Puts more recent searches at the top of the list.
 
   if(queryListing.filter(item => item !== null).length === 0) return null
 

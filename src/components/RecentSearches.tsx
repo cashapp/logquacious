@@ -45,6 +45,9 @@ const QueryListing = ({query, onSelection}: QueryListingProps) => {
 
   const filterTitle = (filter: Filter, value: string | null) => {
     const filterItem = filter.items.find(item => item.id === value)
+    if (filterItem === undefined) {
+      return null;
+    }
     return filterItem.shortTitle === undefined ? filterItem.title : filterItem.shortTitle
   }
 
@@ -67,9 +70,11 @@ const QueryListing = ({query, onSelection}: QueryListingProps) => {
       <span className="tag is-primary is-light">
         {whenToText(query.startTime)} &ndash; {whenToText(query.endTime)}
       </span>
-      {activeFilters.map(
-        filter => <span className="tag is-primary is-light">{filter.title}: {filterTitle(filter,
-          filter.selected)}</span>)}
+      {activeFilters.map((filter) => {
+         const title = filterTitle(filter, filter.selected);
+         return title ? <span className="tag is-primary is-light">{filter.title}: {filterTitle(filter, filter.selected)}</span> : null;
+        })
+      }
     </div>
   </div>
 };

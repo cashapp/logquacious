@@ -44,7 +44,7 @@
     "flatpickr": "^4.6.3",
     "he": "^1.2.0",
     "inferno": "^7.3.3",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "randomcolor": "^0.5.4"
   },
   "devDependencies": {

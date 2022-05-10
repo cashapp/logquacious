@@ -1,8 +1,12 @@
+# Archived
+
+:warning: This project is no longer actively maintained!
+
 <img align="left" src="./lq.png" height="120px">
 
 # Logquacious
 
-Logquacious (lq) is a fast and simple log viewer built by Cash App. 
+Logquacious (lq) is a fast and simple log viewer built by Cash App.
 
 It currently only supports
 exploration of logs stored in [Elasticsearch](https://www.elastic.co/products/elasticsearch),
@@ -12,6 +16,7 @@ contributing more backends, open a pull request!
 ![Demo use of Logquacious](./demo.gif)
 
 ## Rationale
+
 Putting application and system logs in an Elasticsearch index is a common
 way to store logs from multiple sources in a single place that can be searched.
 However, while there are many web-based user interfaces for Elasticsearch, most
@@ -22,21 +27,21 @@ of read-only log exploration.
 
 ## Features
 
-* Fields, filters and data sources are customisable, see [config.example.json](config.example.json).
-* Interactive histogram.
-* Time picker.
-* URLs can be shared.
-* Expandable log entries:
-  * Multiple levels of JSON objects can be expanded.
-  * Click on a value to add as a filter.
-  * Can copy the whole JSON payload, or a single value by pressing the copy icon.
-* Customise log direction.
-* Customise light and dark theme.
+- Fields, filters and data sources are customisable, see [config.example.json](config.example.json).
+- Interactive histogram.
+- Time picker.
+- URLs can be shared.
+- Expandable log entries:
+  - Multiple levels of JSON objects can be expanded.
+  - Click on a value to add as a filter.
+  - Can copy the whole JSON payload, or a single value by pressing the copy icon.
+- Customise log direction.
+- Customise light and dark theme.
 
 ## Planned Features
 
-* Real time tailing.
-* Show log context around an entry.
+- Real time tailing.
+- Show log context around an entry.
 
 ## Local demo
 
@@ -44,6 +49,7 @@ The local demo runs a basic web server which serves Logquacious.
 It also runs an instance of Elasticsearch with a script to generate demo log entries.
 
 You'll need docker and docker-compose installed, then run:
+
 ```
 cd demo
 docker-compose up
@@ -61,12 +67,13 @@ You will need [Docker installed](https://www.docker.com/products/docker-desktop)
 
 You can configure the image in multiple ways:
 
-* A basic configuration that has a single ES endpoint, configured via command line arguments.
-* Mounting custom config.json and/or nginx files.
+- A basic configuration that has a single ES endpoint, configured via command line arguments.
+- Mounting custom config.json and/or nginx files.
 
 #### Command line
 
 You can configure the instance via command line arguments or environment variables (e.g. `ES_URL`):
+
 ```shell script
 # docker run logquacious --help
 Usage: lq-startup
@@ -92,10 +99,11 @@ Flags:
 ```
 
 For example run the following for this configuration:
-* Your Elasticsearch service is at `192.168.0.1`
-* The Elasticsearch indexes start with `logs-`
-* The message field is `text`
-* You want the host to listen on port `9999`
+
+- Your Elasticsearch service is at `192.168.0.1`
+- The Elasticsearch indexes start with `logs-`
+- The message field is `text`
+- You want the host to listen on port `9999`
 
 ```shell script
 docker run -p 0.0.0.0:9999:8080 squareup/logquacious \
@@ -105,6 +113,7 @@ docker run -p 0.0.0.0:9999:8080 squareup/logquacious \
 ```
 
 Typical output:
+
 ```
 2020/01/13 21:39:32 Variables for this docker image looks like this:
 {ESProxy:true ESURL:http://192.168.0.1:9200 ESIndex:logs-* TimestampField:@timestamp LevelField:level ServiceField:service MessageField:text IgnoredFields:[_id _index] IgnoredFieldsJoined:}
@@ -123,39 +132,44 @@ If you have your own `config.json`, you can simply mount it at `/lq/config.json`
 docker run -p 0.0.0.0:9999:8080 -v `pwd`/custom-config.json:/lq/config.json squareup/logquacious
 ```
 
-You can also mount your own nginx configuration at `/etc/nginx/conf.d/lq.conf`. By default it is [generated for you](docker/nginx) based on command line arguments. 
+You can also mount your own nginx configuration at `/etc/nginx/conf.d/lq.conf`. By default it is [generated for you](docker/nginx) based on command line arguments.
 
 ## Build from source
 
-* Install Node.js
+- Install Node.js
+
 ```shell script
 git clone https://github.com/cashapp/logquacious
 cd logquacious
 npm install
 npm run build
 ```
-* `npm run build` will generate a `dist` directory containing all the files needed for a web server, including an `index.html` file.
+
+- `npm run build` will generate a `dist` directory containing all the files needed for a web server, including an `index.html` file.
 
 Configure Logquacious in `config.json`.
 
 Setting up a web server if you don't already have one:
 
-* Install Caddy: `curl https://getcaddy.com | bash -s personal`
-* Create a `Caddyfile` to listen on port 8080 with http, also to talk to your Elasticsearch server:
+- Install Caddy: `curl https://getcaddy.com | bash -s personal`
+- Create a `Caddyfile` to listen on port 8080 with http, also to talk to your Elasticsearch server:
+
 ```
 :8080
 proxy /es my-elastic-search-hostname:9200 {
   without /es
 }
 ```
-* Run `caddy` in the same directory as the `Caddyfile`
-* Point your browser at `http://localhost:8080/`. The Elasticsearch endpoint should be working at `http://localhost:8080/es/`.
+
+- Run `caddy` in the same directory as the `Caddyfile`
+- Point your browser at `http://localhost:8080/`. The Elasticsearch endpoint should be working at `http://localhost:8080/es/`.
 
 ## Development
 
 The development workflow is very similar to the "From Source" set up above. You can run a self reloading development server instead of `npm run build`.
 
 You can either set up CORS on Elasticsearch or reverse proxy both the hot server and Elasticsearch. To do this, create `Caddyfile` in the root of the project:
+
 ```
 :8080
 
@@ -169,6 +183,7 @@ proxy / localhost:1234
 ```
 
 To run the parcel development server:
+
 ```
 npm run hot
 ```
@@ -180,11 +195,12 @@ There are tests which are executed with `npm test`.
 ## Configuration
 
 The top level structure of the json configuration is as follows:
+
 ```json
 {
   "dataSources": [],
   "fields": {
-    "name-of-field-configuration": [],
+    "name-of-field-configuration": []
   },
   "filters": []
 }
@@ -251,10 +267,11 @@ Here is an example:
 ```
 
 This configuration will do the following:
-* It is called `main` which is the `fields` reference used in `dataSources`.
-* Place the `@timestamp` field at the start of each line and format it.
-* Place the `message` field afterwards and make it stand out.
-* All other fields in the log entry will be shown afterwards in the default grey colour, except `_id` and `_index`.
+
+- It is called `main` which is the `fields` reference used in `dataSources`.
+- Place the `@timestamp` field at the start of each line and format it.
+- Place the `message` field afterwards and make it stand out.
+- All other fields in the log entry will be shown afterwards in the default grey colour, except `_id` and `_index`.
 
 If you want to see an example of many transforms check out the [example config](./config.example.json).
 
@@ -263,6 +280,7 @@ If you want to see an example of many transforms check out the [example config](
 There is a menu drop down that is enabled when you use filters. It is between the search button and the time drop down.
 
 You are able to customise it to have values you can filter on, e.g.:
+
 ```json
 "filters": [
   {
@@ -307,6 +325,7 @@ If you want to be able to communicate to Elasticsearch on a different host and p
 configure Elasticsearch to respond with the correct [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
 For example, you are running https://lq.mycompany.com/ which serves the static content. You will need to set these configuration options in Elasticsearch:
+
 ```
 http.cors.enabled: true
 http.cors.allow-origin: "https://lq.mycompany.com/"
@@ -329,4 +348,3 @@ See the Elasticsearch documentation on the [http configuration options](https://
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
